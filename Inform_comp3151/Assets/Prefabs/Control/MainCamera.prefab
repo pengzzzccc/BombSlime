@@ -149,7 +149,8 @@ MonoBehaviour:
   blastWaveStartWidth: 0.22
   blastWaveEndWidth: 0.04
   blastWaveSegments: 64
-  blastWaveSortingOrder: 100
+  blastWaveSortingLayer: player
+  blastWaveSortingOrder: 2
 --- !u!81 &5689670982028208817
 AudioListener:
   m_ObjectHideFlags: 0

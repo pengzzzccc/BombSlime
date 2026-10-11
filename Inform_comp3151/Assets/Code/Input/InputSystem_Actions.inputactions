@@ -693,17 +693,6 @@
                 },
                 {
                     "name": "",
-                    "id": "d2f6a84b-6e39-4c17-8b53-1a97e0c5d814",
-                    "path": "<Gamepad>/leftStick",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Gamepad",
-                    "action": "Navigate",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "9e92bb26-7e3b-4ec4-b06b-3c8f8e498ddc",
                     "path": "<Keyboard>/enter",
                     "interactions": "",

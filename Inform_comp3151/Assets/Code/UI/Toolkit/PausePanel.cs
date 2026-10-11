@@ -17,6 +17,11 @@ namespace Inkform.UI
             Bind(Q<Button>("Btn_SaveAndQuit"), "Btn_SaveAndQuit", OnQuitToMainMenu);
         }
 
+        // Esc / pad B on the pause sheet resumes (UIManager's escape stack), so Back reads "Resume"
+        protected override void DefinePrompts(PromptBar bar) => bar
+            .Add(PromptBar.Key.Confirm, "Confirm")
+            .Add(PromptBar.Key.Back, "Resume", UI.Resume);
+
         private void OnResume() => UI.Resume();
 
         private void OnSettings() => UI.OpenSettings();

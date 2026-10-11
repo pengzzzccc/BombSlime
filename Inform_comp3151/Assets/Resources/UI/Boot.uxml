@@ -1,18 +1,13 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="Boot.uss" />
-    <!-- Boot sequence: one black card, two logo slots. The cards' opacity is driven by
-         BootPanel (studio fades in/holds/out, then game + sting, then it waits for any key);
-         a missing sprite swaps the image element for its placeholder label. No floaty items —
-         this sheet never takes focus, it is dismissed by any input. -->
+    <!-- Boot sequence: one black card with the studio logo slot. The card's opacity is driven
+         by BootPanel (fade in / hold / fade out); then the black sheet dissolves into the main
+         menu's title screen. A missing sprite swaps the image element for its placeholder label.
+         No floaty items — this sheet never takes focus, any input skips it. -->
     <ui:VisualElement name="Boot" class="boot-screen">
         <ui:VisualElement name="StudioCard" class="boot-card" picking-mode="Ignore">
             <ui:VisualElement name="StudioImage" class="boot-logo" picking-mode="Ignore" />
             <ui:Label name="StudioPlaceholder" text="STUDIO LOGO" class="boot-placeholder outline" picking-mode="Ignore" />
         </ui:VisualElement>
-        <ui:VisualElement name="GameCard" class="boot-card" picking-mode="Ignore">
-            <ui:VisualElement name="GameImage" class="boot-logo" picking-mode="Ignore" />
-            <ui:Label name="GamePlaceholder" text="BOMB SLIME" class="boot-placeholder boot-title outline" picking-mode="Ignore" />
-        </ui:VisualElement>
-        <ui:Label name="SkipHint" text="Press any key" class="boot-skip outline" picking-mode="Ignore" />
     </ui:VisualElement>
 </ui:UXML>

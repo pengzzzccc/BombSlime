@@ -16,6 +16,10 @@ namespace Inkform.Bus
         public static event Action<FaceDirection> FaceChanged;
         public static event Action<Vector2, bool> DashAttempted;
 
+        /// <summary>The player just touched a surface — ground, ceiling or a wall — moving into
+        /// it at the given speed (world units / s). Transient, like DashAttempted.</summary>
+        public static event Action<ContactSide, float> Contacted;
+
         /// <summary>Raised by RegisterPlayer: a live player came into existence (scene instance
         /// Awake, or a runtime spawn appearing long after sceneLoaded). Systems that bind once per
         /// player — the animation driver, for one — refresh here, because a newcomer matching the
@@ -69,6 +73,8 @@ namespace Inkform.Bus
 
         public static void RaiseInteractPressed() => InteractPressed?.Invoke();
 
+        public static void RaiseContact(ContactSide side, float impactSpeed) => Contacted?.Invoke(side, impactSpeed);
+
         // Static fields do not clear on scene reload; with Domain Reload off, dead subscribers from
         // the previous run linger
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -77,6 +83,7 @@ namespace Inkform.Bus
             StateChanged = null;
             FaceChanged = null;
             DashAttempted = null;
+            Contacted = null;
             InteractPressed = null;
             PlayerRegistered = null;
             // Match PlayerHandler's field defaults (Idle / R) to avoid an extra broadcast at startup

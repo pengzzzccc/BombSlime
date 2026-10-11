@@ -38,6 +38,14 @@ namespace Inkform.Audio
             Restart();
         }
 
+        /// <summary>Assigns the loop at runtime, for emitters added from code (PatrolMover's loop
+        /// slot). Starts it right away when this component is already enabled.</summary>
+        public void Play(SoundCue loop)
+        {
+            cue = loop;
+            if (cue != null && isActiveAndEnabled) Restart();
+        }
+
         // Scene objects can enable before the persistent AudioService has woken up (editor cold
         // start into a room): re-route once everything has run Awake
         void Start()
@@ -61,7 +69,9 @@ namespace Inkform.Audio
             AudioClip clip = cue.PickClip();
             if (clip == null) return;
 
-            AudioService.ConfigureSource(source, cue);
+            // Always positional: a loop placed in the world must be loud near it and fade with
+            // distance (silent beyond the Cue's Falloff Range), whatever the Cue's Spatial box says
+            AudioService.ConfigureSource(source, cue, forceSpatial: true);
             source.clip = clip;
             source.loop = true;
             PlaceSource();
@@ -80,7 +90,7 @@ namespace Inkform.Audio
             if (cue == null) return;
             // The radius where the loop reaches silence, same number the runtime rolloff uses
             Gizmos.color = new Color(1f, 0.55f, 0.15f, 0.8f);
-            Gizmos.DrawWireSphere(transform.position + offset, cue.spatial ? cue.falloffRange : 1f);
+            Gizmos.DrawWireSphere(transform.position + offset, cue.falloffRange);
         }
 #endif
     }

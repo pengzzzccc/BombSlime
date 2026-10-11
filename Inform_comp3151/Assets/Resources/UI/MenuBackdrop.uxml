@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="MenuBackdrop.uss" />
+    <!-- The main menu scene's cave: one opaque picture (Art/UI/MainMenuBackdrop.png, see
+         MenuBackdrop.uss for how it is made). A layer of its own under every sheet, shown by
+         UIManager in the menu scene only, so the title screen, the main menu, the save menu and
+         the options all sit on it. -->
+    <ui:VisualElement name="MenuBackdrop" class="screen backdrop" picking-mode="Ignore" />
+</ui:UXML>

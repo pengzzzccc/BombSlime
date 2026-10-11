@@ -1,18 +1,32 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="EndPanel.uss" />
-    <!-- End-of-run summary: Celeste AreaComplete-style letter-drop title (built by EndPanel into
-         #TitleRow) + deaths/time read from the run's save slot on open. No dim — the end scene
-         is already the run's closing shot; the outlined text carries its own readability. -->
-    <ui:VisualElement name="EndPanel" class="screen">
-        <ui:VisualElement class="end-center">
+    <!-- End-of-run summary, overlay frame: Celeste AreaComplete-style letter-drop title (built by
+         EndPanel into #TitleRow), a two-column deaths/time table read from the run's save slot
+         on open, one CONFIRM. The sheet is solid black — the end scene shows nothing else;
+         each stat carries the HUD's icon (skull for deaths, clock for time). -->
+    <ui:VisualElement name="EndPanel" class="screen frame frame--overlay end-screen">
+        <ui:VisualElement class="frame-content">
             <ui:VisualElement name="TitleRow" class="end-title-row" picking-mode="Ignore" />
-            <ui:Label name="Lbl_Deaths" class="end-stat outline" picking-mode="Ignore" />
-            <ui:Label name="Lbl_Time" class="end-stat outline" picking-mode="Ignore" />
-            <ui:Button name="Btn_Back" text="CONFIRM" class="menu-item floaty outline" style="margin-top: 50px;" />
+            <ui:VisualElement class="end-stats plate" picking-mode="Ignore">
+                <ui:VisualElement class="end-stat-row" picking-mode="Ignore">
+                    <ui:VisualElement class="end-stat-label" picking-mode="Ignore">
+                        <ui:VisualElement class="end-icon end-skull" picking-mode="Ignore" />
+                        <ui:Label text="Deaths" class="end-stat-text outline" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:Label name="Lbl_Deaths" class="end-stat-value outline" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:VisualElement class="end-stat-row" picking-mode="Ignore">
+                    <ui:VisualElement class="end-stat-label" picking-mode="Ignore">
+                        <ui:VisualElement class="end-icon end-clock" picking-mode="Ignore" />
+                        <ui:Label text="Total time" class="end-stat-text outline" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:Label name="Lbl_Time" class="end-stat-value outline" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Button name="Btn_Back" text="CONFIRM" class="menu-item end-confirm floaty outline" />
         </ui:VisualElement>
-        <ui:VisualElement class="confirm-hint" picking-mode="Ignore">
-            <ui:Label text="Confirm - Enter" class="corner outline" picking-mode="Ignore" />
-            <ui:Label text="Back - Esc" class="corner outline" picking-mode="Ignore" />
+        <ui:VisualElement class="frame-footer" picking-mode="Ignore">
+            <ui:VisualElement name="PromptBar" class="prompt-bar" picking-mode="Ignore" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

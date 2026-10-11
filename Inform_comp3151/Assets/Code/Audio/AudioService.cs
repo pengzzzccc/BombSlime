@@ -112,8 +112,9 @@ namespace Inkform.Audio
 
         /// <summary>Applies a Cue's playback settings to a source — routing, volume, pitch, pause
         /// behaviour, priority and, for spatial Cues, the 3D linear rolloff (see AudioSpatial).
-        /// Shared by the one-shot voices and AmbientSource so both hear a Cue the same way.</summary>
-        public static void ConfigureSource(AudioSource src, SoundCue cue)
+        /// Shared by the one-shot voices and AmbientSource so both hear a Cue the same way.
+        /// forceSpatial makes a world emitter positional even when its Cue's Spatial box is off.</summary>
+        public static void ConfigureSource(AudioSource src, SoundCue cue, bool forceSpatial = false)
         {
             src.outputAudioMixerGroup = OutputFor(cue);
             src.volume = cue.volume;
@@ -121,7 +122,7 @@ namespace Inkform.Audio
             src.ignoreListenerPause = cue.ignoreListenerPause;
             src.priority = (int)cue.priority;
             src.dopplerLevel = 0f;      // a moving camera must not bend the pitch
-            if (cue.spatial)
+            if (cue.spatial || forceSpatial)
             {
                 src.spatialBlend = 1f;
                 src.rolloffMode = AudioRolloffMode.Linear;

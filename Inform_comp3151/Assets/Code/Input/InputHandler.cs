@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using Inkform.Bus;
+using Inkform.Fx.Haptics;
 using Inkform.Player;
 using Inkform.Settings;
 
@@ -193,6 +194,8 @@ namespace Inkform.Input
 
         private static void SwitchTo(InputDevice device)
         {
+            // The pad that just moved is the one haptics go to (only one pad ever rumbles)
+            ActivePadTracker.Note(device);
             SettingsStore.InputDevice expected = device is Gamepad
                 ? SettingsStore.InputDevice.Gamepad
                 : SettingsStore.InputDevice.KeyboardMouse;

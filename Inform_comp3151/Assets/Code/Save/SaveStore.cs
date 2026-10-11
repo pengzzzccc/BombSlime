@@ -27,7 +27,7 @@ namespace Inkform.Save
 
         private static SaveData[] slots;
         private static float runPlayBase;
-        private static float runStartRealtime;
+        private static float runActiveSeconds;   // played since the run (re)started: see AdvancePlayTime
         private static int runDeathBase;
         private static int runDeathSessionBase;
 
@@ -49,7 +49,7 @@ namespace Inkform.Save
             ActiveSlot = -1;
             slots = null;
             runPlayBase = 0f;
-            runStartRealtime = 0f;
+            runActiveSeconds = 0f;
             runDeathBase = 0;
             runDeathSessionBase = 0;
             pendingNewSlot = -1;
@@ -109,6 +109,24 @@ namespace Inkform.Save
 
         public static bool HasSave(int slot) => !Get(slot).IsEmpty;
 
+        // ---- The run's clock and death count: one number everywhere ----
+
+        /// <summary>The run's play time — what the HUD timer shows, the slot stores and the end
+        /// sheet reports. It only advances while the player is actually playing (AdvancePlayTime);
+        /// a continued run picks up from the slot's stored time.</summary>
+        public static float PlaySeconds => runPlayBase + runActiveSeconds;
+
+        /// <summary>The run's deaths: the slot's stored count plus this session's.</summary>
+        public static int RunDeaths => runDeathBase + Mathf.Max(0, LifeBus.DeathCount - runDeathSessionBase);
+
+        /// <summary>Adds played time. Called by the HUD every frame the game is in play (in a level,
+        /// state Playing, no scene transition) — pause, menus and transitions do not count. Runs
+        /// with no active slot too (a session started straight in a level), so the timer moves.</summary>
+        public static void AdvancePlayTime(float deltaTime)
+        {
+            if (deltaTime > 0f) runActiveSeconds += deltaTime;
+        }
+
         public static void BeginNewRun(int slot)
         {
             EnsureLoaded();
@@ -155,7 +173,7 @@ namespace Inkform.Save
         {
             ActiveSlot = slot;
             runPlayBase = playBase;
-            runStartRealtime = Time.realtimeSinceStartup;
+            runActiveSeconds = 0f;
             runDeathBase = deathBase;
             runDeathSessionBase = LifeBus.DeathCount;
         }
@@ -256,8 +274,8 @@ namespace Inkform.Save
         private static void Stamp(SaveData data)
         {
             data.version = SaveData.CurrentVersion;
-            data.playSeconds = runPlayBase + Mathf.Max(0f, Time.realtimeSinceStartup - runStartRealtime);
-            data.deaths = runDeathBase + Mathf.Max(0, LifeBus.DeathCount - runDeathSessionBase);
+            data.playSeconds = PlaySeconds;
+            data.deaths = RunDeaths;
             data.savedAtUtc = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture);
         }
 

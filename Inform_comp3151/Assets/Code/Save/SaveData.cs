@@ -41,7 +41,7 @@ namespace Inkform.Save
         /// <summary>Stable InventoryItemDefinition ids, in FIFO order.</summary>
         public string[] inventoryItemIds = Array.Empty<string>();
 
-        public int inventoryCapacity = 1;
+        public int inventoryCapacity = 0;   // InventoryStore.InitialCapacity: a new run has no slots
 
         /// <summary>Stable scene pickup ids already consumed by this save slot.</summary>
         public string[] collectedInventoryCapacityPickupIds = Array.Empty<string>();

@@ -1,6 +1,8 @@
 using System;
 using Inkform.Bus;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 using UnityEngine.UIElements;
 
 namespace Inkform.UI
@@ -40,11 +42,19 @@ namespace Inkform.UI
         /// <summary>Sheets always leave to the left, whichever side they came in from.</summary>
         protected float ExitToX => -EnterFromX;
 
+        /// <summary>The sheet's bottom-right prompt row (#PromptBar in its UXML), or null when the
+        /// sheet has none. Filled by DefinePrompts on the first open.</summary>
+        protected PromptBar Prompts { get; }
+        private bool promptsDefined;
+
         protected ToolkitPanel(VisualElement root, UIManager ui)
         {
             Root = root;
             UI = ui;
             Root.style.display = DisplayStyle.None;
+
+            VisualElement promptHost = root.Q("PromptBar");
+            if (promptHost != null) Prompts = new PromptBar(promptHost);
         }
 
         public void Open()
@@ -55,6 +65,13 @@ namespace Inkform.UI
             if (IsOpen) return;
 
             IsOpen = true;
+            // Deferred to the first open: the subclass constructor has finished by then, so its
+            // prompts may point at anything it set up
+            if (!promptsDefined && Prompts != null)
+            {
+                promptsDefined = true;
+                DefinePrompts(Prompts);
+            }
             Root.style.display = DisplayStyle.Flex;
             Root.BringToFront();
             OnOpen();
@@ -84,6 +101,10 @@ namespace Inkform.UI
         /// spot where a MonoBehaviour's OnDestroy used to release static-event subscriptions and
         /// scoped locks that must not outlive their owner.</summary>
         protected internal virtual void Teardown() { }
+
+        /// <summary>Declares the sheet's prompt row ("Confirm", "Back"...), once, on first open.
+        /// Give Back the same action Esc / pad B takes in UIManager, so a click matches the key.</summary>
+        protected virtual void DefinePrompts(PromptBar bar) { }
 
         /// <summary>Hook after the panel becomes visible (before the slide-in starts).</summary>
         protected virtual void OnOpen() { }
@@ -142,11 +163,41 @@ namespace Inkform.UI
             }
         }
 
+        /// <summary>The stick moved with nothing focused on this sheet: start from its first control.</summary>
+        internal void Refocus() => FocusFirst();
+
         private void ReleaseFocus()
         {
             if (Root.panel == null) return;
             if (Root.panel.focusController.focusedElement is VisualElement focused && Root.Contains(focused))
                 focused.Blur();
+        }
+
+        // ---- Any-key gates (boot cards, the title screen) ----
+
+        /// <summary>Any key, mouse click or pad button pressed this frame.</summary>
+        protected static bool AnyInputPressed()
+        {
+            Keyboard kb = Keyboard.current;
+            if (kb != null && kb.anyKey.wasPressedThisFrame) return true;
+
+            Gamepad pad = Gamepad.current;
+            if (pad != null && AnyButtonPressed(pad)) return true;
+
+            Mouse mouse = Mouse.current;
+            if (mouse != null && (mouse.leftButton.wasPressedThisFrame || mouse.rightButton.wasPressedThisFrame)) return true;
+            return false;
+        }
+
+        /// <summary>Gamepad exposes no anyButton property: walk the pad's controls and ask each
+        /// button directly. Stick axes are AxisControls and skip themselves via the type filter.</summary>
+        private static bool AnyButtonPressed(Gamepad pad)
+        {
+            foreach (InputControl control in pad.allControls)
+            {
+                if (control is ButtonControl button && button.wasPressedThisFrame) return true;
+            }
+            return false;
         }
 
         /// <summary>Inline display-none on any ancestor (e.g. the hidden device group) makes an

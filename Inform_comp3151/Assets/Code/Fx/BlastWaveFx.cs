@@ -35,6 +35,7 @@ namespace Inkform.Fx
             float startWidth,
             float endWidth,
             int segments,
+            int sortingLayerID,
             int sortingOrder,
             float opacityMultiplier)
         {
@@ -59,7 +60,7 @@ namespace Inkform.Fx
             line.receiveShadows = false;
             line.lightProbeUsage = LightProbeUsage.Off;
             line.reflectionProbeUsage = ReflectionProbeUsage.Off;
-            line.sortingLayerID = 0;
+            line.sortingLayerID = sortingLayerID;
             line.sortingOrder = sortingOrder;
 
             BlastWaveFx wave = go.AddComponent<BlastWaveFx>();

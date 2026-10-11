@@ -1,5 +1,0 @@
-/* Settings ROOT page — the category list. Everything but the centred column itself cascades
-   from the shell's Settings.uss; this file is the page's private extension slot. */
-
-.settings-menu { position: absolute; left: 0; right: 0; top: 0; bottom: 0; flex-direction: column; align-items: center; justify-content: center; }
-.settings-menu .menu-item { -unity-text-align: middle-center; }

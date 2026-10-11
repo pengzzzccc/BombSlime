@@ -11,7 +11,7 @@ namespace Inkform.Player
     /// physical contact, so the dash never stalls on the crate. Victims claim themselves through
     /// the same HazardBus.Exploded path a bomb uses (fragment burst, break sound, the lot), and
     /// the spread wave publishes once per dash via HazardBus.Blast, which FxDirector /
-    /// AudioDirector / RumbleManager render exactly like a bomb's.
+    /// AudioDirector / HapticsDirector render exactly like a bomb's.
     ///
     /// Deliberately an INDEPENDENT loop (own Update, the RopeGun pattern) rather than a step
     /// ticked by PlayerHandler: PlayerHandler.Update is a sense → move → animate chain where any

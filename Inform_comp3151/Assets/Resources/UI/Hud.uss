@@ -1,14 +1,35 @@
-/* Gameplay HUD — every node picks nothing so clicks reach the world. */
+/* Gameplay HUD — every node picks nothing so clicks reach the world. Free-standing text
+   (run stats, fps, save toast) reads over the level through the theme's .outline shadow, made a
+   touch stronger here; the inventory and tutorial hint keep their own dark plates. */
 
 #Hud { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
 .hud-layer { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
 
-.hud-fps { position: absolute; top: 14px; right: 18px; font-size: var(--fs-corner); color: rgba(255, 255, 255, 0.85); -unity-text-align: middle-right; }
-.hud-timer { position: absolute; top: 20px; left: 0; right: 0; font-size: var(--fs-item); color: var(--c-white); -unity-text-align: middle-center; }
+.hud-fps { position: absolute; top: var(--hud-margin); right: var(--hud-margin); font-size: var(--fs-corner); color: rgba(240, 242, 248, 0.9); -unity-text-align: middle-right; text-shadow: 0px 2px 5px rgba(6, 8, 20, 0.85); }
+/* Run stats, top left: [clock] 03:27:451 over [skull] 12. The icons are the Art/UI pixel
+   sprites at whole multiples (clock 20x27 x2, skull 13x13 x3); both text columns start at the
+   same x. Hud.cs rocks the clock each second and pops the skull on a death. */
+.hud-stats { position: absolute; top: var(--hud-margin); left: var(--hud-margin); flex-direction: column; align-items: flex-start; }
+.hud-stat { flex-direction: row; align-items: center; height: 58px; }
+.hud-stat-icon { flex-shrink: 0; background-size: 100% 100%; background-repeat: no-repeat; }
+.hud-clock-icon {
+    width: 40px;
+    height: 54px;
+    margin-right: 14px;
+    transform-origin: center bottom;
+    background-image: url("project://database/Assets/Art/UI/ClockCon.png?fileID=5661768863291250846&guid=8feb860127983174093037784280a732&type=3#ClockCon_0");
+}
+.hud-death-icon {
+    width: 39px;
+    height: 39px;
+    margin-right: 15px;
+    background-image: url("project://database/Assets/Art/UI/deathCon.png?fileID=4445211718763495415&guid=8b4760edf9c6b2b468e61ffdce08df8e&type=3#deathCon_0");
+}
+.hud-stat-text { font-size: var(--fs-item); color: var(--c-text); -unity-text-align: middle-left; letter-spacing: 1px; text-shadow: 0px 3px 8px rgba(6, 8, 20, 0.9); }
 
 .hud-inventory {
     position: absolute;
-    right: 36px; bottom: 36px;
+    right: var(--hud-margin); bottom: var(--hud-margin);
     width: 132px; height: 86px;
     background-color: rgba(3, 4, 6, 0.8);
     border-radius: 8px;
@@ -20,5 +41,26 @@
 }
 .hud-inventory-icon { width: 54px; height: 54px; -unity-background-scale-mode: scale-to-fit; }
 .hud-inventory-count { flex-grow: 1; font-size: var(--fs-corner); color: var(--c-white); -unity-text-align: middle-center; }
+/* A capacity crystal just landed (Hud.CelebrateCapacity): the count flashes green for 0.6s and
+   "+1" floats up off the plate's top edge — opacity and the rise are driven by C#. */
+.hud-inventory-count--up { color: var(--c-green); }
+.hud-inventory-plus {
+    position: absolute;
+    left: 0; right: 0; bottom: 100%;
+    margin-bottom: 4px;
+    font-size: var(--fs-value);
+    color: var(--c-green);
+    -unity-text-align: lower-center;
+    opacity: 0;
+    text-shadow: 0px 2px 6px rgba(6, 8, 20, 0.9);
+}
 
-.hud-save-toast { position: absolute; right: 44px; bottom: 138px; font-size: var(--fs-corner); color: rgba(255, 255, 255, 0.92); opacity: 0; -unity-text-align: middle-right; }   /* opacity driven by C# */
+.hud-save-toast { position: absolute; right: var(--hud-margin); bottom: 138px; font-size: var(--fs-corner); color: rgba(240, 242, 248, 0.95); opacity: 0; -unity-text-align: middle-right; text-shadow: 0px 2px 5px rgba(6, 8, 20, 0.85); }   /* opacity driven by C# */
+
+/* Tutorial hint: one large line at the bottom centre, the button icons inline at the large glyph size. No plate: a deep shadow under every
+   word keeps it readable over the level. Inside the safe margins; a line too long for them wraps
+   between words and icons. Opacity, display and the rise are driven by C# (TutorialHintView). */
+.hud-tutorial { position: absolute; left: var(--safe-x); right: var(--safe-x); bottom: 9%; flex-direction: column; align-items: center; opacity: 0; display: none; }
+.hud-tutorial-panel { flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; max-width: 100%; }
+.hud-tutorial-text { font-size: 48px; color: var(--c-text); -unity-text-align: middle-center; margin: 0 10px; text-shadow: 0px 4px 12px rgba(6, 8, 20, 0.95); }
+/* Icons and keycaps come from the theme's .key-icon / .key-cap, at .key--large (GlyphElements.cs) */

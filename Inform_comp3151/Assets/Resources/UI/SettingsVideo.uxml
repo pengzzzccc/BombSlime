@@ -1,7 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements">
-    <Style src="SettingsVideo.uss" />
-    <!-- Video page: resolution, fullscreen, vsync, fps cap, fx intensity, perf tools. -->
-    <ui:ScrollView name="Scroll" class="settings-scroll" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto">
-        <ui:VisualElement name="Rows" />
-    </ui:ScrollView>
-</ui:UXML>

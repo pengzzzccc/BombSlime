@@ -79,6 +79,12 @@ MonoBehaviour:
   offTime: 1.5
   startVisible: 1
   loopSource: {fileID: 300000000000000001}
+  emitterSprite: {fileID: 8133640237146414919, guid: e1631ec8709ab9c41b187d055e819ddb, type: 3}
+  emitterGlowMaterial: {fileID: 2100000, guid: c76214feb8cd41eb85b00d055e6a6bb5, type: 2}
+  glowLeadTime: 0.2
+  emitterSearchMargin: 0.3
+  glowPadding: 0.25
+  glowWorldWidth: 0.0625
 --- !u!212 &1013494821639984387
 SpriteRenderer:
   serializedVersion: 2

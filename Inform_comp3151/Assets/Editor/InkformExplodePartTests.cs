@@ -134,6 +134,20 @@ namespace Inkform.Tests
             });
         }
 
+        [Test]
+        public void ExplodePart_ChainReactionOff_IgnoresBlast()
+        {
+            GameObject bomb = NewBomb(out ExplodePart part, out GameObject root, chainDelay: 0f);
+            SetField(part, "chainReaction", false);
+            WithBlastCounter(count =>
+            {
+                HazardBus.RaiseExploded(root, Vector2.zero, 1f);
+                Invoke(part, "Update");
+                Assert.AreEqual(0, count(), "chainReaction off: a bomb caught in a blast stays put");
+            });
+            UnityEngine.Object.DestroyImmediate(bomb);   // never exploded, so it did not self-destruct
+        }
+
         // Builds a minimal bomb: Interactable node + ExplodePart + collider. chainDelay is shortened
         // so fuses do not depend on the editor clock; blastMask stays 0 (Nothing) so the overlap in
         // Explode hits nothing and only the overall Blast signal is counted

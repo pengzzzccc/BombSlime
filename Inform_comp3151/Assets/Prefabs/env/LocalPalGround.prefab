@@ -6516,22 +6516,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inkform.Fx.LocalParallaxZone
   strata:
   - target: {fileID: 6601991761956826180}
-    factorX: 0.15
+    factorX: 0.2
     factorY: 0.08
   - target: {fileID: 1854293282408199855}
-    factorX: 0.125
-    factorY: 0.08
-  - target: {fileID: 1430889086889793695}
-    factorX: 0.1
-    factorY: 0.08
-  - target: {fileID: 1430889086889793695}
-    factorX: 0.075
-    factorY: 0.08
-  - target: {fileID: 1430889086889793695}
-    factorX: 0.05
-    factorY: 0.08
-  - target: {fileID: 1430889086889793695}
-    factorX: 0.1
+    factorX: 0.15
     factorY: 0.08
   - target: {fileID: 1430889086889793695}
     factorX: 0.1

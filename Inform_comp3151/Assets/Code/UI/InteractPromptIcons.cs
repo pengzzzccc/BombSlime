@@ -18,9 +18,8 @@ namespace Inkform.UI
     }
 
     /// <summary>
-    /// Device-scheme detection plus code-generated placeholder button icons (no art assets ship with
-    /// the project yet). Everything renders white-on-alpha so the prompt tints it — replace later by
-    /// assigning real sprites on the prompt component; the generated ones are only the fallback.
+    /// Device-scheme detection, plus the generated keycap the world-space interaction prompt draws
+    /// keyboard keys on (pad buttons use the ConIcon art through InputGlyphs / TutorialHintSet).
     ///
     /// Detection follows the same philosophy as InputHandler's auto-switch: the Controls tab family
     /// decides keyboard-vs-pad, the live Gamepad.current decides PS-vs-Xbox (type-name matching — the
@@ -29,8 +28,7 @@ namespace Inkform.UI
     /// </summary>
     public static class InteractPromptIcons
     {
-        // Text glyphs for the north/confirm button per scheme. PlayStation's triangle is a shape, not
-        // a font glyph — it gets its own generated sprite (TriangleSprite) instead of a letter.
+        // Default Interact keys, used only when the live binding cannot be resolved
         public const string KeyboardGlyph = "E";
         public const string XboxGlyph = "Y";
 
@@ -65,8 +63,6 @@ namespace Inkform.UI
         private const int ShapeSize = 48;
 
         private static Sprite keycapSprite;
-        private static Sprite buttonSprite;
-        private static Sprite triangleSprite;
 
         // The generated sprites are runtime Texture2Ds, destroyed when play mode ends — the lazy
         // getters' Unity null check rebuilds them on their own. Clearing the caches here anyway keeps
@@ -76,18 +72,10 @@ namespace Inkform.UI
         private static void ResetStatics()
         {
             keycapSprite = null;
-            buttonSprite = null;
-            triangleSprite = null;
         }
 
         /// <summary>Rounded-square keycap for keyboard letters.</summary>
         public static Sprite KeycapSprite => keycapSprite != null ? keycapSprite : keycapSprite = BuildRoundedRect(6);
-
-        /// <summary>Round pad button for gamepad faces.</summary>
-        public static Sprite ButtonSprite => buttonSprite != null ? buttonSprite : buttonSprite = BuildDisc();
-
-        /// <summary>PlayStation's north-button triangle.</summary>
-        public static Sprite TriangleSprite => triangleSprite != null ? triangleSprite : triangleSprite = BuildTriangle();
 
         private static Sprite BuildRoundedRect(int radius)
         {
@@ -107,53 +95,6 @@ namespace Inkform.UI
                     int cy = Mathf.Clamp(y, radius, ShapeSize - 1 - radius);
                     int dx = x - cx, dy = y - cy;
                     bool inside = dx * dx + dy * dy <= radius * radius;
-                    texture.SetPixel(x, y, inside ? Color.white : Color.clear);
-                }
-            }
-            return Finish(texture);
-        }
-
-        private static Sprite BuildDisc()
-        {
-            var texture = new Texture2D(ShapeSize, ShapeSize, TextureFormat.RGBA32, false)
-            {
-                wrapMode = TextureWrapMode.Clamp,
-                filterMode = FilterMode.Point
-            };
-
-            float centre = (ShapeSize - 1) * 0.5f;
-            float radius = centre;
-            for (int y = 0; y < ShapeSize; y++)
-            {
-                for (int x = 0; x < ShapeSize; x++)
-                {
-                    float dx = x - centre, dy = y - centre;
-                    texture.SetPixel(x, y, dx * dx + dy * dy <= radius * radius ? Color.white : Color.clear);
-                }
-            }
-            return Finish(texture);
-        }
-
-        private static Sprite BuildTriangle()
-        {
-            var texture = new Texture2D(ShapeSize, ShapeSize, TextureFormat.RGBA32, false)
-            {
-                wrapMode = TextureWrapMode.Clamp,
-                filterMode = FilterMode.Point
-            };
-
-            // Pointing up like the PlayStation triangle. Barycentric-ish test: for each row from the
-            // apex, the half-width grows linearly to the base
-            float top = 5f, bottom = ShapeSize - 6f;
-            float halfWidthAtBase = (ShapeSize - 11f) * 0.5f;
-            for (int y = 0; y < ShapeSize; y++)
-            {
-                float t = Mathf.InverseLerp(top, bottom, y);
-                float halfWidth = halfWidthAtBase * t;
-                float centre = (ShapeSize - 1) * 0.5f;
-                for (int x = 0; x < ShapeSize; x++)
-                {
-                    bool inside = y >= top && y <= bottom && Mathf.Abs(x - centre) <= halfWidth;
                     texture.SetPixel(x, y, inside ? Color.white : Color.clear);
                 }
             }

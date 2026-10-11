@@ -1,8 +1,4 @@
-/* Pause sheet — 40% dim over the frozen game, centred title + button column. */
+/* Pause sheet — layout comes from the shared overlay frame (Theme.uss). The list sits on a
+   plate a little narrower than the overlay column. */
 
-.menu-center { position: absolute; left: 0; right: 0; top: 0; bottom: 0; flex-direction: column; align-items: center; justify-content: center; }
-.menu-center > .menu-title { margin-bottom: 40px; }
-
-/* Own column class (not the main menu's .menu-column): centred flow, narrower. */
-.pause-column { width: 720px; flex-direction: column; align-items: center; }
-.menu-center .menu-item { -unity-text-align: middle-center; }
+.pause-list { max-width: 560px; padding: 20px 32px; }

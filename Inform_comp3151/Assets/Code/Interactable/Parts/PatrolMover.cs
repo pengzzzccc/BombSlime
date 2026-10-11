@@ -1,3 +1,4 @@
+using Inkform.Audio;
 using UnityEngine;
 
 namespace Inkform.Interactable.Parts
@@ -72,6 +73,10 @@ namespace Inkform.Interactable.Parts
         [Tooltip("Normalized time to normalized distance while moving in descending-index direction")]
         [SerializeField] private AnimationCurve returnCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
 
+        [Header("Sound")]
+        [Tooltip("Constant looping sound carried along with the mover (like a laser hum). Always positional: full volume up close, fading to silence at the Cue's Falloff Range. Empty = silent")]
+        [SerializeField] private SoundCue loopCue;
+
         private Interactable root;
         private Rigidbody2D body;       // when a rigidbody exists, sync its position so players standing on top get carried
         private Vector2[] route;        // world-space waypoints resolved at Attach
@@ -99,6 +104,10 @@ namespace Inkform.Interactable.Parts
             this.root = root;
             body = root.GetComponent<Rigidbody2D>();
             startPos = root.transform.position;
+
+            // The loop rides an AmbientSource on the moving root, so it follows the patrol (same
+            // component the laser hum uses). Added here so a Cue in the slot is all a prefab needs
+            if (loopCue != null) root.gameObject.AddComponent<AmbientSource>().Play(loopCue);
 
             // Resolve the route: explicit waypoints, or the legacy pointA/pointB pair — pre-asset
             // prefabs keep their serialized data and their exact old behavior

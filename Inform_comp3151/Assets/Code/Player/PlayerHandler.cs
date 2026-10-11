@@ -25,6 +25,8 @@ namespace Inkform.Player
     {
         private ContactSensor contact;
         private PlayerMotor motor;
+        private readonly ContactEdges contactEdges = new ContactEdges();
+        private static readonly System.Action<ContactSide, float> RaiseContact = PlayerBus.RaiseContact;
         private AnimStateResolver anim;
         private PlayerInventory inventory; // may be null: levels without item gameplay need not attach it
         private RopeGun ropeGun;        // may be null: levels without the rope gun play fine
@@ -74,7 +76,10 @@ namespace Inkform.Player
             // Order must not move: animation reads contact and velocity from this same frame,
             // otherwise it lags a frame and flashes the wrong animation on landing/jumping moments
             contact.Tick();
+            // "Just touched" moments for haptics, judged against last frame's velocity
+            contactEdges.Detect(contact.OnGround, contact.OnCeiling, contact.OnLeftWall, contact.OnRightWall, RaiseContact);
             motor.Tick();
+            contactEdges.RememberVelocity(new Vector2(motor.VelocityX, motor.VelocityY));
             if (motor.ConsumeJumpStarted()) anim.OnJumpStarted();
             anim.Tick();
             // Dash smashing lives in DashBreaker's own Update (RopeGun-style independent loop):
@@ -218,6 +223,7 @@ namespace Inkform.Player
             // counts as "just landed" and plays a Land animation and landing sound for nothing
             contact.Tick();
             anim.SyncContactBaseline();
+            contactEdges.SyncBaseline(contact.OnGround, contact.OnCeiling, contact.OnLeftWall, contact.OnRightWall);
         }
     }
 }

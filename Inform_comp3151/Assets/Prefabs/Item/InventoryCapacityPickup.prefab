@@ -120,6 +120,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inkform.Interactable.Parts.InventoryCapacityPart
   pickupId: 
   capacityIncrease: 1
+  glowMaterial: {fileID: 2100000, guid: 7e014bfad2f043a3a43440493f2d9b20, type: 2}
 --- !u!60 &6075525136103228041
 PolygonCollider2D:
   m_ObjectHideFlags: 0

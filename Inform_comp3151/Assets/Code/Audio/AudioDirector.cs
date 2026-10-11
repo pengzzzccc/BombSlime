@@ -22,7 +22,12 @@ namespace Inkform.Audio
         [Header("Item")]
         [SerializeField] private SoundCue itemEaten;    // swallow
         [SerializeField] private SoundCue itemSpit;     // spit out
-        [SerializeField] private SoundCue inventoryCapacityUpgrade; // permanent backpack expansion pickup
+        // The capacity crystal (CapacityUpgradeFlight): touched, it flies into the HUD over 1.65s by
+        // default — the world is frozen meanwhile but audio is not — and the backpack grows on landing
+        [Tooltip("Touching a capacity crystal — one sound for its whole flight into the HUD (SFX_GetCrt, 1.64s)")]
+        [SerializeField] private SoundCue inventoryCapacityUpgrade;
+        [Tooltip("The crystal lands in the HUD backpack and the capacity goes up")]
+        [SerializeField] private SoundCue capacityLand;
 
         [Header("Player")]
         [SerializeField] private SoundCue jump;
@@ -53,6 +58,7 @@ namespace Inkform.Audio
             ItemBus.ItemStored += OnItemEaten;
             ItemBus.ItemReleased += OnItemReleased;
             ItemBus.InventoryCapacityUpgraded += OnInventoryCapacityUpgraded;
+            ItemBus.CapacityFlight += OnCapacityFlight;
             PlayerBus.StateChanged += OnPlayerState;
             PlayerBus.DashAttempted += OnDashAttempted;
             RopeGunBus.Fired += OnRopeFired;
@@ -71,6 +77,7 @@ namespace Inkform.Audio
             ItemBus.ItemStored -= OnItemEaten;
             ItemBus.ItemReleased -= OnItemReleased;
             ItemBus.InventoryCapacityUpgraded -= OnInventoryCapacityUpgraded;
+            ItemBus.CapacityFlight -= OnCapacityFlight;
             PlayerBus.StateChanged -= OnPlayerState;
             PlayerBus.DashAttempted -= OnDashAttempted;
             RopeGunBus.Fired -= OnRopeFired;
@@ -127,6 +134,13 @@ namespace Inkform.Audio
 
         private void OnInventoryCapacityUpgraded(Vector2 pos, int capacityIncrease) =>
             Play(inventoryCapacityUpgrade, pos);
+
+        // Landing is on the HUD, not in the world: no position. A flight torn down by a scene
+        // change (Cancel) never lands, so it stays silent.
+        private void OnCapacityFlight(CapacityFlightPhase phase, int capacityIncrease)
+        {
+            if (phase == CapacityFlightPhase.Land) Play(capacityLand);
+        }
 
         // Both of these are "the player's own sounds", always at the camera center, so like
         // jump/land they pass no position. The matching Cue assets should keep spatial off —

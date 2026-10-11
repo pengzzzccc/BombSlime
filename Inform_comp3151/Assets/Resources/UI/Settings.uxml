@@ -1,18 +1,24 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="Settings.uss" />
-    <!-- Settings shell: header + the page mount + the always-present BACK. Each sub-page
-         (ROOT category list / AUDIO / VIDEO / CONTROLS) is its own UXML/USS/Page triple,
-         instantiated by SettingsPanel into #Pages and display-toggled by its router. Row
-         styles cascade from this sheet to every mounted page. -->
-    <ui:VisualElement name="Settings" class="screen dim">
-        <ui:VisualElement class="settings-header" picking-mode="Ignore">
-            <ui:Label name="Title" text="OPTIONS" class="menu-title header-outline" picking-mode="Ignore" />
+    <!-- Settings, one page on the page frame: the title top left, then a single scrolling list
+         on a plate in the centred content column — AUDIO, VIDEO and CONTROLS one after another,
+         each a section title followed by its rows (label left, value / bar / key icons right).
+         SettingsPanel's sections build the rows into #Rows; prompts bottom right. -->
+    <ui:VisualElement name="Settings" class="screen dim frame">
+        <ui:VisualElement class="frame-header" picking-mode="Ignore">
+            <ui:Label name="Title" text="OPTIONS" class="page-title title-font header-outline" picking-mode="Ignore" />
         </ui:VisualElement>
 
-        <ui:VisualElement name="Pages" class="settings-pages" />
+        <ui:VisualElement class="frame-content" picking-mode="Ignore">
+            <ui:VisualElement class="content-column settings-column plate">
+                <ui:ScrollView name="Scroll" class="settings-scroll" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto">
+                    <ui:VisualElement name="Rows" class="settings-rows" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+        </ui:VisualElement>
 
-        <ui:VisualElement class="settings-bottom">
-            <ui:Button name="Btn_Back" text="BACK" class="menu-item floaty outline" />
+        <ui:VisualElement class="frame-footer" picking-mode="Ignore">
+            <ui:VisualElement name="PromptBar" class="prompt-bar" picking-mode="Ignore" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

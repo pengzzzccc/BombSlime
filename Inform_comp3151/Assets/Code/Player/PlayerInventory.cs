@@ -1,13 +1,15 @@
 using Inkform.Bus;
 using Inkform.Interactable;
 using Inkform.Item;
+using Inkform.Life;
 using Inkform.Tool;
 using UnityEngine;
 
 namespace Inkform.Player
 {
     /// <summary>Player-side inventory gameplay facade. World parts store through this component;
-    /// player actions consume or release through it. InventoryStore remains the data/save backing.</summary>
+    /// player actions consume or release through it. InventoryStore remains the data/save backing.
+    /// Dying empties the backpack (the bombs, not the capacity the crystals earned).</summary>
     public class PlayerInventory : MonoBehaviour
     {
         [SerializeField] private float spitOffset = 0.9f;
@@ -15,6 +17,17 @@ namespace Inkform.Player
 
         public int Count => InventoryStore.Count;
         public bool IsEmpty => InventoryStore.Count == 0;
+
+        void OnEnable() => LifeBus.Died += OnDied;
+
+        void OnDisable() => LifeBus.Died -= OnDied;
+
+        private void OnDied(DeathContext ctx)
+        {
+            if (ctx.Victim != gameObject) return;
+
+            InventoryStore.ClearItems();
+        }
 
         public bool TryStore(InventoryItemDefinition definition) => InventoryStore.TryAdd(definition);
 
@@ -35,16 +48,15 @@ namespace Inkform.Player
 
         public bool TryReleaseFirst(Vector2 dir)
         {
+            bool fromBackpack = InventoryStore.TryPeekFirst(out InventoryItemDefinition definition);
 #if UNITY_EDITOR
-            // F1 infinite bombs: an empty backpack is topped up with the one bomb item in the
-            // project (Resources/Inventory/AllinoneBomb) so spitting works immediately
-            if (DebugCheats.InfiniteBombs && InventoryStore.Count == 0)
-            {
-                InventoryItemDefinition bomb = Resources.Load<InventoryItemDefinition>("Inventory/AllinoneBomb");
-                if (bomb != null) InventoryStore.TryAdd(bomb);
-            }
+            // F1 infinite bombs: an empty backpack spits the one bomb item in the project
+            // (Resources/Inventory/AllinoneBomb) without storing it — a new run has no slots to
+            // hold it in
+            if (!fromBackpack && DebugCheats.InfiniteBombs)
+                definition = Resources.Load<InventoryItemDefinition>("Inventory/AllinoneBomb");
 #endif
-            if (!InventoryStore.TryPeekFirst(out InventoryItemDefinition definition)) return false;
+            if (definition == null) return false;
             if (definition.WorldPrefab == null)
             {
                 Debug.LogWarning($"Inventory item '{definition.Id}' has no world prefab; retaining it in the backpack", definition);
@@ -66,7 +78,9 @@ namespace Inkform.Player
             carriable.Release(mouth, velocity);
 #if UNITY_EDITOR
             // F1 infinite bombs: the item stays in the backpack — one bomb, endless spits
-            if (!DebugCheats.InfiniteBombs)
+            if (fromBackpack && !DebugCheats.InfiniteBombs)
+#else
+            if (fromBackpack)
 #endif
                 InventoryStore.RemoveFirst();
             ItemBus.RaiseItemReleased(definition, mouth, velocity);

@@ -1,0 +1,94 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 757766a733f047c883dae259cc4ee80b, type: 3}
+  m_Name: TutorialHints
+  m_EditorClassIdentifier: Assembly-CSharp::Inkform.UI.TutorialHintSet
+  hints:
+  - hint: 0
+    keyboardText: '{Move} to move'
+    gamepadText: '{Move} to move'
+  - hint: 1
+    keyboardText: Press {Jump} to jump, hold to jump higher
+    gamepadText: Press {Jump} to jump, hold to jump higher
+  - hint: 2
+    keyboardText: Aim with the mouse, click {RopeFire} to hook, click again to let
+      go
+    gamepadText: Aim with {Aim}, press {RopeFire} to hook, press again to let go
+  - hint: 3
+    keyboardText: Hook on Bomb, Press {SpitBomb} to throw a bomb at the reticle
+    gamepadText: Hook on Bomb, Press {SpitBomb} to throw a bomb at the reticle
+  - hint: 4
+    keyboardText: Grap a Bomb, Press {Dash} to dash toward the reticle
+    gamepadText: Grap a Bomb, Press {Dash} to dash toward the reticle
+  - hint: 5
+    keyboardText: Jump {Jump} to briefly move along the ceiling
+    gamepadText: Jump {Jump} to briefly move along the ceiling
+  gamepadIcons:
+  - control: leftTrigger
+    xbox: {fileID: 7648980015805897073, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+    playStation: {fileID: -2347275551008867600, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+  - control: rightTrigger
+    xbox: {fileID: 7192174033887211493, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+    playStation: {fileID: -7417389665078950120, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+  - control: leftShoulder
+    xbox: {fileID: -5222186991267956642, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+    playStation: {fileID: -182262112508196817, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+  - control: rightShoulder
+    xbox: {fileID: -8550385889474657520, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+    playStation: {fileID: -3590465558699726043, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+  - control: leftStick
+    xbox: {fileID: 6190820297653565540, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+    playStation: {fileID: 6190820297653565540, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+  - control: rightStick
+    xbox: {fileID: 8286020162446692931, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+    playStation: {fileID: 8286020162446692931, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+  - control: leftStickPress
+    xbox: {fileID: 2790511405579997441, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+    playStation: {fileID: 2790511405579997441, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+  - control: rightStickPress
+    xbox: {fileID: -6947931172881701973, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+    playStation: {fileID: -6947931172881701973, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+  - control: buttonSouth
+    xbox: {fileID: 5263054887591772365, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+    playStation: {fileID: 2743142303401280629, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+  - control: buttonEast
+    xbox: {fileID: 4125173676758339424, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+    playStation: {fileID: -2784076504478251383, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+  - control: buttonWest
+    xbox: {fileID: -2781936336183695522, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+    playStation: {fileID: -7361144099263506892, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+  - control: buttonNorth
+    xbox: {fileID: -3216917607447616878, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+    playStation: {fileID: -8289287195854025685, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+  - control: dpad
+    xbox: {fileID: -3690499634644089408, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+    playStation: {fileID: -3690499634644089408, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+  - control: dpad/up
+    xbox: {fileID: 7616088950052447714, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+    playStation: {fileID: 7616088950052447714, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+  - control: dpad/left
+    xbox: {fileID: -5116473699205974890, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+    playStation: {fileID: -5116473699205974890, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+  - control: dpad/down
+    xbox: {fileID: -5885788509505131755, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+    playStation: {fileID: -5885788509505131755, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+  - control: dpad/right
+    xbox: {fileID: -1868008699069229116, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+    playStation: {fileID: -1868008699069229116, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+  - control: select
+    xbox: {fileID: -1543895117682266636, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+    playStation: {fileID: -1543895117682266636, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+  - control: start
+    xbox: {fileID: -8589205210176932790, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+    playStation: {fileID: -8589205210176932790, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
+  mouseLeft: {fileID: 7393499047454288295, guid: ab31eece9e458e047a645b7a44d23903, type: 3}
+  mouseRight: {fileID: -5116198927626267380, guid: 1caf2f9351ba9284ab5c47024ef499dd, type: 3}

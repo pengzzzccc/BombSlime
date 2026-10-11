@@ -1,30 +1,65 @@
-/* Save slot selection — SAVE SLOTS header over a centred cascade of postcards. */
+/* Save slot selection — three cards in the centred content column of the page frame.
 
-.save-title { position: absolute; left: 0; right: 0; top: 110px; font-size: var(--fs-item); color: var(--c-white); -unity-text-align: middle-center; }
+   Each card is the pixel-art plate Art/UI/saveslot.png (sprite saveslot_0: 91x19 px with a
+   1px clear margin, point filtered and uncompressed in its import settings), shown at exactly
+   10x — 910x190 — so its pixels stay square. Measured on the art (x10):
+   - the slanted ends: the plate's left edge runs from x 20 (bottom) to x 60 (top), its right
+     edge from x 860 (bottom) to x 900 (top); the outline is 10px thick, top and bottom;
+   - the red line: x 490..830, y 110..120 — the details sit on it, right-aligned.
+   Text stays in ink (the plate is light). */
 
-.save-column { position: absolute; left: 0; right: 0; top: 0; bottom: 0; flex-direction: column; align-items: center; justify-content: center; }
+.save-column { flex-direction: column; align-items: center; justify-content: center; }
 
-.postcard-slot { flex-shrink: 0; width: 980px; height: 150px; margin: 14px 0; }
+.postcard-slot {
+    flex-shrink: 0;
+    width: 910px;
+    height: 190px;
+    margin: 8px 0;
+    transition-property: scale;
+    transition-duration: 0.12s;
+}
+/* Selected card: a size up, the plate washed green (the plate is its own backing: no shadow on its ink) */
+.postcard-slot:hover, .postcard-slot:focus { scale: 1.03 1.03; }
 
+/* Slot + level stacked on the left (clear of the slanted end), vertically centred */
 .postcard {
     position: absolute;
     left: 0; top: 0; right: 0; bottom: 0;
-    background-color: var(--c-card);
-    border-color: var(--c-card-edge);
-    border-width: 3px;
-    border-radius: 10px;
-    flex-direction: column;
+    background-image: url("project://database/Assets/Art/UI/saveslot.png?fileID=5358285155671718059&guid=a30cfe6abdeb2be46b7666061250ce6a&type=3#saveslot_0");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
+    padding: 0 0 0 84px;
 }
 
-.postcard-slot:hover > .postcard, .postcard-slot:focus > .postcard { border-color: var(--c-green); }
+.postcard-slot:hover > .postcard, .postcard-slot:focus > .postcard { -unity-background-image-tint-color: rgb(214, 255, 196); }
 
-.card-title { font-size: var(--fs-value); color: var(--c-ink-soft); -unity-text-align: middle-center; }
-.card-info { font-size: var(--fs-corner); color: var(--c-ink); -unity-text-align: middle-center; margin-top: 8px; white-space: normal; }
+.card-main { flex-direction: column; justify-content: center; max-width: 390px; }
+.card-title { font-size: var(--fs-sub); color: var(--c-ink-soft); -unity-text-align: middle-left; letter-spacing: 2px; }
+.card-level { font-size: 32px; color: var(--c-ink); -unity-text-align: middle-left; margin-top: 2px; white-space: normal; }
+/* On the red line — right edge on its end (x 830), bottom just above it (y 108):
+   [clock] time  [skull] deaths over the save date (or the overwrite prompt). The icons are the
+   HUD's Art/UI sprites at text height: clock 20x27 x1, skull 13x13 x2. */
+.card-info { position: absolute; right: 80px; bottom: 82px; flex-direction: column; align-items: flex-end; }
+.card-stats { flex-direction: row; align-items: center; }
+.card-icon { flex-shrink: 0; background-size: 100% 100%; background-repeat: no-repeat; }
+.card-clock {
+    width: 20px;
+    height: 27px;
+    margin-right: 6px;
+    background-image: url("project://database/Assets/Art/UI/ClockCon.png?fileID=5661768863291250846&guid=8feb860127983174093037784280a732&type=3#ClockCon_0");
+}
+.card-skull {
+    width: 26px;
+    height: 26px;
+    margin: 0 6px 0 18px;
+    background-image: url("project://database/Assets/Art/UI/deathCon.png?fileID=4445211718763495415&guid=8b4760edf9c6b2b468e61ffdce08df8e&type=3#deathCon_0");
+}
+.card-stat { font-size: var(--fs-corner); color: var(--c-ink-soft); -unity-text-align: middle-left; }
+.card-note { font-size: var(--fs-corner); color: var(--c-ink-soft); -unity-text-align: lower-right; margin-top: 2px; }
 
-/* The BACK button rides the bottom-right hint row (hints are picking Ignore, the button is not). */
-.confirm-hint > .menu-item { font-size: var(--fs-value); margin-left: 20px; }
-
-/* Overwrite-hold fill; width is driven by SaveMenuPanel each tick. */
-.hold-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background-color: rgba(132, 255, 84, 0.22); }
+/* Overwrite-hold fill inside the plate's interior (clear of the outline and the slanted ends);
+   its width is driven by SaveMenuPanel each tick as a share of this track. */
+.hold-track { position: absolute; left: 70px; right: 60px; top: 20px; bottom: 20px; }
+.hold-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background-color: rgba(132, 255, 84, 0.35); }

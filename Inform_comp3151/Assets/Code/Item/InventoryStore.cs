@@ -5,10 +5,11 @@ using UnityEngine;
 
 namespace Inkform.Item
 {
-    /// <summary>FIFO, data-backed inventory with a persistent, upgradeable capacity.</summary>
+    /// <summary>FIFO, data-backed inventory with a persistent, upgradeable capacity. A new run starts
+    /// with no slots at all: every slot is a capacity crystal the player has found.</summary>
     public static class InventoryStore
     {
-        public const int InitialCapacity = 1;
+        public const int InitialCapacity = 0;
 
         public static event Action Changed;
 
@@ -94,6 +95,15 @@ namespace Inkform.Item
             Notify();
         }
 #endif
+
+        /// <summary>Empties the backpack but keeps what the crystals earned — the capacity and the
+        /// collected pickup ids are permanent. Saved like any other change (the player's death).</summary>
+        public static void ClearItems()
+        {
+            if (items.Count == 0) return;
+            items.Clear();
+            Notify();
+        }
 
         public static void Clear() => ClearInternal(true);
 

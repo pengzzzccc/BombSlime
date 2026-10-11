@@ -1,5 +1,29 @@
-/* End of run — letter-dropped title, deaths/time stats, one CONFIRM. */
+/* End of run — letter-dropped title, a two-column stats table, one CONFIRM, on solid black. */
 
-.end-center { position: absolute; left: 0; right: 0; top: 0; bottom: 0; flex-direction: column; align-items: center; justify-content: center; }
+.end-screen { background-color: rgb(0, 0, 0); }
+
 .end-title-row { flex-direction: row; align-items: center; justify-content: center; height: 120px; margin-bottom: 30px; }
-.end-stat { font-size: var(--fs-begin); color: var(--c-white); -unity-text-align: middle-center; margin: 10px 0; }
+/* The dropped letters (UiFx.DropTitle: game font, header shadow) in the title colour */
+.end-title-row > Label { color: var(--c-title); }
+/* The stats table on its plate, as wide as the rows */
+.end-stats { width: 100%; max-width: 900px; align-items: center; }
+
+/* Label right-aligned / value left-aligned around the centre line, so the numbers line up */
+.end-stat-row { flex-direction: row; width: 100%; max-width: 900px; margin: 8px 0; }
+/* Icon + name, pushed against the centre line; the icons are the HUD's (clock 20x27 x2, skull 13x13 x3) */
+.end-stat-label { width: 50%; flex-direction: row; justify-content: flex-end; align-items: center; padding-right: 24px; }
+.end-stat-text { font-size: var(--fs-page); color: var(--c-muted); -unity-text-align: middle-right; }
+.end-icon { flex-shrink: 0; margin-right: 18px; background-size: 100% 100%; background-repeat: no-repeat; }
+.end-clock {
+    width: 40px;
+    height: 54px;
+    background-image: url("project://database/Assets/Art/UI/ClockCon.png?fileID=5661768863291250846&guid=8feb860127983174093037784280a732&type=3#ClockCon_0");
+}
+.end-skull {
+    width: 39px;
+    height: 39px;
+    background-image: url("project://database/Assets/Art/UI/deathCon.png?fileID=4445211718763495415&guid=8b4760edf9c6b2b468e61ffdce08df8e&type=3#deathCon_0");
+}
+.end-stat-value { width: 50%; font-size: var(--fs-page); color: var(--c-text); -unity-text-align: middle-left; padding-left: 24px; }
+
+.end-confirm { margin-top: 50px; -unity-text-align: middle-center; }

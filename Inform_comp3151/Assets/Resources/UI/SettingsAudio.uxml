@@ -1,7 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements">
-    <Style src="SettingsAudio.uss" />
-    <!-- Audio page: mute + the three volume sliders. Rows are built in C# into #Rows. -->
-    <ui:ScrollView name="Scroll" class="settings-scroll" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto">
-        <ui:VisualElement name="Rows" />
-    </ui:ScrollView>
-</ui:UXML>

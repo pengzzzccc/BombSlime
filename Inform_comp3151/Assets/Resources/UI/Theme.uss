@@ -10,22 +10,41 @@
 
 :root {
     --c-green:     rgb(132, 255, 84);   /* hover / focus highlight */
-    --c-header:    rgb(72, 61, 139);    /* big title outline, version */
-    --c-gray:      rgb(128, 128, 128);  /* big titles, subheaders */
-    --c-disabled:  rgb(47, 79, 79);     /* disabled rows/buttons */
+    --c-title:     rgb(246, 240, 226);  /* big titles: warm white, the game font */
+    --c-text:      rgb(240, 242, 248);  /* menu items, row labels and values */
+    --c-muted:     rgb(178, 186, 210);  /* kickers, group headers, stat labels, version */
+    --c-gray:      rgb(178, 186, 210);  /* legacy name: kept equal to --c-muted */
+    --c-header:    rgb(178, 186, 210);  /* legacy name (version label): kept equal to --c-muted */
+    --c-disabled:  rgba(240, 242, 248, 0.35);   /* disabled rows/buttons: dimmed, still legible */
     --c-card:      rgb(252, 240, 245);  /* save postcard cream */
     --c-card-edge: rgb(35, 28, 38);
     --c-ink:       rgb(24, 20, 26);     /* text on postcards */
     --c-ink-soft:  rgb(60, 50, 66);
-    --c-dim:       rgba(0, 0, 0, 0.4);  /* sheet overlay */
+    --c-dim:       rgba(0, 0, 0, 0.5);  /* sheet overlay */
+    --c-plate:     rgba(10, 12, 28, 0.55);   /* the dark backing behind lists and tables */
     --c-white:     rgb(255, 255, 255);
-    --fs-title: 76px;                   /* type scale: title/begin/item/value/sub/corner */
-    --fs-begin: 57px;
-    --fs-item: 38px;
+
+    /* Type scale, tuned for Alibaba PuHuiTi Medium (text) and BombSlimeFonts (titles) */
+    --fs-display: 104px;                /* the game's name on the main menu */
+    --fs-title: 76px;                   /* page and overlay titles */
+    --fs-begin: 56px;
+    --fs-page: 52px;
+    --fs-section: 44px;                 /* section titles inside a page (options) */
+    --fs-item: 36px;
     --fs-value: 30px;
-    --fs-sub: 23px;
-    --fs-corner: 19px;
-    --float-y: -8px;                   /* hover/focus lift */
+    --fs-sub: 22px;
+    --fs-corner: 22px;
+    --float-y: -8px;                    /* legacy: the old focus lift, no longer applied */
+
+    /* Layout grid (reference 1920x1080, the panel scales by height): nothing but
+       backgrounds crosses the safe margins; content columns never exceed --content-w. */
+    --safe-x: 120px;
+    --safe-y: 64px;
+    --header-h: 150px;
+    --footer-h: 56px;
+    --content-w: 1100px;
+    --key-h: 40px;                      /* button icons / keycaps */
+    --hud-margin: 32px;                 /* gameplay HUD keeps tighter to the edges than menus */
 }
 
 /* ---- sheet skeleton ---- */
@@ -33,35 +52,111 @@
 .screen { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
 .dim { background-color: var(--c-dim); }
 
-/* ---- text ---- */
+/* Dark rounded backing for lists and tables, so text reads over the cave and over gameplay */
+.plate { background-color: var(--c-plate); border-radius: 14px; padding: 24px 32px; }
 
-.outline {
-    -unity-text-outline-width: 2px;
-    -unity-text-outline-color: rgba(0, 0, 0, 0.9);
-}
-.header-outline {
-    -unity-text-outline-width: 3px;
-    -unity-text-outline-color: var(--c-header);
-}
+/* ---- text ----
+   Clean text, no outlines. The weight is one notch above PuHuiTi Medium via the inherited bold
+   style below — it reaches every label in the panel, the postcards and keycaps included. The two
+   "outline" classes every sheet already uses carry a soft drop shadow instead: that, and the
+   plates, is what separates the text from whatever is behind it. */
+
+:root { -unity-font-style: bold; }
+
+.outline { -unity-text-outline-width: 0; text-shadow: 0px 2px 4px rgba(6, 8, 20, 0.75); }
+.header-outline { -unity-text-outline-width: 0; text-shadow: 0px 4px 12px rgba(6, 8, 20, 0.85); }
+
+/* Titles in the game's own font (Latin only — every title is) */
+.title-font { -unity-font: resource("UI/BombSlimeFonts"); -unity-font-style: normal; }
 
 /* ---- selectable controls ----
    Transparent background/borders suppress the Unity default Button
-   look (grey rounded fill) that comes with unity-theme://default.
-   :focus sits beside :hover so gamepad/keyboard navigation is visible. */
+   look (grey rounded fill) that comes with unity-theme://default. */
 
 .floaty { background-color: rgba(0, 0, 0, 0); border-width: 0; border-radius: 0; }
-.floaty:hover, .floaty:focus { translate: 0 var(--float-y); background-color: rgba(0, 0, 0, 0); }
+.floaty:hover, .floaty:focus { background-color: rgba(0, 0, 0, 0); }
 
-/* ---- menu text ---- */
+/* ---- menu text ----
+   Selected (focus) or under the mouse: green, a size up, and heavier — a hairline stroke in the
+   same green thickens the letters without reading as an outline. Every sheet selects this way. */
 
-.menu-item { color: var(--c-white); font-size: var(--fs-item); -unity-text-align: middle-left; padding: 4px 12px; margin: 6px 0; }
-.menu-item:hover, .menu-item:focus { color: var(--c-green); }
+.menu-item {
+    color: var(--c-text);
+    font-size: var(--fs-item);
+    -unity-text-align: middle-left;
+    padding: 4px 12px;
+    margin: 6px 0;
+    transition-property: scale, color;
+    transition-duration: 0.12s;
+}
+.menu-item:hover, .menu-item:focus {
+    color: var(--c-green);
+    scale: 1.08 1.08;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: var(--c-green);
+}
 .menu-item:disabled { color: var(--c-disabled); }
 .menu-begin { font-size: var(--fs-begin); }
-.menu-title { font-size: var(--fs-title); color: var(--c-gray); -unity-text-align: middle-center; }
-.corner { font-size: var(--fs-corner); color: var(--c-white); }
+.menu-title { font-size: var(--fs-title); color: var(--c-title); -unity-text-align: middle-center; }
+.corner { font-size: var(--fs-corner); color: var(--c-text); }
 
-/* ---- bottom-right Confirm/Back hint ---- */
+/* ---- screen frame: every menu sheet is header / content / footer inside the safe margins ----
+   Page sheets (main menu, save slots, options) keep their title top-left; overlay sheets
+   (pause, end of run) add .frame--overlay and centre everything in the content area. */
 
-.confirm-hint { position: absolute; right: 40px; bottom: 28px; flex-direction: row; align-items: center; }
-.confirm-hint > .corner { margin-left: 28px; }
+.frame {
+    padding-left: var(--safe-x);
+    padding-right: var(--safe-x);
+    padding-top: var(--safe-y);
+    padding-bottom: var(--safe-y);
+    flex-direction: column;
+}
+.frame-header { flex-shrink: 0; height: var(--header-h); justify-content: flex-start; }
+.frame-content { flex-grow: 1; flex-shrink: 1; position: relative; }
+.frame-footer { flex-shrink: 0; height: var(--footer-h); flex-direction: row; align-items: flex-end; justify-content: space-between; }
+.frame--overlay > .frame-content { align-items: center; justify-content: center; }
+
+.page-kicker { font-size: var(--fs-sub); color: var(--c-muted); -unity-text-align: middle-left; letter-spacing: 4px; margin-bottom: 2px; }
+.page-title { font-size: var(--fs-title); color: var(--c-title); -unity-text-align: middle-left; letter-spacing: 2px; }
+.overlay-title { margin-bottom: 40px; letter-spacing: 2px; }
+
+/* Content column: centred, full width up to --content-w */
+.content-column { width: 100%; max-width: var(--content-w); align-self: center; flex-grow: 1; }
+
+/* Left-aligned menu list (main menu): text starts on the safe margin, grows from its left edge */
+.menu-list { flex-direction: column; align-items: flex-start; }
+.menu-list > .menu-item { -unity-text-align: middle-left; padding-left: 0; transform-origin: left center; }
+/* Centred list for overlays: grows from its centre */
+.overlay-list { width: 100%; max-width: 720px; flex-direction: column; align-items: center; }
+.overlay-list > .menu-item { -unity-text-align: middle-center; transform-origin: center; }
+
+.version-label { color: var(--c-muted); font-size: var(--fs-corner); }
+
+/* ---- prompt bar: device-aware [icon] label pairs, bottom right (PromptBar.cs) ---- */
+
+.prompt-bar { flex-direction: row; align-items: center; margin-left: auto; }
+.prompt { flex-direction: row; align-items: center; margin-left: 32px; }
+.prompt-label { font-size: var(--fs-corner); color: var(--c-text); margin-left: 8px; }
+.prompt--clickable:hover > .prompt-label { color: var(--c-green); }
+
+/* ---- button glyphs (GlyphElements.cs): pad art, or a drawn keycap in the same style ---- */
+
+.key-icon { -unity-background-scale-mode: scale-to-fit; margin: 0 3px; flex-shrink: 0; }   /* size set in C# from the sprite */
+.key-cap {
+    height: var(--key-h);
+    min-width: var(--key-h);
+    padding: 0 8px;
+    margin: 0 3px;
+    flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(28, 28, 32);
+    border-radius: 6px;
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.85);
+}
+.key-cap-label { font-size: 20px; color: var(--c-white); -unity-text-align: middle-center; padding: 0; margin: 0; }
+.key--small.key-cap { height: 32px; min-width: 32px; padding: 0 6px; border-radius: 5px; }
+.key--small > .key-cap-label { font-size: 16px; }
+.key--large.key-cap { height: 60px; min-width: 60px; padding: 0 12px; border-radius: 9px; border-width: 3px; }
+.key--large > .key-cap-label { font-size: 30px; }

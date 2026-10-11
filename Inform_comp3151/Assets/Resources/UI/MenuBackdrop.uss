@@ -1,0 +1,17 @@
+/* Main menu cave backdrop: Art/UI/MainMenuBackdrop.png, the menu art's final look baked into
+   one opaque 640x360 picture — Art/scene/Background L1BG_ Layer4, 3, 2, 1, then
+   Art/scene/Frontground/foreground7 on top, blended in sRGB like the reference shot. Baked
+   rather than stacked at runtime: the project renders in linear space, where the layers'
+   faint teal washes (alpha 56) would blend to a different tone than the reference.
+
+   Pixel art, point filtered and uncompressed in its import settings: at the 1920x1080 reference
+   it shows at exactly 3x. It covers the screen centred on any aspect ratio. The colour behind it
+   is the frame's ink, for the instant before the art is up. */
+
+.backdrop {
+    background-color: rgb(39, 43, 75);
+    background-image: url("project://database/Assets/Art/UI/MainMenuBackdrop.png?fileID=2800000&guid=b6396c7d3340468b8f5f1abd546ffcee&type=3#MainMenuBackdrop");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}

@@ -21,6 +21,10 @@ namespace Inkform.Settings
     /// RuntimeInitializeOnLoadMethod loads persisted values (a plain static default would be wiped by
     /// the ResetStatics pass that must run for the event).
     /// </summary>
+    /// <summary>Gamepad rumble strength. Each pad family maps the levels onto its own motors:
+    /// HapticsDirector's table for the DualSense, GenericPadHaptics' shares for every other pad.</summary>
+    public enum RumbleLevel { Off, Low, Medium, High }
+
     public static class SettingsStore
     {
         /// <summary>Which input device family gameplay input is filtered to (InputHandler).</summary>
@@ -30,13 +34,18 @@ namespace Inkform.Settings
         public const float MinSensitivity = 0f;
         public const float MaxSensitivity = 5f;
 
+        // Defaults (first run, and RESET ALL). Rumble and trigger effects share one default level.
+        public const RumbleLevel DefaultLevel = RumbleLevel.Medium;
+        public const float DefaultStickSensitivity = 1.6f;
+        public const float DefaultRopeSnapDeadZone = 0.25f;
+
         // ---- Values (PlayerPrefs-backed) ----
 
         public static float MasterVolume { get; private set; } = 1f;
         public static float MusicVolume { get; private set; } = 1f;
         public static float SfxVolume { get; private set; } = 1f;
         public static float MouseSensitivity { get; private set; } = 1f;
-        public static float StickSensitivity { get; private set; } = 1f;
+        public static float StickSensitivity { get; private set; } = DefaultStickSensitivity;
 
         /// <summary>Silences everything without touching the three volume values, so unmuting restores
         /// the mix the player set. Applied through AudioListener.volume — see ApplyAudio.</summary>
@@ -54,6 +63,10 @@ namespace Inkform.Settings
         /// <summary>Frame rate counter overlay visible in gameplay.</summary>
         public static bool ShowFps { get; private set; }
 
+        /// <summary>The run timer at the HUD's top left. Hiding it only hides it: the run's
+        /// clock (SaveStore.PlaySeconds) keeps counting.</summary>
+        public static bool ShowTimer { get; private set; } = true;
+
         /// <summary>Session performance recorder on/off — writes the Docs/PerfLogs (or Log/) CSV
         /// traces. Off by default: it is a development tool, and a player's session should not pay
         /// for a CSV nobody asked for.</summary>
@@ -63,9 +76,21 @@ namespace Inkform.Settings
         /// PerfIntervals never get in through the setter.</summary>
         public static float PerfInterval { get; private set; } = 1f;
 
-        /// <summary>Gamepad rumble on/off; RumbleManager reads this live. Strengths are tuned at
-        /// half-motor-power in the manager itself, so there is no middle setting to feel through.</summary>
-        public static bool Rumble { get; private set; } = true;
+        /// <summary>Gamepad rumble strength (the motors); HapticsDirector and GenericPadHaptics
+        /// read it live. Off stops the motors only — the DualSense's trigger feel has a level of
+        /// its own (TriggerLevel).</summary>
+        public static RumbleLevel RumbleLevel { get; private set; } = DefaultLevel;
+
+        /// <summary>Any rumble at all (level above Off).</summary>
+        public static bool Rumble => RumbleLevel != RumbleLevel.Off;
+
+        /// <summary>Trigger feel strength: the DualSense's adaptive-trigger resistance, snap-back
+        /// and buzz at Low / Medium / High, or Off (other pads have no trigger feel).
+        /// HapticsDirector reads this live, independently of the rumble level.</summary>
+        public static RumbleLevel TriggerLevel { get; private set; } = DefaultLevel;
+
+        /// <summary>Any trigger feel at all (level above Off).</summary>
+        public static bool TriggerEffects => TriggerLevel != RumbleLevel.Off;
 
         // ---- Grapping hook (rope gun) aim feel; RopeGun reads these live ----
 
@@ -83,8 +108,9 @@ namespace Inkform.Settings
 
         /// <summary>While sliding on a wall snap, rescale the aim input by the measured geometric
         /// gain so the anchor slides at the free-cursor speed the sensitivity settings define,
-        /// whatever the wall angle.</summary>
-        public static bool RopeAdaptiveSpeed { get; private set; } = true;
+        /// whatever the wall angle. Not a setting of its own: it goes with Wall Snap (the slide
+        /// it corrects only exists while wall snapping).</summary>
+        public static bool RopeAdaptiveSpeed => RopeWallSnap;
 
         /// <summary>Global visual FX intensity 0~1: scales screen shake, camera zoom, post punch and
         /// shatter launch speed at their consumers. Hitstop is a duration, not a strength, so it is
@@ -139,10 +165,14 @@ namespace Inkform.Settings
         private const string KeyFps = "Inkform.fpsCap";
         private const string KeyVSync = "Inkform.vsync";
         private const string KeyShowFps = "Inkform.showFps";
+        private const string KeyShowTimer = "Inkform.showTimer";
         private const string KeyFxIntensity = "Inkform.fxIntensity";
         private const string KeyPerfRecording = "Inkform.perfRecording";
         private const string KeyPerfInterval = "Inkform.perfInterval";
-        private const string KeyRumble = "Inkform.rumbleOn";
+        private const string KeyRumbleLevel = "Inkform.rumbleLevel";
+        private const string KeyRumbleLegacy = "Inkform.rumbleOn";     // pre-levels on/off switch, migrated on load
+        private const string KeyTriggerLevel = "Inkform.triggerLevel";
+        private const string KeyTriggerEffects = "Inkform.triggerEffectsOn";   // pre-levels on/off switch, migrated on load
         private const string KeyRopeWallSnap = "Inkform.ropeWallSnap";
         private const string KeyRopeBombSnap = "Inkform.ropeBombSnap";
         private const string KeyRopeDeadZone = "Inkform.ropeSnapDeadZone";
@@ -158,20 +188,22 @@ namespace Inkform.Settings
             Changed = null;
             MasterVolume = MusicVolume = SfxVolume = 1f;
             Muted = false;
-            MouseSensitivity = StickSensitivity = 1f;
+            MouseSensitivity = 1f;
+            StickSensitivity = DefaultStickSensitivity;
             Device = InputDevice.KeyboardMouse;
             ResolutionWidth = ResolutionHeight = 0;
             Fullscreen = true;
             FpsCap = 120;
             VSync = false;
             ShowFps = false;
+            ShowTimer = true;
             PerfRecording = false;
             PerfInterval = 1f;
-            Rumble = true;
+            RumbleLevel = DefaultLevel;
+            TriggerLevel = DefaultLevel;
             RopeWallSnap = true;
             RopeBombSnap = true;
-            RopeSnapDeadZone = 0.3f;
-            RopeAdaptiveSpeed = true;
+            RopeSnapDeadZone = DefaultRopeSnapDeadZone;
             FxIntensity = 1f;
             cachedResolutions = null;
         }
@@ -196,19 +228,35 @@ namespace Inkform.Settings
             // Remove the preference shipped for a minimap that was never implemented.
             PlayerPrefs.DeleteKey("Inkform.mapEnabled");
             MouseSensitivity = PlayerPrefs.GetFloat(KeyMouseSens, 1f);
-            StickSensitivity = PlayerPrefs.GetFloat(KeyStickSens, 1f);
+            StickSensitivity = PlayerPrefs.GetFloat(KeyStickSens, DefaultStickSensitivity);
             Device = (InputDevice)PlayerPrefs.GetInt(KeyDevice, (int)InputDevice.KeyboardMouse);
             Fullscreen = PlayerPrefs.GetInt(KeyFullscreen, 1) != 0;
             FpsCap = PlayerPrefs.GetInt(KeyFps, 120);
             VSync = PlayerPrefs.GetInt(KeyVSync, 0) != 0;
             ShowFps = PlayerPrefs.GetInt(KeyShowFps, 0) != 0;
+            ShowTimer = PlayerPrefs.GetInt(KeyShowTimer, 1) != 0;
             PerfRecording = PlayerPrefs.GetInt(KeyPerfRecording, 0) != 0;
             PerfInterval = PlayerPrefs.GetFloat(KeyPerfInterval, 1f);
-            Rumble = PlayerPrefs.GetInt(KeyRumble, 1) != 0;
+            RumbleLevel = MigrateRumbleLevel(
+                PlayerPrefs.HasKey(KeyRumbleLevel), PlayerPrefs.GetInt(KeyRumbleLevel, (int)DefaultLevel),
+                PlayerPrefs.HasKey(KeyRumbleLegacy), PlayerPrefs.GetInt(KeyRumbleLegacy, 1));
+            if (PlayerPrefs.HasKey(KeyRumbleLegacy))
+            {
+                PlayerPrefs.SetInt(KeyRumbleLevel, (int)RumbleLevel);
+                PlayerPrefs.DeleteKey(KeyRumbleLegacy);
+            }
+            TriggerLevel = MigrateRumbleLevel(
+                PlayerPrefs.HasKey(KeyTriggerLevel), PlayerPrefs.GetInt(KeyTriggerLevel, (int)DefaultLevel),
+                PlayerPrefs.HasKey(KeyTriggerEffects), PlayerPrefs.GetInt(KeyTriggerEffects, 1));
+            if (PlayerPrefs.HasKey(KeyTriggerEffects))
+            {
+                PlayerPrefs.SetInt(KeyTriggerLevel, (int)TriggerLevel);
+                PlayerPrefs.DeleteKey(KeyTriggerEffects);
+            }
             RopeWallSnap = PlayerPrefs.GetInt(KeyRopeWallSnap, 1) != 0;
             RopeBombSnap = PlayerPrefs.GetInt(KeyRopeBombSnap, 1) != 0;
-            RopeSnapDeadZone = PlayerPrefs.GetFloat(KeyRopeDeadZone, 0.3f);
-            RopeAdaptiveSpeed = PlayerPrefs.GetInt(KeyRopeAdaptive, 1) != 0;
+            RopeSnapDeadZone = PlayerPrefs.GetFloat(KeyRopeDeadZone, DefaultRopeSnapDeadZone);
+            PlayerPrefs.DeleteKey(KeyRopeAdaptive);   // retired: adaptive speed now follows Wall Snap
             FxIntensity = PlayerPrefs.GetFloat(KeyFxIntensity, 1f);
 
             ResolutionWidth = PlayerPrefs.GetInt(KeyResW, 0);
@@ -339,6 +387,14 @@ namespace Inkform.Settings
             Changed?.Invoke();
         }
 
+        public static void SetShowTimer(bool value)
+        {
+            if (ShowTimer == value) return;
+            ShowTimer = value;
+            PlayerPrefs.SetInt(KeyShowTimer, value ? 1 : 0);
+            Changed?.Invoke();
+        }
+
         public static void SetFxIntensity(float value)
         {
             value = Mathf.Clamp01(value);
@@ -368,11 +424,31 @@ namespace Inkform.Settings
             Changed?.Invoke();
         }
 
-        public static void SetRumble(bool value)
+        public static void SetRumbleLevel(RumbleLevel value)
         {
-            if (Rumble == value) return;
-            Rumble = value;
-            PlayerPrefs.SetInt(KeyRumble, value ? 1 : 0);
+            if (RumbleLevel == value) return;
+            RumbleLevel = value;
+            PlayerPrefs.SetInt(KeyRumbleLevel, (int)value);
+            Changed?.Invoke();
+        }
+
+        /// <summary>A stored level (rumble, and the trigger level the same way): the levels key
+        /// when present, else the old on/off switch (off stays Off, on becomes High — the strength
+        /// the switch used to give), else the default. Out-of-range stored values clamp. Pure so
+        /// tests can pin the migration.</summary>
+        public static RumbleLevel MigrateRumbleLevel(bool hasLevel, int level, bool hasLegacy, int legacyOn)
+        {
+            if (hasLevel)
+                return (RumbleLevel)System.Math.Max((int)RumbleLevel.Off, System.Math.Min((int)RumbleLevel.High, level));
+            if (hasLegacy) return legacyOn != 0 ? RumbleLevel.High : RumbleLevel.Off;
+            return DefaultLevel;
+        }
+
+        public static void SetTriggerLevel(RumbleLevel value)
+        {
+            if (TriggerLevel == value) return;
+            TriggerLevel = value;
+            PlayerPrefs.SetInt(KeyTriggerLevel, (int)value);
             Changed?.Invoke();
         }
 
@@ -403,31 +479,25 @@ namespace Inkform.Settings
             Changed?.Invoke();
         }
 
-        public static void SetRopeAdaptiveSpeed(bool value)
-        {
-            if (RopeAdaptiveSpeed == value) return;
-            RopeAdaptiveSpeed = value;
-            PlayerPrefs.SetInt(KeyRopeAdaptive, value ? 1 : 0);
-            Changed?.Invoke();
-        }
-
         public static void ResetToDefaults()
         {
             MasterVolume = MusicVolume = SfxVolume = 1f;
             Muted = false;
-            MouseSensitivity = StickSensitivity = 1f;
+            MouseSensitivity = 1f;
+            StickSensitivity = DefaultStickSensitivity;
             Device = InputDevice.KeyboardMouse;
             Fullscreen = true;
             FpsCap = 120;
             VSync = false;
             ShowFps = false;
+            ShowTimer = true;
             PerfRecording = false;
             PerfInterval = 1f;
-            Rumble = true;
+            RumbleLevel = DefaultLevel;
+            TriggerLevel = DefaultLevel;
             RopeWallSnap = true;
             RopeBombSnap = true;
-            RopeSnapDeadZone = 0.3f;
-            RopeAdaptiveSpeed = true;
+            RopeSnapDeadZone = DefaultRopeSnapDeadZone;
             FxIntensity = 1f;
             Resolution r = Screen.currentResolution;
             ResolutionWidth = r.width;
@@ -450,10 +520,14 @@ namespace Inkform.Settings
             PlayerPrefs.DeleteKey(KeyFps);
             PlayerPrefs.DeleteKey(KeyVSync);
             PlayerPrefs.DeleteKey(KeyShowFps);
+            PlayerPrefs.DeleteKey(KeyShowTimer);
             PlayerPrefs.DeleteKey(KeyFxIntensity);
             PlayerPrefs.DeleteKey(KeyPerfRecording);
             PlayerPrefs.DeleteKey(KeyPerfInterval);
-            PlayerPrefs.DeleteKey(KeyRumble);
+            PlayerPrefs.DeleteKey(KeyRumbleLevel);
+            PlayerPrefs.DeleteKey(KeyRumbleLegacy);
+            PlayerPrefs.DeleteKey(KeyTriggerLevel);
+            PlayerPrefs.DeleteKey(KeyTriggerEffects);
             PlayerPrefs.DeleteKey(KeyRopeWallSnap);
             PlayerPrefs.DeleteKey(KeyRopeBombSnap);
             PlayerPrefs.DeleteKey(KeyRopeDeadZone);

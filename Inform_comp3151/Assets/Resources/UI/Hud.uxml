@@ -1,18 +1,32 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="Hud.uss" />
     <!-- Gameplay HUD. Everything picks nothing (picking-mode Ignore): the HUD must never eat a
-         click meant for the world. Layout mirrors the old HudRoot prefab: FPS top right,
-         timer top centre, inventory bottom right, "Saved" toast above it. Visibility of the
+         click meant for the world. Run stats top left (the run timer with its clock, the death
+         count with its skull), FPS top right, inventory bottom right, "Saved" toast above it. The tutorial
+         hint line sits bottom centre, no plate (TutorialHintView fills and fades it). Visibility of the
          whole Gameplay layer is driven by Hud.SetGameplayVisible. -->
     <ui:VisualElement name="Hud" class="screen" picking-mode="Ignore">
         <ui:VisualElement name="Gameplay" class="hud-layer" picking-mode="Ignore">
             <ui:Label name="FpsLabel" class="hud-fps outline" picking-mode="Ignore" />
-            <ui:Label name="TimerLabel" text="00:00" class="hud-timer outline" picking-mode="Ignore" />
+            <ui:VisualElement name="RunStats" class="hud-stats" picking-mode="Ignore">
+                <ui:VisualElement name="TimerRow" class="hud-stat" picking-mode="Ignore">
+                    <ui:VisualElement name="ClockIcon" class="hud-stat-icon hud-clock-icon" picking-mode="Ignore" />
+                    <ui:Label name="TimerLabel" text="00:00:000" class="hud-stat-text outline" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:VisualElement name="DeathRow" class="hud-stat" picking-mode="Ignore">
+                    <ui:VisualElement name="DeathIcon" class="hud-stat-icon hud-death-icon" picking-mode="Ignore" />
+                    <ui:Label name="DeathLabel" text="0" class="hud-stat-text outline" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
             <ui:VisualElement name="Inventory" class="hud-inventory" picking-mode="Ignore">
                 <ui:Image name="InventoryIcon" class="hud-inventory-icon" picking-mode="Ignore" />
-                <ui:Label name="InventoryCount" text="0/1" class="hud-inventory-count outline" picking-mode="Ignore" />
+                <ui:Label name="InventoryCount" text="0/0" class="hud-inventory-count outline" picking-mode="Ignore" />
+                <ui:Label name="InventoryPlus" text="+1" class="hud-inventory-plus outline" picking-mode="Ignore" />
             </ui:VisualElement>
             <ui:Label name="SaveToast" text="Saved" class="hud-save-toast outline" picking-mode="Ignore" />
+            <ui:VisualElement name="TutorialHint" class="hud-tutorial" picking-mode="Ignore">
+                <ui:VisualElement name="TutorialHintPanel" class="hud-tutorial-panel" picking-mode="Ignore" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

@@ -71,6 +71,11 @@ namespace Inkform.Player
         private bool snapSliding;
         private Vector2 lastAnchorPos;
         private Vector2 lastAimOffset;
+
+        // Set by Aim() on non-zero input, consumed by UpdatePreview: the edge-snap escape is a
+        // deliberate "pull the cursor closer" gesture and must not fire on input-less frames —
+        // a lock's anchor distance drifts as the player walks, which would otherwise fake the pull
+        private bool aimMovedSincePreview;
         private const float SnapGainMin = 0.2f;
         private const float SnapGainMax = 5f;
 
@@ -256,6 +261,10 @@ namespace Inkform.Player
         public void Aim(Vector2 delta, bool pixelDelta)
         {
             if (phase != RopePhase.Idle || LifeBus.IsDead) return;
+
+            // Real input is the only legitimate "pull the cursor" gesture — UpdatePreview's
+            // edge-snap escape is evaluated exclusively on these frames (see there)
+            if (delta.sqrMagnitude > 0f) aimMovedSincePreview = true;
 
             // Adaptive wall-slide speed: while the reticle slides on a wall snap, divide the
             // input by the measured geometric gain — the anchor then moves along the wall at
@@ -669,7 +678,14 @@ namespace Inkform.Player
                 // the snap — the reticle turns red right where the player pulled it (the cursor's
                 // own length is kept; the handover below must not stretch it back to the anchor).
                 // The dead zone keeps the flip from flickering at the boundary.
-                if (aimOffset.magnitude < lastAnchorDistance - SettingsStore.RopeSnapDeadZone)
+                // Evaluated only on frames with real aim input: the check reads the anchor's
+                // DISTANCE from the player, which drifts while a lock is held and the player
+                // walks (a bomb receding as the player backs off) — an ungated escape would fire
+                // with no input at all, skip the wasGreen handover below, and leave the cursor
+                // parked short of every anchor on the ray: the reticle could then never turn
+                // green again until the aim moved (stuck-red crosshair, wall ungrabbable).
+                if (aimMovedSincePreview &&
+                    aimOffset.magnitude < lastAnchorDistance - SettingsStore.RopeSnapDeadZone)
                 {
                     previewGreen = false;
                     reticle.position = target;
@@ -708,6 +724,7 @@ namespace Inkform.Player
             snapSliding = previewGreen && SettingsStore.RopeWallSnap && previewCarriable == null;
             lastAnchorPos = reticle.position;
             lastAimOffset = aimOffset;
+            aimMovedSincePreview = false;
 
             reticleSprite.color = previewGreen ? hitColor : missColor;
             float s = crosshairSize * (previewGreen ? 1.25f : 1f);

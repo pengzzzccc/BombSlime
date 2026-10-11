@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -2953139323176419468}
   - component: {fileID: 3001680339242159087}
   - component: {fileID: 1890563257483117343}
-  - component: {fileID: 5373973602472525390}
+  - component: {fileID: 1521758927831488983}
   m_Layer: 6
   m_Name: FloatStone
   m_TagString: Untagged
@@ -139,6 +139,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  loopCue: {fileID: 0}
 --- !u!212 &3001680339242159087
 SpriteRenderer:
   serializedVersion: 2
@@ -225,8 +226,8 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
---- !u!60 &5373973602472525390
-PolygonCollider2D:
+--- !u!61 &1521758927831488983
+BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -259,7 +260,7 @@ PolygonCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0.019695982, y: -0.06644547}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -269,22 +270,5 @@ PolygonCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Points:
-    m_Paths:
-    - - {x: -0.38202727, y: 0.37385896}
-      - {x: -0.50262916, y: 0.10609406}
-      - {x: -0.44313684, y: -0.07471565}
-      - {x: -0.4403316, y: -0.3645468}
-      - {x: -0.33181, y: -0.35312065}
-      - {x: -0.13820001, y: -0.36334652}
-      - {x: -0.06719549, y: -0.46515945}
-      - {x: 0.09940701, y: -0.46131834}
-      - {x: 0.23784824, y: -0.35022703}
-      - {x: 0.29992804, y: -0.40959692}
-      - {x: 0.44360998, y: -0.41327798}
-      - {x: 0.48948908, y: -0.3586612}
-      - {x: 0.4048909, y: -0.12623827}
-      - {x: 0.48889348, y: -0.054022387}
-      - {x: 0.48160434, y: 0.1665372}
-      - {x: 0.3402663, y: 0.37385896}
-  m_UseDelaunayMesh: 1
+  m_Size: {x: 0.79328394, y: 0.56194973}
+  m_EdgeRadius: 0

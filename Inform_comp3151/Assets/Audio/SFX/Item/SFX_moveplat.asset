@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a24bf2b91cd40740b08c77e7fe8159e, type: 3}
+  m_Name: SFX_moveplat
+  m_EditorClassIdentifier: Assembly-CSharp::Inkform.Audio.SoundCue
+  clips:
+  - {fileID: 8300000, guid: 727a30a6461bd1446b687ffbe6e8437e, type: 3}
+  output: {fileID: 0}
+  volume: 1
+  category: 0
+  pitchRange: {x: 0.95, y: 1.05}
+  loop: 1
+  ignoreListenerPause: 0
+  cooldown: 0.05
+  maxConcurrent: 3
+  priority: 128
+  spatial: 0
+  falloffRange: 20

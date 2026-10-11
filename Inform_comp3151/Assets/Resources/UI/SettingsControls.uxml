@@ -1,8 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements">
-    <Style src="SettingsControls.uss" />
-    <!-- Controls page: device, rumble, sensitivities, the two rebind tables, unstuck, and the
-         GRAPPING HOOK section (rope snap options). -->
-    <ui:ScrollView name="Scroll" class="settings-scroll" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto">
-        <ui:VisualElement name="Rows" />
-    </ui:ScrollView>
-</ui:UXML>

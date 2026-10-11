@@ -1,19 +1,18 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="PauseMenu.uss" />
-    <!-- Pause sheet: 40% dim (Celeste MenuOptions Black * 0.4) + centered TextMenu column,
-         sliding in from the right like OuiOptions. -->
-    <ui:VisualElement name="PauseMenu" class="screen dim">
-        <ui:VisualElement class="menu-center">
-            <ui:Label text="PAUSED" class="menu-title header-outline" picking-mode="Ignore" />
-            <ui:VisualElement class="pause-column">
+    <!-- Pause sheet, overlay frame: 40% dim (Celeste MenuOptions Black * 0.4), title and menu
+         centred, prompts bottom right. Slides in from the right like OuiOptions. -->
+    <ui:VisualElement name="PauseMenu" class="screen dim frame frame--overlay">
+        <ui:VisualElement class="frame-content">
+            <ui:Label text="PAUSED" class="menu-title overlay-title title-font header-outline" picking-mode="Ignore" />
+            <ui:VisualElement class="overlay-list plate pause-list">
                 <ui:Button name="Btn_Resume" text="RESUME" class="menu-item floaty outline" />
                 <ui:Button name="Btn_Settings" text="OPTIONS" class="menu-item floaty outline" />
                 <ui:Button name="Btn_SaveAndQuit" text="SAVE &amp; QUIT" class="menu-item floaty outline" />
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement class="confirm-hint" picking-mode="Ignore">
-            <ui:Label text="Confirm - Enter" class="corner outline" picking-mode="Ignore" />
-            <ui:Label text="Back - Esc" class="corner outline" picking-mode="Ignore" />
+        <ui:VisualElement class="frame-footer" picking-mode="Ignore">
+            <ui:VisualElement name="PromptBar" class="prompt-bar" picking-mode="Ignore" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

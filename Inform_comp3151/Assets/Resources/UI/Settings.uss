@@ -1,34 +1,85 @@
-/* Settings shell — two-level. Each sub-page is its own UXML/USS/Page triple mounted into
-   #Pages; this sheet carries the shell (header, page area, BACK) plus the shared row styles
-   that cascade into every mounted page. */
+/* Settings — one page. The sections (AUDIO / VIDEO / CONTROLS) stack in a single ScrollView
+   on a plate in the centred content column; every row is label left, control column right at a
+   fixed width, so values, bars and key icons line up down the whole page. */
 
-.settings-header { position: absolute; left: 0; right: 0; top: 28px; }
-.settings-pages { position: absolute; left: 0; right: 0; top: 140px; bottom: 120px; }
-.settings-scroll { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
-.settings-bottom { position: absolute; right: 40px; bottom: 28px; flex-direction: row; }
-.settings-bottom > .menu-item { font-size: var(--fs-value); margin-left: 20px; }
+.settings-column { flex-direction: column; padding: 8px 20px; }
+.settings-scroll { flex-grow: 1; }
+.settings-rows { padding-bottom: 32px; }
 
-/* Row vocabulary shared by every page (the shell's stylesheet cascades down to them). */
+/* Thin, quiet scrollbar for the mouse; pads scroll with the right stick */
+.settings-scroll .unity-scroller--vertical { width: 6px; border-width: 0; background-color: rgba(0, 0, 0, 0); }
+.settings-scroll .unity-scroller--vertical .unity-base-slider__tracker { background-color: rgba(255, 255, 255, 0.08); border-width: 0; border-radius: 3px; }
+.settings-scroll .unity-scroller--vertical .unity-base-slider__dragger { background-color: rgba(255, 255, 255, 0.35); border-width: 0; border-radius: 3px; }
+.settings-scroll .unity-scroller--vertical .unity-repeat-button { display: none; }
 
-.subheader { font-size: var(--fs-sub); color: var(--c-gray); -unity-text-align: middle-left; margin: 26px 24px 10px 24px; -unity-font-style: bold; }
+/* Section titles in the game font, centred; group headers inside a section small and tracked */
+.section-title { font-size: var(--fs-section); color: var(--c-title); -unity-text-align: middle-center; letter-spacing: 4px; margin: 26px 0 10px 0; }
+.subheader { font-size: var(--fs-sub); color: var(--c-muted); -unity-text-align: middle-left; letter-spacing: 4px; margin: 22px 12px 4px 12px; }
 
-/* flex-shrink: 0 — the rows must never be squashed by a constrained ancestor. */
-.option-row { flex-shrink: 0; flex-direction: row; height: 60px; margin: 4px 24px; padding: 0 12px; align-items: center; }
-.option-row .row-label { font-size: var(--fs-item); color: var(--c-white); flex-grow: 1; -unity-text-align: middle-left; }
-.option-row .row-arrow { font-size: var(--fs-item); color: var(--c-white); }
-.option-row .row-value { font-size: var(--fs-value); color: var(--c-white); min-width: 300px; max-width: 420px; -unity-text-align: middle-center; margin: 0 16px; }
-.option-row:hover .row-label, .option-row:focus .row-label { color: var(--c-green); }
-.option-row:disabled .row-label { color: var(--c-disabled); }
+/* ---- rows ---- */
 
-.slider-row { flex-shrink: 0; flex-direction: row; height: 60px; margin: 4px 24px; padding: 0 12px; align-items: center; }
-.slider-row .row-label { font-size: var(--fs-item); color: var(--c-white); flex-grow: 1; -unity-text-align: middle-left; }
-.slider-row .settings-slider { width: 520px; height: 40px; margin-left: 16px; }
-.slider-row .row-readout { font-size: var(--fs-value); color: var(--c-white); min-width: 110px; -unity-text-align: middle-right; margin-left: 16px; }
-.slider-row:hover .row-label, .slider-row.focused .row-label { color: var(--c-green); }
+.settings-row {
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: center;
+    height: 58px;
+    margin: 2px 0;
+    padding: 0 12px;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+}
+.settings-row .row-label {
+    flex-grow: 1;
+    font-size: var(--fs-item);
+    color: var(--c-text);
+    -unity-text-align: middle-left;
+    transform-origin: left center;
+    transition-property: scale, color;
+    transition-duration: 0.12s;
+}
+.settings-row .row-control {
+    width: 460px;
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    transform-origin: right center;
+    transition-property: scale;
+    transition-duration: 0.12s;
+}
 
-/* The slider's own visual: thin round track, white round knob.
-   (Sizing rules — the geometry logic comes from the default theme.) */
-.settings-slider .unity-base-slider__tracker { height: 8px; background-color: rgba(255, 255, 255, 0.16); border-radius: 4px; }
-.settings-slider .unity-base-slider__dragger { width: 20px; height: 26px; border-radius: 10px; background-color: var(--c-white); }
-.settings-slider:focus .unity-base-slider__dragger,
+.row-arrow { font-size: var(--fs-item); color: var(--c-text); padding: 0 10px; }
+.row-arrow--end { opacity: 0.25; }
+.row-value { flex-grow: 1; font-size: var(--fs-value); color: var(--c-text); -unity-text-align: middle-center; }
+.row-readout { width: 96px; font-size: var(--fs-value); color: var(--c-text); -unity-text-align: middle-right; margin-left: 16px; }
+.row-glyphs { justify-content: center; }
+
+/* Selected (or under the mouse): green, a size up, and heavier — a hairline stroke in the same
+   green thickens the letters without reading as an outline */
+.settings-row:focus, .settings-row:hover { background-color: rgba(132, 255, 84, 0.07); }
+.settings-row:focus .row-label, .settings-row:hover .row-label {
+    color: var(--c-green);
+    scale: 1.08 1.08;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: var(--c-green);
+}
+.settings-row:focus .row-control, .settings-row:hover .row-control { scale: 1.08 1.08; }
+.settings-row:focus .row-value, .settings-row:hover .row-value,
+.settings-row:focus .row-arrow, .settings-row:hover .row-arrow,
+.settings-row:focus .row-readout, .settings-row:hover .row-readout {
+    color: var(--c-green);
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: var(--c-green);
+}
+.settings-row:disabled .row-label { color: var(--c-disabled); }
+.settings-row:disabled { background-color: rgba(0, 0, 0, 0); }
+
+/* ---- bars ---- */
+
+.settings-slider { flex-grow: 1; height: 40px; margin: 0; }
+.settings-slider .unity-base-slider__tracker { height: 8px; background-color: rgba(255, 255, 255, 0.18); border-width: 0; border-radius: 4px; }
+.settings-slider .unity-base-slider__dragger { width: 20px; height: 26px; border-width: 0; border-radius: 10px; background-color: var(--c-text); }
+.settings-row:focus .settings-slider .unity-base-slider__tracker { height: 12px; background-color: rgba(132, 255, 84, 0.45); border-radius: 6px; }
+.settings-row:focus .settings-slider .unity-base-slider__dragger,
 .settings-slider .unity-base-slider__dragger:active { background-color: var(--c-green); }

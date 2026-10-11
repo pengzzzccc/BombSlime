@@ -423,8 +423,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fbc007d272b4510abb997bb87f46c97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inkform.Fx.ParallaxLayer
-  factorX: 0.3
-  factorY: 0.3
+  factorX: 0.1
+  factorY: 0.1
   wrapX: 0
   wrapY: 0
   tileSizeOverride: {x: 0, y: 0}
@@ -647,8 +647,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fbc007d272b4510abb997bb87f46c97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inkform.Fx.ParallaxLayer
-  factorX: 0.35
-  factorY: 0.35
+  factorX: 0.2
+  factorY: 0.2
   wrapX: 0
   wrapY: 0
   tileSizeOverride: {x: 0, y: 0}
@@ -699,8 +699,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fbc007d272b4510abb997bb87f46c97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inkform.Fx.ParallaxLayer
-  factorX: 0.1
-  factorY: 0.1
+  factorX: 0.3
+  factorY: 0.3
   wrapX: 0
   wrapY: 0
   tileSizeOverride: {x: 0, y: 0}

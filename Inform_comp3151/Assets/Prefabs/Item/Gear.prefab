@@ -135,6 +135,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  loopCue: {fileID: 11400000, guid: eeab8574a7a365440a71971f9622bb6f, type: 2}
 --- !u!114 &704323470483767124
 MonoBehaviour:
   m_ObjectHideFlags: 0

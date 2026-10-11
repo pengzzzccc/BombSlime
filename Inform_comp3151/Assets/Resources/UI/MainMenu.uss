@@ -1,5 +1,51 @@
-/* Main menu sheet — title block and menu column pinned to the left. */
+/* Main menu — the shared page frame does the placement; this sheet drops the menu list a
+   little below the title (about 40% of the screen height) and places the game logo. */
 
-.menu-title-block { position: absolute; left: 150px; top: 64px; }
-.menu-column { position: absolute; left: 150px; top: 210px; width: 640px; flex-direction: column; align-items: stretch; }
-.version-label { position: absolute; left: 80px; bottom: 28px; color: var(--c-header); }
+.main-menu-content { justify-content: flex-start; padding-top: 140px; }
+
+/* Game logo, placed by its centre as a share of the screen. This is its resting spot beside the
+   menu; on the title screen MainMenuPanel overrides left / top / size inline (centred, smaller)
+   and tweens back to these values. 448 px = 7x the 64 px pixel art. */
+.main-logo {
+    position: absolute;
+    left: 74%;
+    top: 44%;
+    width: 448px;
+    height: 448px;
+    translate: -50% -50%;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-logo-placeholder {
+    display: none;
+    font-size: var(--fs-title);
+    color: var(--c-white);
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+}
+
+/* Title screen prompt under the centred logo (below the blob of the x18 logo); MainMenuPanel shows it and drives its breathing */
+.press-any-key {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 87%;
+    translate: -50% -50%;
+    font-size: var(--fs-item);
+    color: var(--c-white);
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+}
+
+/* The game's name on the menu: display size, the game font (title colour and shadow come from
+   .page-title / .header-outline) */
+.main-title { font-size: var(--fs-display); letter-spacing: 4px; }
+
+/* The list hugs its items on the left margin; its plate sits behind them, reaching a little past
+   the text on every side (more on the right, where a selected item grows) */
+.main-menu-content > .menu-list { align-self: flex-start; position: relative; }
+.menu-plate { position: absolute; left: -36px; right: -56px; top: -20px; bottom: -20px; padding: 0; }

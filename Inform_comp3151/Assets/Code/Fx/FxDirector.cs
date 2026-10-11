@@ -36,7 +36,9 @@ namespace Inkform.Fx
         [SerializeField, Min(0f)] private float blastWaveStartWidth = 0.22f;
         [SerializeField, Min(0f)] private float blastWaveEndWidth = 0.04f;
         [SerializeField, Range(24, 128)] private int blastWaveSegments = 64;
-        [SerializeField] private int blastWaveSortingOrder = 100;
+        [Tooltip("Sorting layer name of the ring; drawn with the player, above it by the order below")]
+        [SerializeField] private string blastWaveSortingLayer = "player";
+        [SerializeField] private int blastWaveSortingOrder = 2;
 
         void OnEnable()
         {
@@ -67,6 +69,7 @@ namespace Inkform.Fx
                     blastWaveStartWidth,
                     blastWaveEndWidth,
                     blastWaveSegments,
+                    SortingLayer.NameToID(blastWaveSortingLayer),
                     blastWaveSortingOrder,
                     waveOpacity);
             }

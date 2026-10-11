@@ -1,40 +1,83 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="SaveMenu.uss" />
-    <!-- Celeste OuiFileSelect: 40% dim, a SAVE SLOTS header, then three postcard-style slots
-         sliding in from the right with a cascade. Slot names Slot0..Slot2 are queried by
-         SaveMenuPanel; HoldFill0..2 show the overwrite-hold progress. Captions are ASCII on
-         purpose (BombSlimeFonts is Latin-only). -->
-    <ui:VisualElement name="SaveMenu" class="screen">
-        <ui:VisualElement class="dim" picking-mode="Ignore" />
-        <ui:Label text="SAVE SLOTS" class="save-title header-outline" picking-mode="Ignore" />
-        <ui:VisualElement class="save-column">
-            <ui:Button name="Slot0" class="postcard-slot floaty">
-                <ui:VisualElement class="postcard">
-                    <ui:VisualElement name="HoldFill0" class="hold-fill" picking-mode="Ignore" />
-                    <ui:Label name="SlotTitle0" class="card-title" picking-mode="Ignore" />
-                    <ui:Label name="SlotInfo0" class="card-info" picking-mode="Ignore" />
-                </ui:VisualElement>
-            </ui:Button>
-            <ui:Button name="Slot1" class="postcard-slot floaty">
-                <ui:VisualElement class="postcard">
-                    <ui:VisualElement name="HoldFill1" class="hold-fill" picking-mode="Ignore" />
-                    <ui:Label name="SlotTitle1" class="card-title" picking-mode="Ignore" />
-                    <ui:Label name="SlotInfo1" class="card-info" picking-mode="Ignore" />
-                </ui:VisualElement>
-            </ui:Button>
-            <ui:Button name="Slot2" class="postcard-slot floaty">
-                <ui:VisualElement class="postcard">
-                    <ui:VisualElement name="HoldFill2" class="hold-fill" picking-mode="Ignore" />
-                    <ui:Label name="SlotTitle2" class="card-title" picking-mode="Ignore" />
-                    <ui:Label name="SlotInfo2" class="card-info" picking-mode="Ignore" />
-                </ui:VisualElement>
-            </ui:Button>
+    <!-- Celeste OuiFileSelect on the page frame: 40% dim, SAVE SLOTS title top left, then three
+         postcard slots in the centred content column, sliding in from the right with a cascade.
+         Each card is the Art/UI/saveslot plate: slot number and level stacked on the left,
+         vertically centred; on the plate's line at the right, [clock] time  [skull] deaths over
+         the save date (SlotStats / SlotTime / SlotDeaths / SlotNote). Slot0..Slot2 and the
+         SlotTitle / SlotLevel labels are queried by SaveMenuPanel;
+         HoldFill0..2 show the overwrite-hold progress inside their plate's interior (hold-track).
+         Back lives in the prompt bar (SaveMenuPanel.DefinePrompts). -->
+    <ui:VisualElement name="SaveMenu" class="screen dim frame">
+        <ui:VisualElement class="frame-header" picking-mode="Ignore">
+            <ui:Label text="SAVE SLOTS" class="page-title title-font header-outline" picking-mode="Ignore" />
         </ui:VisualElement>
-        <ui:VisualElement class="confirm-hint">
-            <ui:Label text="Overwrite - Hold Ctrl / Y" class="corner outline" picking-mode="Ignore" />
-            <ui:Label text="Confirm - Enter" class="corner outline" picking-mode="Ignore" />
-            <ui:Label text="Back - Esc" class="corner outline" picking-mode="Ignore" />
-            <ui:Button name="Btn_Back" text="BACK" class="menu-item floaty outline" />
+        <ui:VisualElement class="frame-content">
+            <ui:VisualElement class="content-column save-column">
+                <ui:Button name="Slot0" class="postcard-slot floaty">
+                    <ui:VisualElement class="postcard">
+                        <ui:VisualElement class="hold-track" picking-mode="Ignore">
+                            <ui:VisualElement name="HoldFill0" class="hold-fill" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="card-main" picking-mode="Ignore">
+                            <ui:Label name="SlotTitle0" class="card-title" picking-mode="Ignore" />
+                            <ui:Label name="SlotLevel0" class="card-level" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="SlotInfo0" class="card-info" picking-mode="Ignore">
+                            <ui:VisualElement name="SlotStats0" class="card-stats" picking-mode="Ignore">
+                                <ui:VisualElement class="card-icon card-clock" picking-mode="Ignore" />
+                                <ui:Label name="SlotTime0" class="card-stat" picking-mode="Ignore" />
+                                <ui:VisualElement class="card-icon card-skull" picking-mode="Ignore" />
+                                <ui:Label name="SlotDeaths0" class="card-stat" picking-mode="Ignore" />
+                            </ui:VisualElement>
+                            <ui:Label name="SlotNote0" class="card-note" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:Button>
+                <ui:Button name="Slot1" class="postcard-slot floaty">
+                    <ui:VisualElement class="postcard">
+                        <ui:VisualElement class="hold-track" picking-mode="Ignore">
+                            <ui:VisualElement name="HoldFill1" class="hold-fill" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="card-main" picking-mode="Ignore">
+                            <ui:Label name="SlotTitle1" class="card-title" picking-mode="Ignore" />
+                            <ui:Label name="SlotLevel1" class="card-level" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="SlotInfo1" class="card-info" picking-mode="Ignore">
+                            <ui:VisualElement name="SlotStats1" class="card-stats" picking-mode="Ignore">
+                                <ui:VisualElement class="card-icon card-clock" picking-mode="Ignore" />
+                                <ui:Label name="SlotTime1" class="card-stat" picking-mode="Ignore" />
+                                <ui:VisualElement class="card-icon card-skull" picking-mode="Ignore" />
+                                <ui:Label name="SlotDeaths1" class="card-stat" picking-mode="Ignore" />
+                            </ui:VisualElement>
+                            <ui:Label name="SlotNote1" class="card-note" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:Button>
+                <ui:Button name="Slot2" class="postcard-slot floaty">
+                    <ui:VisualElement class="postcard">
+                        <ui:VisualElement class="hold-track" picking-mode="Ignore">
+                            <ui:VisualElement name="HoldFill2" class="hold-fill" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="card-main" picking-mode="Ignore">
+                            <ui:Label name="SlotTitle2" class="card-title" picking-mode="Ignore" />
+                            <ui:Label name="SlotLevel2" class="card-level" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="SlotInfo2" class="card-info" picking-mode="Ignore">
+                            <ui:VisualElement name="SlotStats2" class="card-stats" picking-mode="Ignore">
+                                <ui:VisualElement class="card-icon card-clock" picking-mode="Ignore" />
+                                <ui:Label name="SlotTime2" class="card-stat" picking-mode="Ignore" />
+                                <ui:VisualElement class="card-icon card-skull" picking-mode="Ignore" />
+                                <ui:Label name="SlotDeaths2" class="card-stat" picking-mode="Ignore" />
+                            </ui:VisualElement>
+                            <ui:Label name="SlotNote2" class="card-note" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:Button>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement class="frame-footer" picking-mode="Ignore">
+            <ui:VisualElement name="PromptBar" class="prompt-bar" picking-mode="Ignore" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
