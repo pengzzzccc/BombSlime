@@ -22,6 +22,7 @@ namespace Inkform.Interactable.Parts
     ///    doors — the old maskless version detonated on every Interactable it brushed past;
     /// 4. Chain: caught in another explosion (HazardBus.Exploded, claimed via the victim) it
     ///    detonates after chainDelay, so a row of bombs blows in sequence instead of one frame.
+    ///    chainReaction = false makes it immune to this path only.
     ///
     /// Blast propagation runs entirely through HazardBus: RaiseExploded per victim (BreakablePart
     /// shatters, PlayerHandler gets knocked back, other explosives chain) + one RaiseBlast overall
@@ -53,6 +54,9 @@ namespace Inkform.Interactable.Parts
         [Tooltip("Contact with these layers detonates regardless of arming — spikes and other" +
             " hazards. Defaults to the Hazard layer; existing prefabs take it via this default")]
         [SerializeField] private LayerMask hazardDetonatorMask = 1 << 13;
+        [Tooltip("Caught in another explosion, this one detonates too. Off = immune to chain reactions" +
+            " (contact paths still apply)")]
+        [SerializeField] private bool chainReaction = true;
         [Tooltip("Delay before detonating after being caught in another explosion (0 = same-frame chain)")]
         [SerializeField] private float chainDelay = 0.1f;
 
@@ -147,6 +151,7 @@ namespace Inkform.Interactable.Parts
         // Called by HazardBus when another explosion affects this object: the victim claims itself
         private void OnChainExploded(GameObject victim, Vector2 center, float force)
         {
+            if (!chainReaction) return;
             if (root == null || victim != root.gameObject) return;
             chainPending = true;
             chainTimer.Set(chainDelay);
