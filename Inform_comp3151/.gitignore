@@ -91,5 +91,10 @@ crashlytics-build.properties
 /[Ll]og/
 Docs/PerfLogs/
 
+# PerfLog viewer level art (Export Level Layouts + Art): several MB per room, re-render locally;
+# the sidecars only point at those images. level_layouts.js/.json stay tracked.
+Docs/Tool/PerfLogViewer/data/*.jpg
+Docs/Tool/PerfLogViewer/data/*.art.json
+
 # Player save slots (the game writes them beside the project root in the editor)
 /[Ss]aves/

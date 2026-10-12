@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inkform PerfLog Viewer</title>
+<link rel="stylesheet" href="css/viewer.css">
+<script>
+  // Theme before first paint: a stored choice wins, otherwise the OS preference via CSS
+  try { var t = localStorage.getItem("ik.theme"); if (t) document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M3 20h18"/><path d="M5 20V9l4 3 3-7 3 7 4-3v11"/><circle cx="12" cy="14" r="1.6" fill="currentColor"/>
+    </svg>
+    <span data-i18n="app.title">PerfLog 关卡分析</span><small>Inkform</small>
+  </div>
+  <nav class="scene-tabs" id="sceneTabs" role="tablist" aria-label="Scenes"></nav>
+  <div class="top-actions">
+    <button class="btn ghost" id="btnAdd" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      <span class="lbl" data-i18n="action.addLogs">添加日志</span>
+    </button>
+    <button class="btn ghost" id="btnExport" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+      <span class="lbl" data-i18n="action.exportPng">导出图片</span>
+    </button>
+    <button class="btn icon" id="btnLang" type="button" title="中文 / English">EN</button>
+    <button class="btn icon" id="btnTheme" type="button" data-i18n-title="action.theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+    <button class="btn icon only-narrow" id="btnSidebar" type="button" aria-label="Sessions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <section class="side-section">
+      <h3><span data-i18n="side.sessions">会话</span>
+        <span class="links"><button class="linkbtn" id="selAll" data-i18n="side.all">全选</button><button class="linkbtn" id="selNone" data-i18n="side.none">全不选</button></span>
+      </h3>
+      <ul class="session-list" id="sessionList"></ul>
+    </section>
+    <section class="side-section">
+      <h3 data-i18n="side.causes">死因</h3>
+      <div class="chips" id="causeChips"></div>
+    </section>
+    <section class="side-section">
+      <h3 data-i18n="side.build">版本筛选</h3>
+      <select class="sel" id="buildFilter"></select>
+    </section>
+    <section class="side-section">
+      <h3 data-i18n="side.layout">关卡布局</h3>
+      <div class="layout-status" id="layoutStatus"></div>
+    </section>
+  </aside>
+
+  <main class="main">
+    <div class="view-tabs" role="tablist" id="viewTabs">
+      <button class="view-tab" role="tab" data-view="map" data-i18n="tab.map">关卡地图</button>
+      <button class="view-tab" role="tab" data-view="overview" data-i18n="tab.overview">总览</button>
+      <button class="view-tab" role="tab" data-view="segments" data-i18n="tab.segments">检查点分段</button>
+      <button class="view-tab" role="tab" data-view="deaths" data-i18n="tab.deaths">死亡分析</button>
+      <button class="view-tab" role="tab" data-view="curve" data-i18n="tab.curve">难度曲线</button>
+      <button class="view-tab" role="tab" data-view="perf" data-i18n="tab.perf">性能</button>
+    </div>
+
+    <section class="view map-view" id="view-map">
+      <div class="map-shell" id="mapShell">
+        <canvas id="mapCanvas" tabindex="0" aria-label="Level map"></canvas>
+
+        <div class="float map-toolbar" id="mapToolbar">
+          <div class="seg" id="baseMode">
+            <button data-mode="art" data-i18n="map.base.art">实景</button>
+            <button data-mode="schematic" data-i18n="map.base.schematic">示意</button>
+            <button data-mode="blend" data-i18n="map.base.blend">混合</button>
+          </div>
+          <label class="tb-range" id="dimWrap"><span data-i18n="map.dim">底图亮度</span><input type="range" id="dimSlider" min="10" max="100" value="45"></label>
+          <span class="tb-sep"></span>
+          <button class="btn" id="btnLayers" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="m2 13 10 5 10-5"/></svg>
+            <span data-i18n="map.layers">图层</span>
+          </button>
+          <button class="btn" id="btnReplay" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4z" fill="currentColor"/></svg>
+            <span data-i18n="map.replay">幽灵回放</span>
+          </button>
+          <button class="btn icon" id="btnFit" data-i18n-title="map.fit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+          </button>
+          <button class="btn icon" id="btnHot" data-i18n-title="map.hottest">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+          </button>
+        </div>
+
+        <div class="float layer-panel hidden" id="layerPanel"></div>
+        <div class="float map-legend" id="mapLegend"></div>
+        <div class="float minimap" id="minimapWrap"><canvas id="minimap"></canvas></div>
+        <div class="float scalebar" id="scalebar"><span id="scaleLabel"></span><div class="rule" id="scaleRule"></div></div>
+        <div class="float map-hint hidden" id="mapHint"></div>
+        <div class="float tooltip" id="mapTip"></div>
+
+        <div class="float replay-bar hidden" id="replayBar">
+          <button class="btn icon" id="rpPlay" aria-label="Play">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <input type="range" id="rpSlider" min="0" max="1000" value="0" step="1">
+          <span class="time num" id="rpTime">0:00 / 0:00</span>
+          <select id="rpSpeed">
+            <option value="0.5">0.5×</option><option value="1">1×</option><option value="2">2×</option>
+            <option value="4" selected>4×</option><option value="8">8×</option><option value="16">16×</option>
+          </select>
+        </div>
+        <div class="float replay-panel hidden" id="replayPanel"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-overview"></section>
+    <section class="view" id="view-segments"></section>
+    <section class="view" id="view-deaths"></section>
+    <section class="view" id="view-curve"></section>
+    <section class="view" id="view-perf"></section>
+
+    <div class="dropzone" id="dropzone">
+      <div class="drop-card">
+        <svg class="hero" viewBox="0 0 132 96" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="22" y="10" width="62" height="76" rx="8" opacity=".35"/>
+          <rect x="34" y="18" width="62" height="70" rx="8" fill="var(--surface-1)"/>
+          <path d="M44 34h30M44 44h40M44 54h22" opacity=".55"/>
+          <path d="M46 76c8-10 14 2 22-8s14-4 20-12" stroke-width="2.5"/>
+          <circle cx="68" cy="67" r="3" fill="currentColor"/>
+          <path d="M108 30v26M98 46l10 10 10-10" stroke-width="2.5"/>
+        </svg>
+        <h1 data-i18n="drop.title">把 perf_*.csv 拖到这里</h1>
+        <p data-i18n="drop.body">支持一次拖入多个日志。工具会读取死亡、检查点分段、玩家轨迹和性能数据，并叠加到真实关卡上。</p>
+        <button class="btn primary" id="btnPick" type="button" data-i18n="drop.pick">选择日志文件</button>
+        <div class="hint" data-i18n-html="drop.hint">日志在 <code>Docs/PerfLogs/</code>。关卡布局由 Unity 菜单 <code>Tools › Inkform › Analytics › Export Level Layouts</code> 生成。</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="drag-overlay" id="dragOverlay">
+  <div class="ring"></div>
+  <div class="msg">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5"/><path d="M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2"/></svg>
+    <span data-i18n="drop.release">松开即可加载</span>
+  </div>
+</div>
+<div class="float progress-toast hidden" id="progress"><span id="progressText"></span><div class="track"><i id="progressBar"></i></div></div>
+<div class="float toast hidden" id="toast"></div>
+<input type="file" id="fileInput" multiple accept=".csv,.json,.txt" hidden>
+
+<script src="vendor/echarts.min.js"></script>
+<script src="data/level_layouts.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/parse.js"></script>
+<script src="js/model.js"></script>
+<script src="js/heat.js"></script>
+<script src="js/mapview.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

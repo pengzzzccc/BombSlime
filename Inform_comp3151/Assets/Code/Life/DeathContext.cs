@@ -22,11 +22,17 @@ namespace Inkform.Life
         /// <summary>Death cause. DeathDirector picks the strategy by it.</summary>
         public readonly DeathCause Cause;
 
-        public DeathContext(GameObject victim, Vector2 from, DeathCause cause)
+        /// <summary>The hazard that did it (HarmOnTouch's Interactable root), or null when the
+        /// publisher does not say. Presentation never reads it — it exists so analytics (the perf
+        /// log's death events) can tell "Gear (12)" from the spike tilemap, which Cause alone cannot.</summary>
+        public readonly GameObject Source;
+
+        public DeathContext(GameObject victim, Vector2 from, DeathCause cause, GameObject source = null)
         {
             Victim = victim;
             From = from;
             Cause = cause;
+            Source = source;
         }
     }
 }
