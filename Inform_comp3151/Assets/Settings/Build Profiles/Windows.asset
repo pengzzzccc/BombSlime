@@ -23,9 +23,6 @@ MonoBehaviour:
   - m_enabled: 1
     m_path: Assets/Scenes/Menu/MainMenu.unity
     m_guid: 37631e5845af32445b0a05c4cfa3a1a1
-  - m_enabled: 0
-    m_path: Assets/Scenes/Test/PlayerTest.unity
-    m_guid: 7f80c46cb978389418099080bbd56749
   - m_enabled: 1
     m_path: Assets/Scenes/Level1/Mine Cave 1.unity
     m_guid: 742e3b7aacdf8d74bac3cd030b491f51
@@ -36,8 +33,14 @@ MonoBehaviour:
     m_path: Assets/Scenes/Level1/Mine Cave 3.unity
     m_guid: 49a6807fcb1271b409efc4f30dc7529f
   - m_enabled: 1
+    m_path: Assets/Scenes/Level2/Lab_base.unity
+    m_guid: 473b3ef3b3f71e74f8fad4d191ff621f
+  - m_enabled: 1
     m_path: Assets/Scenes/Menu/End.unity
     m_guid: 6af981f88ec3d944192dfde0ff18c9ed
+  - m_enabled: 0
+    m_path: Assets/Scenes/Test/PlayerTest.unity
+    m_guid: 7f80c46cb978389418099080bbd56749
   m_HasScriptingDefines: 1
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:

@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 218039a879a425449ba5f53f5f0710e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inkform.Fx.CameraLimit
-  axis: 0
-  position: 0
+  length: 20
   blockPositive: 1
+  zoneDepth: 16
+  zoneBehind: 5

@@ -35,6 +35,10 @@ namespace Inkform.Fx
         [SerializeField] private float lookAhead = 1.2f;            // look-ahead distance toward facing, 0 = off
         [SerializeField] private float lookAheadSmooth = 0.35f;
 
+        [Header("Limit walls")]
+        [Tooltip("Seconds a CameraLimit takes to fade in / out as the player enters / leaves its zone — the camera glides instead of snapping")]
+        [SerializeField, Min(0f)] private float limitBlendSeconds = 0.3f;
+
         [Header("Shake")]
         [SerializeField] private float traumaDecay = 1.6f;          // trauma decay per second
         [SerializeField] private float maxShakeOffset = 0.6f;       // max offset at trauma = 1
@@ -61,6 +65,7 @@ namespace Inkform.Fx
         // load and cached — a scene without walls costs zero per-frame scans, and the deathCache's
         // fake-null re-resolve trick does not fit a list
         private readonly List<CameraLimit> limits = new List<CameraLimit>();
+        private readonly List<float> limitWeights = new List<float>();   // per wall, 0..1; < 0 = not yet set
         private bool limitsResolved;
 
         /// <summary>True while a cutscene owns the camera's base position.</summary>
@@ -274,7 +279,7 @@ namespace Inkform.Fx
             lookAheadNow = lookAhead * (PlayerBus.Face == FaceDirection.R ? 1f : -1f);
 
             Vector2 want = AnchorOf(target) + followOffset + new Vector2(lookAheadNow, 0f);
-            want = ClampToLimits(want);   // a teleport must not land the view past a limit wall
+            want = ClampToLimits(want, instant: true);   // a teleport must not land the view past a limit wall
             followBasePosition = want;
             transform.position = new Vector3(want.x, want.y, baseZ);
         }
@@ -283,7 +288,7 @@ namespace Inkform.Fx
         void LateUpdate()
         {
             // Held shots are designer-authored (FocusAt anchors) — limits clamp only live following
-            Vector2 basePos = followHeld ? followBasePosition : ClampToLimits(FollowStep());
+            Vector2 basePos = followHeld ? followBasePosition : ClampToLimits(FollowStep(), instant: false);
             Vector2 shakeOffset = ShakeStep();
             ZoomStep();
 
@@ -296,11 +301,14 @@ namespace Inkform.Fx
         /// transform's own segment (up axis, `length` reach, centre at its position) and blocks one
         /// side along its right axis; the view's half-size projected onto the wall normal is the
         /// standoff distance, so the SCREEN edge stops on the wall line. Walls apply only while the
-        /// camera centre projects inside the segment's span. SmoothDamp's internal state stays
-        /// unclamped — the camera presses against the wall while the target lies beyond it and
-        /// resumes the instant the target comes back, no snap either way.
+        /// camera centre projects inside the segment's span, and only while the player stands in
+        /// the wall's zone (CameraLimit.InZone) — otherwise one short wall would grip a whole band
+        /// of the map. Entering / leaving a zone fades the wall in / out over limitBlendSeconds
+        /// (instant on a teleport), so the camera glides rather than snaps. SmoothDamp's internal
+        /// state stays unclamped — the camera presses against the wall while the target lies beyond
+        /// it and resumes the instant the target comes back, no snap either way.
         /// </summary>
-        private Vector2 ClampToLimits(Vector2 position)
+        private Vector2 ClampToLimits(Vector2 position, bool instant)
         {
             if (!limitsResolved)
             {
@@ -308,6 +316,8 @@ namespace Inkform.Fx
                 // Parameterless overload: FindObjectsSortMode and its overloads were deprecated
                 // in Unity 6.4; active-only unsorted is the same set the old call returned.
                 limits.AddRange(FindObjectsByType<CameraLimit>());
+                limitWeights.Clear();
+                for (int i = 0; i < limits.Count; i++) limitWeights.Add(-1f);
                 limitsResolved = true;
             }
             if (limits.Count == 0) return position;
@@ -315,15 +325,30 @@ namespace Inkform.Fx
             float halfHeight = cam.orthographicSize;
             float halfWidth = halfHeight * cam.aspect;
 
+            // The zones are judged by the player, not the camera: the camera lags and leads, the
+            // player is where the play is
+            Transform target = Target;
+            Vector2 player = target != null ? AnchorOf(target) : position;
+            float blendStep = limitBlendSeconds > 0f
+                ? GameTimeController.PresentationDeltaTime / limitBlendSeconds
+                : 1f;
+
             for (int i = 0; i < limits.Count; i++)
             {
                 CameraLimit wall = limits[i];
                 if (wall == null) continue;
 
+                float wantWeight = wall.InZone(player) ? 1f : 0f;
+                float weight = instant || limitWeights[i] < 0f
+                    ? wantWeight
+                    : Mathf.MoveTowards(limitWeights[i], wantWeight, blendStep);
+                limitWeights[i] = weight;
+                if (weight <= 0f) continue;
+
                 Transform wallTransform = wall.transform;
                 Vector2 centre = wallTransform.position;
                 Vector2 wallDir = wallTransform.up;
-                Vector2 normal = (Vector2)wallTransform.right * (wall.BlockPositive ? 1f : -1f);
+                Vector2 normal = wall.Normal;
 
                 // Past either end of the segment the wall does not exist — follow freely there
                 Vector2 offset = position - centre;
@@ -333,7 +358,7 @@ namespace Inkform.Fx
                 // whole view rect on the allowed side of the wall line
                 float standoff = Mathf.Abs(halfWidth * normal.x) + Mathf.Abs(halfHeight * normal.y);
                 float distance = Vector2.Dot(offset, normal);
-                if (distance < standoff) position += normal * (standoff - distance);
+                if (distance < standoff) position += normal * ((standoff - distance) * weight);
             }
             return position;
         }

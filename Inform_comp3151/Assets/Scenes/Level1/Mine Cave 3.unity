@@ -57400,11 +57400,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
---- !u!4 &135005656 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5108392746215038472, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
-  m_PrefabInstance: {fileID: 1757403899}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &138065292
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -185094,6 +185089,10 @@ PrefabInstance:
     - target: {fileID: 3120196454340134741, guid: c664563175294324cbee3dadf5111719, type: 3}
       propertyPath: length
       value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3120196454340134741, guid: c664563175294324cbee3dadf5111719, type: 3}
+      propertyPath: zoneDepth
+      value: 10.4
       objectReference: {fileID: 0}
     - target: {fileID: 3120196454340134741, guid: c664563175294324cbee3dadf5111719, type: 3}
       propertyPath: blockPositive
@@ -641387,7 +641386,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3120196454340134741, guid: c664563175294324cbee3dadf5111719, type: 3}
       propertyPath: length
-      value: 5
+      value: 8.28
       objectReference: {fileID: 0}
     - target: {fileID: 3120196454340134741, guid: c664563175294324cbee3dadf5111719, type: 3}
       propertyPath: blockPositive
@@ -642032,6 +642031,10 @@ PrefabInstance:
       propertyPath: spawnId
       value: Mine Cave 2
       objectReference: {fileID: 0}
+    - target: {fileID: 5108392746215038473, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
+      propertyPath: isStartPoint
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -642463,7 +642466,6 @@ Transform:
   - {fileID: 302095346}
   - {fileID: 2011010763}
   - {fileID: 785222836}
-  - {fileID: 135005656}
   - {fileID: 2002074645}
   - {fileID: 696484949}
   - {fileID: 1906207763}
@@ -948908,67 +948910,6 @@ PrefabInstance:
     - target: {fileID: 5108392746215038472, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
---- !u!1001 &1757403899
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 644193270}
-    m_Modifications:
-    - target: {fileID: 5108392746215038471, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
-      propertyPath: m_Name
-      value: Checkpoint (14)
-      objectReference: {fileID: 0}
-    - target: {fileID: 5108392746215038472, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -106.55
-      objectReference: {fileID: 0}
-    - target: {fileID: 5108392746215038472, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 24.149994
-      objectReference: {fileID: 0}
-    - target: {fileID: 5108392746215038472, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5108392746215038472, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5108392746215038472, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5108392746215038472, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5108392746215038472, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5108392746215038472, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5108392746215038472, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5108392746215038472, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5108392746215038473, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
-      propertyPath: isStartPoint
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
