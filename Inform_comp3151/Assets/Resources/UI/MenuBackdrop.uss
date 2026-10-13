@@ -6,11 +6,15 @@
 
    Pixel art, point filtered and uncompressed in its import settings: at the 1920x1080 reference
    it shows at exactly 3x. It covers the screen centred on any aspect ratio. The colour behind it
-   is the frame's ink, for the instant before the art is up. */
+   is the frame's ink, for the instant before the art is up.
+
+   The tint darkens the picture (multiplied in, ~60% brightness) so the logo and menu read
+   clearly over it; raise it toward white to brighten. */
 
 .backdrop {
     background-color: rgb(39, 43, 75);
     background-image: url("project://database/Assets/Art/UI/MainMenuBackdrop.png?fileID=2800000&guid=b6396c7d3340468b8f5f1abd546ffcee&type=3#MainMenuBackdrop");
+    -unity-background-image-tint-color: rgb(155, 155, 155);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

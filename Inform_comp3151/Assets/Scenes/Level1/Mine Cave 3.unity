@@ -643742,6 +643742,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: MovablePlatform (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 7882870677473844813, guid: 873a91d03a337aa40b3229c0e1a762db, type: 3}
+      propertyPath: m_SortingLayer
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7882870677473844813, guid: 873a91d03a337aa40b3229c0e1a762db, type: 3}
+      propertyPath: m_SortingLayerID
+      value: 1806310747
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -950571,6 +950579,14 @@ PrefabInstance:
     - target: {fileID: 5231306245338658663, guid: 873a91d03a337aa40b3229c0e1a762db, type: 3}
       propertyPath: m_Name
       value: MovablePlatform (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7882870677473844813, guid: 873a91d03a337aa40b3229c0e1a762db, type: 3}
+      propertyPath: m_SortingLayer
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7882870677473844813, guid: 873a91d03a337aa40b3229c0e1a762db, type: 3}
+      propertyPath: m_SortingLayerID
+      value: 1806310747
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

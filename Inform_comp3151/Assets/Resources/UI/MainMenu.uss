@@ -5,13 +5,13 @@
 
 /* Game logo, placed by its centre as a share of the screen. This is its resting spot beside the
    menu; on the title screen MainMenuPanel overrides left / top / size inline (centred, smaller)
-   and tweens back to these values. 448 px = 7x the 64 px pixel art. */
+   and tweens back to these values. 768 px = 12x the 64 px pixel art (MainMenuPanel.MenuLogoSize). */
 .main-logo {
     position: absolute;
     left: 74%;
     top: 44%;
-    width: 448px;
-    height: 448px;
+    width: 768px;
+    height: 768px;
     translate: -50% -50%;
     background-size: contain;
     background-position: center;
@@ -28,7 +28,7 @@
     white-space: nowrap;
 }
 
-/* Title screen prompt under the centred logo (below the blob of the x18 logo); MainMenuPanel shows it and drives its breathing */
+/* Title screen prompt under the centred logo (below the x13 logo);MainMenuPanel shows it and drives its breathing */
 .press-any-key {
     display: none;
     position: absolute;

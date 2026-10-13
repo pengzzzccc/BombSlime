@@ -94,6 +94,21 @@ namespace Inkform.Tests
             }
         }
 
+        [Test]
+        public void DashHint_FollowsDashDirection()
+        {
+            foreach (bool gamepad in new[] { false, true })
+            {
+                string aim = set.TextFor(TutorialHint.Dash, gamepad);
+                string move = set.TextFor(TutorialHint.Dash, gamepad, moveDash: true);
+                StringAssert.Contains("{Move}", move, $"gamepad={gamepad}: move-dash copy names the move input");
+                Assert.AreNotEqual(aim, move, $"gamepad={gamepad}: move-dash copy differs from the aim copy");
+            }
+
+            // Hints without move-dash copy fall back to their normal line
+            Assert.AreEqual(set.TextFor(TutorialHint.Jump, true), set.TextFor(TutorialHint.Jump, true, moveDash: true));
+        }
+
         // ---- Template ----
 
         [Test]

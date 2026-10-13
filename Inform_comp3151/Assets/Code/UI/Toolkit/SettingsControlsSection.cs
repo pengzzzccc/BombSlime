@@ -206,7 +206,7 @@ namespace Inkform.UI
                 button.RegisterCallback<NavigationMoveEvent>(e =>
                 {
                     if (e.direction == NavigationMoveEvent.Direction.Left || e.direction == NavigationMoveEvent.Direction.Right)
-                        e.StopImmediatePropagation();
+                        OptionRow.KeepFocus(button, e);
                 });
             }
         }

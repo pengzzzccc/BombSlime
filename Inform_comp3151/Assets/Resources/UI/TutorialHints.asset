@@ -27,8 +27,13 @@ MonoBehaviour:
     keyboardText: Hook on Bomb, Press {SpitBomb} to throw a bomb at the reticle
     gamepadText: Hook on Bomb, Press {SpitBomb} to throw a bomb at the reticle
   - hint: 4
-    keyboardText: Grap a Bomb, Press {Dash} to dash toward the reticle
-    gamepadText: Grap a Bomb, Press {Dash} to dash toward the reticle
+    keyboardText: Grab a Bomb, aim with the mouse and press {Dash} to dash toward
+      the reticle
+    gamepadText: Grab a Bomb, aim with {Aim} and press {Dash} to dash toward the
+      reticle
+    keyboardMoveDashText: Grab a Bomb, hold {Move} and press {Dash} to dash that
+      way
+    gamepadMoveDashText: Grab a Bomb, push {Move} and press {Dash} to dash that way
   - hint: 5
     keyboardText: Jump {Jump} to briefly move along the ceiling
     gamepadText: Jump {Jump} to briefly move along the ceiling

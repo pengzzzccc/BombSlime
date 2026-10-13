@@ -89,7 +89,8 @@ namespace Inkform.UI
                 if (ReferenceEquals(requests[i].owner, owner)) requests.RemoveAt(i);
         }
 
-        // Rebinds and device switches both land here; the icons are rebuilt on the next tick
+        // Rebinds, device switches and the Dash Direction setting all land here; the line is
+        // rebuilt on the next tick
         private void OnSettingsChanged() => bindingsDirty = true;
 
         // ---- Per-frame ----
@@ -152,7 +153,12 @@ namespace Inkform.UI
             bindingsDirty = false;
 
             panel.Clear();
-            string template = set != null ? set.TextFor(hint, scheme != PromptScheme.KeyboardMouse) : hint.ToString();
+            // The dash line follows the Dash Direction setting too (changing it raises
+            // SettingsStore.Changed, which rebuilds the line in place like a device switch)
+            bool moveDash = SettingsStore.DashAim == SettingsStore.DashAimSource.Move;
+            string template = set != null
+                ? set.TextFor(hint, scheme != PromptScheme.KeyboardMouse, moveDash)
+                : hint.ToString();
             foreach (InputGlyphs.Segment segment in InputGlyphs.Split(template))
             {
                 if (!segment.isToken)

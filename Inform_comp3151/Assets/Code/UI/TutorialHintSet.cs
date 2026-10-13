@@ -24,6 +24,11 @@ namespace Inkform.UI
             public TutorialHint hint;
             [TextArea] public string keyboardText;
             [TextArea] public string gamepadText;
+
+            [Tooltip("Used instead of Keyboard Text while Dash Direction is set to Move (WASD steers the dash). Empty = Keyboard Text")]
+            [TextArea] public string keyboardMoveDashText;
+            [Tooltip("Used instead of Gamepad Text while Dash Direction is set to Move (the left stick steers the dash). Empty = Gamepad Text")]
+            [TextArea] public string gamepadMoveDashText;
         }
 
         [Serializable]
@@ -46,12 +51,18 @@ namespace Inkform.UI
 
         public static TutorialHintSet Load() => Resources.Load<TutorialHintSet>(ResourcePath);
 
-        /// <summary>The hint's line for the device family; empty when the hint has no copy.</summary>
-        public string TextFor(TutorialHint hint, bool gamepad)
+        /// <summary>The hint's line for the device family; empty when the hint has no copy.
+        /// moveDash (Dash Direction = Move) picks the hint's move-dash line where it has one.</summary>
+        public string TextFor(TutorialHint hint, bool gamepad, bool moveDash = false)
         {
             foreach (HintCopy copy in hints)
             {
                 if (copy == null || copy.hint != hint) continue;
+                if (moveDash)
+                {
+                    string alt = gamepad ? copy.gamepadMoveDashText : copy.keyboardMoveDashText;
+                    if (!string.IsNullOrEmpty(alt)) return alt;
+                }
                 return (gamepad ? copy.gamepadText : copy.keyboardText) ?? string.Empty;
             }
             return string.Empty;

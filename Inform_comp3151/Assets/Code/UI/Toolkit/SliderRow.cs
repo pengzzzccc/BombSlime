@@ -130,7 +130,7 @@ namespace Inkform.UI
         private void OnNavigate(NavigationMoveEvent e)
         {
             if (e.direction == NavigationMoveEvent.Direction.Left || e.direction == NavigationMoveEvent.Direction.Right)
-                e.StopImmediatePropagation();
+                OptionRow.KeepFocus(this, e);
         }
 
         private void UpdateReadout(float value)

@@ -18,8 +18,8 @@ namespace Inkform.UI
     /// Enter — moves to the next choice and does wrap, a quick way to cycle; a click on a chevron
     /// steps that way.
     ///
-    /// Left / right never move focus off the row: StopImmediatePropagation keeps the focus
-    /// controller (a propagation-phase handler since Unity 6) from seeing them.
+    /// Left / right never move focus off the row: KeepFocus stops the event and has the focus
+    /// controller ignore it (see there).
     /// </summary>
     public class OptionRow : VisualElement
     {
@@ -115,14 +115,24 @@ namespace Inkform.UI
             switch (e.direction)
             {
                 case NavigationMoveEvent.Direction.Left:
-                    e.StopImmediatePropagation();
+                    KeepFocus(this, e);
                     if (IsChoice) Step(-1);
                     break;
                 case NavigationMoveEvent.Direction.Right:
-                    e.StopImmediatePropagation();
+                    KeepFocus(this, e);
                     if (IsChoice) Step(+1);
                     break;
             }
+        }
+
+        /// <summary>Swallows a left / right move so focus stays on the row. Stopping propagation
+        /// alone is not enough in Unity 6: the focus controller switches focus off the event on
+        /// its own pass — the stick's moves (sent from code by UIManager) slipped through and
+        /// the row lost focus — so it is also told to ignore the event outright.</summary>
+        internal static void KeepFocus(VisualElement row, NavigationMoveEvent e)
+        {
+            e.StopImmediatePropagation();
+            row.focusController?.IgnoreEvent(e);
         }
 
         private void Step(int dir)

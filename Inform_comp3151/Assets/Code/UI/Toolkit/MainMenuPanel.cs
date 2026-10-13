@@ -30,14 +30,15 @@ namespace Inkform.UI
         private const float MenuEnterFromX = -120f;
 
         // The logo's title-screen spot: centre as a share of the screen, size a whole multiple of
-        // the 64 px art (x18 — the art's own margins keep the blob itself inside the screen, clear
-        // of the prompt at 87%). Its spot beside the menu lives in MainMenu.uss (.main-logo, x7).
+        // the 64 px art (x13 ≈ 0.7 of the old x18; a whole multiple keeps the point-filtered
+        // pixels even). Its spot beside the menu lives in MainMenu.uss (.main-logo, x12 ≈ 1.7 of
+        // the old x7) — keep MenuLogoSize equal to it, the tween lands there.
         private const float TitleLogoLeft = 50f;
         private const float TitleLogoTop = 45f;
-        private const float TitleLogoSize = 1152f;
+        private const float TitleLogoSize = 832f;
         private const float MenuLogoLeft = 74f;
         private const float MenuLogoTop = 44f;
-        private const float MenuLogoSize = 448f;
+        private const float MenuLogoSize = 768f;
 
         private readonly VisualElement logo;
         private readonly Label pressAnyKey;
