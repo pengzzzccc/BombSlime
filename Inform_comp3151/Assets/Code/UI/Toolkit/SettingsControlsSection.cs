@@ -8,7 +8,7 @@ namespace Inkform.UI
 {
     /// <summary>
     /// The CONTROLS section, in groups: DEVICE (input device, rumble level, trigger effects level),
-    /// SENSITIVITY, KEY BINDINGS (the active device's rebind table only, each key drawn as its
+    /// SENSITIVITY, DASH (which input steers the dash), KEY BINDINGS (the active device's rebind table only, each key drawn as its
     /// button icon), GRAPPLING HOOK (the rope gun's snap options the RopeGun reads live from
     /// SettingsStore; adaptive slide speed goes with Wall Snap, no row of its own) and MAINTENANCE last (Unstuck, Reset Bindings, Reset All — out of the way
     /// of a stray press). The section follows a live device switch while the sheet is open:
@@ -63,7 +63,11 @@ namespace Inkform.UI
 
         private static readonly RumbleLevel[] RumbleLevels = (RumbleLevel[])Enum.GetValues(typeof(RumbleLevel));
 
+        private static readonly SettingsStore.DashAimSource[] DashAimSources =
+            (SettingsStore.DashAimSource[])Enum.GetValues(typeof(SettingsStore.DashAimSource));
+
         private readonly OptionRow unstuckRow;
+        private readonly OptionRow dashAimRow;
         private readonly VisualElement kbmGroup, padGroup;
         private readonly VisualElement[] kbmKeySlots, padKeySlots;
         private readonly Label bindingsHeader;
@@ -89,6 +93,10 @@ namespace Inkform.UI
                 () => SettingsStore.MouseSensitivity, SettingsStore.SetMouseSensitivity);
             AddSliderRow("Controller Sensitivity", SettingsStore.MinSensitivity, SettingsStore.MaxSensitivity, SensText,
                 () => SettingsStore.StickSensitivity, SettingsStore.SetStickSensitivity);
+
+            AddSubHeader("DASH");
+            dashAimRow = AddListRow("Dash Direction", DashAimSources, () => SettingsStore.DashAim,
+                SettingsStore.SetDashAim, DashAimText);
 
             // The rebind tables switch with the device
             bindingsHeader = AddSubHeader("KEY BINDINGS");
@@ -143,6 +151,7 @@ namespace Inkform.UI
             if (bindingsHeader != null) bindingsHeader.text = kbm ? "KEY BINDINGS (KEYBOARD)" : "KEY BINDINGS (GAMEPAD)";
             if (kbmGroup != null) kbmGroup.style.display = kbm ? DisplayStyle.Flex : DisplayStyle.None;
             if (padGroup != null) padGroup.style.display = kbm ? DisplayStyle.None : DisplayStyle.Flex;
+            dashAimRow?.Refresh();      // its text names the active device's controls
 
             for (int i = 0; i < KbmRows.Length; i++)
                 RefreshBindingRow(i, KbmRows, kbmKeySlots[i], BindingTools.KbmGroup);
@@ -244,6 +253,15 @@ namespace Inkform.UI
             RumbleLevel.High => "HIGH",
             _ => "OFF",
         };
+
+        // Names the physical control for the active device: the sticks on a pad, mouse / keys otherwise
+        private static string DashAimText(SettingsStore.DashAimSource source)
+        {
+            bool pad = SettingsStore.Device == SettingsStore.InputDevice.Gamepad;
+            return source == SettingsStore.DashAimSource.Move
+                ? (pad ? "LEFT STICK" : "MOVE KEYS")
+                : (pad ? "RIGHT STICK" : "MOUSE AIM");
+        }
 
         private static InputAction GetAction(string actionName)
         {

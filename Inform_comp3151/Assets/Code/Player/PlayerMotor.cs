@@ -30,6 +30,8 @@ namespace Inkform.Player
         [SerializeField] private float gravity = 3f;
         [SerializeField] private float fallGravityMultiplier = 2.2f;
         [SerializeField][Range(0, 1)] private float onWallGravityMultiplier = 0.2f;
+        [Tooltip("On the frame the player first touches a wall while airborne, a fall faster than maxFallSpeed * this is rewritten down to it — the wall catches the player instead of the slide starting at full speed")]
+        [SerializeField][Range(0, 1)] private float wallCatchFallFraction = 1f / 3f;
         [Tooltip("Symmetric Y speed cap: free-fall terminal velocity AND the safety net for any one-off upward burst (rope release, knockback). Active rope pulls and dashes assert their own speed and are unaffected; a jump lands exactly on it.")]
         [SerializeField] private float maxFallSpeed = 12f;
 
@@ -67,6 +69,9 @@ namespace Inkform.Player
         // Expiry edge for StepDash: set by Dash(), cleared on the first frame the timer is no
         // longer running — that frame asserts dashEndYVelocity (see StepDash)
         private bool dashActive;
+
+        // Previous frame's OnWall, for the wall-catch edge in ApplyNonLinearGravity
+        private bool wasOnWall;
 
         // Platform follow state: standing on a moving platform carries the player along. Zero
         // "platform awareness" on the player side — it only reads physical facts (how far the contacted
@@ -273,6 +278,7 @@ namespace Inkform.Player
             wallJumpBuffer.Clear();
             attackTimer.Clear();
             dashActive = false;
+            wasOnWall = false;
             knockbackTimer.Clear();
             updateBuffer.Clear();
             coyoteTimer.Clear();
@@ -287,6 +293,11 @@ namespace Inkform.Player
         // Read the comment on ContactSensor.ceilingStickTimer before reordering
         private void ApplyNonLinearGravity()
         {
+            // Wall contact edge: sampled before the early returns below so the baseline stays
+            // current through flight / dash frames
+            bool wallTouched = contact.OnWall && !wasOnWall;
+            wasOnWall = contact.OnWall;
+
 #if UNITY_EDITOR
             // F2 flight: gravity never touches the body — Move drives both axes directly. Toggling
             // off self-heals: the normal path below assigns gravityScale every frame anyway
@@ -328,6 +339,13 @@ namespace Inkform.Player
                 body.linearVelocityY = -maxFallSpeed;
             if (!knockbackTimer.IsRunning && body.linearVelocityY > maxFallSpeed)
                 body.linearVelocityY = maxFallSpeed;
+
+            // Wall catch: on the first frame of touching a wall in the air, a fall faster than
+            // the catch speed is rewritten to it; the reduced wall-slide gravity takes over from
+            // there. Edge-only — while staying on the wall the fall is free to build again
+            float catchSpeed = maxFallSpeed * wallCatchFallFraction;
+            if (wallTouched && !contact.OnGround && body.linearVelocityY < -catchSpeed)
+                body.linearVelocityY = -catchSpeed;
         }
 
         private void StepJump()

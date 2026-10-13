@@ -1,5 +1,6 @@
 using Inkform.Bus;
 using Inkform.Life;
+using Inkform.Settings;
 using Inkform.Tool;
 using UnityEngine;
 
@@ -123,11 +124,12 @@ namespace Inkform.Player
             motor.CutJump();
         }
 
-        /// <summary>Dash action (LeftShift / LB). Direction = the aim direction (the rope gun's
-        /// reticle; on a pad that is the right stick's last pushed direction), SNAPPED to 8
-        /// directions — never a free angle — falling back to the 8-way move input, then to the
-        /// facing. The dash itself is fixed-direction and gravity-free for its whole duration,
-        /// decaying to a stop at the end (see PlayerMotor).</summary>
+        /// <summary>Dash action (LeftShift / LB). The source follows SettingsStore.DashAim: Aim =
+        /// the rope gun's reticle (on a pad, the right stick's last pushed direction); Move = the
+        /// move input (left stick / WASD), falling back to the facing when it is idle. Without a
+        /// rope gun Aim degrades to Move. Either way the direction is SNAPPED to 8 directions —
+        /// never a free angle. The dash itself is fixed-direction and gravity-free for its whole
+        /// duration, decaying to a stop at the end (see PlayerMotor).</summary>
         public void Dash()
         {
             if (LifeBus.IsDead) return;
@@ -136,7 +138,8 @@ namespace Inkform.Player
             if (succeeded)
             {
                 Vector2 dir;
-                if (ropeGun != null)
+                bool useMove = SettingsStore.DashAim == SettingsStore.DashAimSource.Move;
+                if (!useMove && ropeGun != null)
                     dir = Dir8.Snap(ropeGun.EffectiveFireDir);
                 else if (lastMoveInput.sqrMagnitude > 0.0001f)
                     dir = Dir8.Snap(lastMoveInput);
