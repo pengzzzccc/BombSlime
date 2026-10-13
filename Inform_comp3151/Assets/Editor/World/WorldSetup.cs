@@ -177,10 +177,13 @@ namespace Inkform.WorldTools
         // ---- Missing doors & spawns ----
 
         /// <summary>Creates the doors and arrival checkpoints the existing doors imply but the
-        /// scenes lack — the reverse door for every one-way connection, and the arrival checkpoint
-        /// every door's targetSpawnId names. New objects land in a row near the scene origin (the
-        /// old fixer's convention): the tool knows the topology, not the level geometry, so placing
-        /// them is the level editor's half of the job.</summary>
+        /// scenes lack — the reverse door for every one-way connection (except into the end
+        /// room, a credits card), and the arrival checkpoint every door's targetSpawnId names,
+        /// the new reverse doors' included, in one run. New doors land in a row near the scene
+        /// origin (the old fixer's convention): the tool knows the topology, not the level
+        /// geometry, so placing them is the level editor's half of the job. A new arrival
+        /// checkpoint is parented beside the door it pairs with, so it follows when the door is
+        /// dragged into place.</summary>
         [MenuItem("Tools/Inkform/World/Create Missing Doors & Spawns")]
         private static void CreateMissingDoorsAndSpawns()
         {
@@ -233,6 +236,7 @@ namespace Inkform.WorldTools
             // arrival checkpoint each door's targetSpawnId names in its destination
             var doorsToCreate = new Dictionary<string, List<(string dest, string spawnId)>>();
             var spawnsToCreate = new Dictionary<string, List<string>>();
+            string endScene = world.EndRoom != null ? world.EndRoom.SceneName : null;
             foreach (string source in doorTargets.Keys)
             {
                 for (int i = 0; i < doorTargets[source].Count; i++)
@@ -240,23 +244,20 @@ namespace Inkform.WorldTools
                     string dest = doorTargets[source][i];
 
                     // Reverse door: arrive in `source`... created in `dest`, pointing back at
-                    // `source`, arriving at the spawn named after `dest` (the pairing convention)
+                    // `source`, arriving at the spawn named after `dest` (the pairing convention).
+                    // The end room is a credits card, not a place to walk back out of: a door
+                    // into it never gets a reverse.
                     bool hasReverse = doorTargets.TryGetValue(dest, out List<string> back)
                         && back.Contains(source);
-                    if (!hasReverse) AddCreation(doorsToCreate, dest, (source, dest));
-
-                    string namedSpawn = doorSpawnIds[source][i];
-                    if (!string.IsNullOrEmpty(namedSpawn)
-                        && spawnIds.TryGetValue(dest, out HashSet<string> existing)
-                        && !existing.Contains(namedSpawn))
+                    if (!hasReverse && dest != endScene)
                     {
-                        if (!spawnsToCreate.TryGetValue(dest, out List<string> list))
-                        {
-                            list = new List<string>();
-                            spawnsToCreate[dest] = list;
-                        }
-                        if (!list.Contains(namedSpawn)) list.Add(namedSpawn);
+                        AddCreation(doorsToCreate, dest, (source, dest));
+                        // The new reverse door names the spawn `dest` in `source`: plan that
+                        // arrival checkpoint in this same run, not on a second one
+                        AddSpawnIfMissing(spawnsToCreate, spawnIds, source, dest);
                     }
+
+                    AddSpawnIfMissing(spawnsToCreate, spawnIds, dest, doorSpawnIds[source][i]);
                 }
             }
 
@@ -312,6 +313,22 @@ namespace Inkform.WorldTools
             Debug.Log($"World: created {doorCount} door(s) and {spawnCount} spawn checkpoint(s) near the scene origin — drag them into position.");
         }
 
+        // A checkpoint with this spawn id is wanted in `room`: plan it unless the room already
+        // has one (or it is already planned). An empty id means the start point — nothing to make.
+        private static void AddSpawnIfMissing(Dictionary<string, List<string>> spawnsToCreate,
+            Dictionary<string, HashSet<string>> spawnIds, string room, string spawnId)
+        {
+            if (string.IsNullOrEmpty(spawnId)) return;
+            if (!spawnIds.TryGetValue(room, out HashSet<string> existing) || existing.Contains(spawnId)) return;
+
+            if (!spawnsToCreate.TryGetValue(room, out List<string> list))
+            {
+                list = new List<string>();
+                spawnsToCreate[room] = list;
+            }
+            if (!list.Contains(spawnId)) list.Add(spawnId);
+        }
+
         private static void AddCreation(Dictionary<string, List<(string dest, string spawnId)>> map, string room, (string dest, string spawnId) entry)
         {
             if (!map.TryGetValue(room, out List<(string dest, string spawnId)> list))
@@ -351,6 +368,18 @@ namespace Inkform.WorldTools
             GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
             instance.name = objectName;
             instance.transform.position = new Vector3(slot * 3f, 0f, 0f);
+
+            // The pairing convention: Spawn_X sits beside the door to X — the way back to where
+            // the player came from. Parent it there (just clear of the door's 1.2-wide trigger,
+            // so arriving does not walk straight back out) and it moves when the door is dragged
+            // into place. Flip the offset to the room's inner side if needed.
+            foreach (LevelExit exit in Object.FindObjectsByType<LevelExit>(FindObjectsInactive.Include))
+            {
+                if (exit.Destination == null || exit.Destination.SceneName != spawnId) continue;
+                instance.transform.SetParent(exit.transform, false);
+                instance.transform.localPosition = new Vector3(1.5f, 0f, 0f);
+                break;
+            }
 
             var so = new SerializedObject(instance.GetComponent<Checkpoint>());
             so.FindProperty("spawnId").stringValue = spawnId;

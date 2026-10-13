@@ -55,6 +55,9 @@ MonoBehaviour:
   - m_enabled: 1
     m_path: Assets/Scenes/Menu/End.unity
     m_guid: 6af981f88ec3d944192dfde0ff18c9ed
+  - m_enabled: 1
+    m_path: Assets/Scenes/Level2/Lab_base.unity
+    m_guid: 6af981f88ec3d944192dfde0ff18c9ed
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:
