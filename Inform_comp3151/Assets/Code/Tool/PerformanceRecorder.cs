@@ -21,12 +21,16 @@ namespace Inkform.Tool
 {
     /// <summary>
     /// Session performance recorder: samples once per SettingsStore.PerfInterval (Video page's
-    /// "Sample Rate", 0.1–5 s) whenever SettingsStore.PerfRecording is on, writing one CSV row per
-    /// sample until shutdown — frame pacing plus where the player was and what state they were in
-    /// when it got slow. Toggling the setting mid-run closes the current file (with its summary)
-    /// and opens a fresh one. Note the summary totals (frames, min FPS, hitches) are not reset per
-    /// file, so a later file's summary also counts the earlier stretches, and only the first file
-    /// gets the "# screen=" line.
+    /// "Perf Rate", 0.1–5 s) whenever SettingsStore.PerfRecording ("Perf Recording") is on, writing
+    /// one CSV row per sample until shutdown — frame pacing plus where the player was and what state
+    /// they were in when it got slow. Toggling the setting mid-run closes the current file (with its
+    /// summary) and opens a fresh one. Note the summary totals (frames, min FPS, hitches) are not
+    /// reset per file, so a later file's summary also counts the earlier stretches, and only the
+    /// first file gets the "# screen=" line.
+    ///
+    /// Gameplay events ride along as '#E,' comment lines (format=2): every death with its cause,
+    /// hazard and position, every respawn and checkpoint stamp, and a summary per checkpoint-to-
+    /// checkpoint segment — see CheckpointSegmentTracker. Sample-row readers skip them as comments.
     ///
     /// Output location follows one rule: an existing project-root Log/ folder wins; otherwise a
     /// PerfLogs folder is created under Docs/ and used. The session header stamps the git branch and
@@ -49,7 +53,7 @@ namespace Inkform.Tool
         private const float PausedGapSeconds = 1f;              // larger = sleep/minimize gap, not a frame
         private const string HeadlessFallbackFolder = "PerfLogs";
 
-        // Sampling cadence lives in SettingsStore (Graphics tab: Performance Log + Sample Rate);
+        // Sampling cadence lives in SettingsStore (Video section: Perf Recording + Perf Rate);
         // this cached copy is re-synced whenever the settings change
         private float sampleInterval = 1f;
         private bool recording;     // a session file is open and being written
@@ -57,6 +61,11 @@ namespace Inkform.Tool
         private static PerformanceRecorder active;
 
         private StreamWriter writer;
+        private CheckpointSegmentTracker segments;     // one per file, writes the '#E,' event lines
+
+        // Play-time clock for the event lines: unscaled time that only runs while the game state is
+        // Playing, so a segment's play_dur_s leaves out the pause menu and scene transitions
+        private double playClock;
 
         // Window aggregation: unscaled frame time summed over the interval, plus fps extremes within it
         private float windowTime;
@@ -144,13 +153,7 @@ namespace Inkform.Tool
             setPassRecorder.Dispose();
             trianglesRecorder.Dispose();
 #endif
-            if (recording)
-            {
-                LevelBus.Started -= OnSceneStarted;
-                WriteSummary();
-                CloseStream();
-                recording = false;
-            }
+            StopRecording();
         }
 
         // ---- Settings-driven recording state ----
@@ -176,17 +179,31 @@ namespace Inkform.Tool
 
             recording = true;
             LevelBus.Started += OnSceneStarted;
+            LifeBus.Died += OnDied;
+            LifeBus.Respawned += OnRespawned;
+            LifeBus.CheckpointSet += OnCheckpointSet;
+
+            // Switched on mid-level: measure from here. Without a player this is the menu (or boot),
+            // and the first LevelBus.Started opens the first segment instead
+            if (PlayerBus.Player != null)
+                segments.BeginScene(Now, playClock, SceneManagerSceneName(), CheckpointSegmentTracker.FromRecordingStart);
         }
 
-        /// <summary>Closes the session: a summary line, the scene-marker unsubscribe, the stream.</summary>
+        /// <summary>Closes the session: the open segment and a summary line, the bus unsubscribes,
+        /// the stream.</summary>
         private void StopRecording()
         {
             if (!recording) return;
             recording = false;
 
             LevelBus.Started -= OnSceneStarted;
+            LifeBus.Died -= OnDied;
+            LifeBus.Respawned -= OnRespawned;
+            LifeBus.CheckpointSet -= OnCheckpointSet;
+            segments?.Stop(Now, playClock);
             WriteSummary();
             CloseStream();
+            segments = null;
             ResetWindow();
         }
 
@@ -215,6 +232,8 @@ namespace Inkform.Tool
                 ResetWindow();
                 return;
             }
+
+            if (GameStateStore.Current == GameStateStore.GameState.Playing) playClock += dt;
 
             int fps = Mathf.RoundToInt(1f / dt);
             if (fps < windowMinFps) windowMinFps = fps;
@@ -245,10 +264,12 @@ namespace Inkform.Tool
                     $"perf_{DateTime.Now:yyyyMMdd_HHmmss}.csv");
 
                 writer = new StreamWriter(path, append: false, Encoding.UTF8);
+                segments = new CheckpointSegmentTracker(writer);
 
                 WriteHeader();
 
                 startRealtime = Time.realtimeSinceStartup;
+                playClock = 0.0;
                 lastSceneName = SceneManagerSceneName();
                 lastGcBytes = GC.GetTotalMemory(false);
                 lastGcCollects = GC.CollectionCount(0);
@@ -278,6 +299,7 @@ namespace Inkform.Tool
         private void WriteHeader()
         {
             writer.WriteLine("# Inkform performance log");
+            writer.WriteLine("# format=2");     // 2 = carries '#E,' event lines (see CheckpointSegmentTracker)
             writer.WriteLine($"# startedAt={DateTime.Now:yyyy-MM-dd'T'HH:mm:ss}");
             writer.WriteLine($"# branch={RunGit("rev-parse --abbrev-ref HEAD")}");
             writer.WriteLine($"# commit={RunGit("rev-parse HEAD")}");
@@ -288,6 +310,7 @@ namespace Inkform.Tool
             writer.WriteLine("time_s,scene,fps_avg,fps_min,fps_max,frame_ms,gc_mb,x,y,state,face,"
                            + "game_state,hitches,max_frame_ms,gc_alloc_kb,gc_collects,scene_load_ms,"
                            + "voices,deaths,rope,mementos,cam_mode,draw_calls,set_pass,tris");
+            CheckpointSegmentTracker.WriteSchema(writer);
             writer.Flush();
         }
 
@@ -302,7 +325,7 @@ namespace Inkform.Tool
                                + $" targetFps={Application.targetFrameRate} vSync={QualitySettings.vSyncCount}");
             }
 
-            double now = Time.realtimeSinceStartup - startRealtime;
+            double now = Now;
             float avgFps = windowFrames / Mathf.Max(windowTime, 1e-5f);
             float avgMs = 1000f * windowTime / Mathf.Max(windowFrames, 1);
             string scene = SceneManagerSceneName();   // scene marker rows come from LevelBus.Started
@@ -383,13 +406,76 @@ namespace Inkform.Tool
         // can see exactly where the hard part of the run started.
         private void OnSceneStarted(string sceneName)
         {
-            if (writer == null || sceneName == null || sceneName == lastSceneName) return;
+            if (writer == null) return;
+
+            // Segments restart on every landing, including a reload of the same scene (Continue after
+            // quitting to the menu) and a null one (the menu itself, which only closes); the marker
+            // line below keeps its old only-on-change rule
+            segments.BeginScene(Now, playClock, sceneName);
+            writer.Flush();
+
+            if (sceneName == null || sceneName == lastSceneName) return;
             lastSceneName = sceneName;
 
-            double now = Time.realtimeSinceStartup - startRealtime;
             writer.WriteLine(string.Format(CultureInfo.InvariantCulture,
-                "# scene={0} t={1:F1}s", sceneName, now));
+                "# scene={0} t={1:F1}s", sceneName, Now));
             writer.Flush();
+        }
+
+        // ---- gameplay events (format=2 '#E,' lines) ----
+
+        private double Now => Time.realtimeSinceStartup - startRealtime;
+
+        private void OnDied(DeathContext ctx)
+        {
+            if (writer == null) return;
+
+            // The victim is whatever collider touched the hazard; the registered player root is the
+            // better position source when it exists (a child collider would be offset)
+            Transform body = PlayerBus.Player != null ? PlayerBus.Player.transform
+                           : ctx.Victim != null ? ctx.Victim.transform : null;
+            Vector2 pos = body != null ? (Vector2)body.position : ctx.From;
+            Rigidbody2D rb = body != null ? body.GetComponentInParent<Rigidbody2D>() : null;
+            RopeGun rope = Rope;
+
+            segments.OnDeath(Now, playClock, SceneManagerSceneName(), pos, ctx.From,
+                ctx.Cause.ToString(),
+                ctx.Source != null ? ctx.Source.name : "",
+                PlayerBus.State.ToString(),
+                rope != null ? rope.Phase.ToString() : "",
+                rb != null ? rb.linearVelocity : Vector2.zero);
+            writer.Flush();
+        }
+
+        private void OnRespawned(GameObject victim, Vector2 pos)
+        {
+            if (writer == null) return;
+            segments.OnRespawn(Now, playClock, SceneManagerSceneName(), pos);
+            writer.Flush();
+        }
+
+        private void OnCheckpointSet(Vector2 spawnPos)
+        {
+            if (writer == null) return;
+            segments.OnCheckpoint(Now, playClock, SceneManagerSceneName(), spawnPos, CheckpointNameAt(spawnPos));
+            writer.Flush();
+        }
+
+        // The bus only carries the respawn position, so the stamped machine is found again by it —
+        // a stamp is rare enough that a scene search per stamp costs nothing, and the bus signature
+        // (five other subscribers) stays as it is
+        private static string CheckpointNameAt(Vector2 spawnPos)
+        {
+            Checkpoint best = null;
+            float bestSq = 0.01f;
+            foreach (Checkpoint checkpoint in FindObjectsByType<Checkpoint>())
+            {
+                float sq = (checkpoint.SpawnPos - spawnPos).sqrMagnitude;
+                if (sq > bestSq) continue;
+                bestSq = sq;
+                best = checkpoint;
+            }
+            return best != null ? best.name : "";
         }
 
         private void WriteSummary()

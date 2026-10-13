@@ -85,6 +85,10 @@ MonoBehaviour:
   emitterSearchMargin: 0.3
   glowPadding: 0.25
   glowWorldWidth: 0.0625
+  transitionMaterial: {fileID: 2100000, guid: 4682f2c01b2a4246acb4825e99a60360, type: 2}
+  appearTime: 0.175
+  disappearTime: 0.15
+  beamBase: 0
 --- !u!212 &1013494821639984387
 SpriteRenderer:
   serializedVersion: 2

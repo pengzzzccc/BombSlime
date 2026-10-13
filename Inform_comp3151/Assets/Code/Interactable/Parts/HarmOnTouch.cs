@@ -23,9 +23,11 @@ namespace Inkform.Interactable.Parts
         [SerializeField] private string targetTag = Tags.Player;
 
         private Collider2D hitBox;      // collider on the node: used for the kill point
+        private GameObject source;      // the hazard as a whole, named in the death context for analytics
 
         public void Attach(Interactable root)
         {
+            source = root.gameObject;
             // RequireComponent guarantees a collider on the node; not getting one means misconfiguration — complain
             hitBox = root.GetComponent<Collider2D>();
             if (hitBox == null)
@@ -46,7 +48,8 @@ namespace Inkform.Interactable.Parts
             LifeBus.RaiseDied(new DeathContext(
                 other.gameObject,
                 hitBox.ClosestPoint(other.bounds.center),
-                cause));
+                cause,
+                source));
 
             return true;    // handled: short-circuit later parts (only the player can die)
         }

@@ -30,6 +30,10 @@ namespace Inkform.Settings
         /// <summary>Which input device family gameplay input is filtered to (InputHandler).</summary>
         public enum InputDevice { KeyboardMouse, Gamepad }
 
+        /// <summary>Which input steers the dash (PlayerHandler.Dash): Aim = the rope gun's reticle
+        /// (right stick / mouse), Move = the move input (left stick / WASD).</summary>
+        public enum DashAimSource { Aim, Move }
+
         // Sensitivity is a plain multiplier, shown as such in the UI (e.g. "2.5"); 1.0 means no change.
         public const float MinSensitivity = 0f;
         public const float MaxSensitivity = 5f;
@@ -53,6 +57,9 @@ namespace Inkform.Settings
 
         /// <summary>Input family gameplay input is filtered to (InputHandler).</summary>
         public static InputDevice Device { get; private set; } = InputDevice.KeyboardMouse;
+
+        /// <summary>Dash direction source; PlayerHandler reads it live on each dash.</summary>
+        public static DashAimSource DashAim { get; private set; } = DashAimSource.Aim;
 
         public static int ResolutionWidth { get; private set; }
         public static int ResolutionHeight { get; private set; }
@@ -155,6 +162,7 @@ namespace Inkform.Settings
         private const string KeyMouseSens = "Inkform.mouseSensitivity";
         private const string KeyStickSens = "Inkform.stickSensitivity";
         private const string KeyDevice = "Inkform.inputDevice";
+        private const string KeyDashAim = "Inkform.dashAimSource";
         // The .v3 suffix is a scheme version: bumping it orphans every previously saved override so a
         // changed default layout reaches players who had rebound under the old defaults (v3, 2026-10:
         // gamepad Dash/Jump/SpitBomb remapped to LB / LT / RB). Rebinding saves under the new key.
@@ -191,6 +199,7 @@ namespace Inkform.Settings
             MouseSensitivity = 1f;
             StickSensitivity = DefaultStickSensitivity;
             Device = InputDevice.KeyboardMouse;
+            DashAim = DashAimSource.Aim;
             ResolutionWidth = ResolutionHeight = 0;
             Fullscreen = true;
             FpsCap = 120;
@@ -230,6 +239,8 @@ namespace Inkform.Settings
             MouseSensitivity = PlayerPrefs.GetFloat(KeyMouseSens, 1f);
             StickSensitivity = PlayerPrefs.GetFloat(KeyStickSens, DefaultStickSensitivity);
             Device = (InputDevice)PlayerPrefs.GetInt(KeyDevice, (int)InputDevice.KeyboardMouse);
+            DashAim = PlayerPrefs.GetInt(KeyDashAim, (int)DashAimSource.Aim) == (int)DashAimSource.Move
+                ? DashAimSource.Move : DashAimSource.Aim;
             Fullscreen = PlayerPrefs.GetInt(KeyFullscreen, 1) != 0;
             FpsCap = PlayerPrefs.GetInt(KeyFps, 120);
             VSync = PlayerPrefs.GetInt(KeyVSync, 0) != 0;
@@ -335,6 +346,14 @@ namespace Inkform.Settings
             if (Device == value) return;
             Device = value;
             PlayerPrefs.SetInt(KeyDevice, (int)value);
+            Changed?.Invoke();
+        }
+
+        public static void SetDashAim(DashAimSource value)
+        {
+            if (DashAim == value) return;
+            DashAim = value;
+            PlayerPrefs.SetInt(KeyDashAim, (int)value);
             Changed?.Invoke();
         }
 
@@ -486,6 +505,7 @@ namespace Inkform.Settings
             MouseSensitivity = 1f;
             StickSensitivity = DefaultStickSensitivity;
             Device = InputDevice.KeyboardMouse;
+            DashAim = DashAimSource.Aim;
             Fullscreen = true;
             FpsCap = 120;
             VSync = false;
@@ -513,6 +533,7 @@ namespace Inkform.Settings
             PlayerPrefs.DeleteKey(KeyMouseSens);
             PlayerPrefs.DeleteKey(KeyStickSens);
             PlayerPrefs.DeleteKey(KeyDevice);
+            PlayerPrefs.DeleteKey(KeyDashAim);
             PlayerPrefs.DeleteKey(KeyBindings);
             PlayerPrefs.DeleteKey(KeyResW);
             PlayerPrefs.DeleteKey(KeyResH);

@@ -60,6 +60,7 @@ namespace Inkform.Audio
             ItemBus.InventoryCapacityUpgraded += OnInventoryCapacityUpgraded;
             ItemBus.CapacityFlight += OnCapacityFlight;
             PlayerBus.StateChanged += OnPlayerState;
+            PlayerBus.Jumped += OnJumped;
             PlayerBus.DashAttempted += OnDashAttempted;
             RopeGunBus.Fired += OnRopeFired;
             RopeGunBus.Hit += OnRopeHit;
@@ -79,6 +80,7 @@ namespace Inkform.Audio
             ItemBus.InventoryCapacityUpgraded -= OnInventoryCapacityUpgraded;
             ItemBus.CapacityFlight -= OnCapacityFlight;
             PlayerBus.StateChanged -= OnPlayerState;
+            PlayerBus.Jumped -= OnJumped;
             PlayerBus.DashAttempted -= OnDashAttempted;
             RopeGunBus.Fired -= OnRopeFired;
             RopeGunBus.Hit -= OnRopeHit;
@@ -154,15 +156,16 @@ namespace Inkform.Audio
         // consistency; audibly identical to passing nothing
         private void OnItemReleased(InventoryItemDefinition item, Vector2 pos, Vector2 velocity) => Play(itemSpit, pos);
 
+        // Jump sound follows the jump itself, not the JumpUp state: JumpUp only plays for jumps with
+        // horizontal speed (a straight-up jump goes directly to Rise), and the state dedup would
+        // also swallow back-to-back JumpUps — either way the jump went silent
+        private void OnJumped() => Play(jump);
+
         // PlayerBus already dedups (broadcasts only when a state actually changes), so no per-frame spam.
-        // Eat/Release animations were removed (dash is pure dash), leaving only jump and land
+        // Eat/Release animations were removed (dash is pure dash), leaving only land
         private void OnPlayerState(PlayerState state)
         {
-            switch (state)
-            {
-                case PlayerState.JumpUp: Play(jump); break;
-                case PlayerState.Land: Play(land); break;
-            }
+            if (state == PlayerState.Land) Play(land);
         }
 
         // Position only says "where the sound happens"; whether it pans and fades with distance is

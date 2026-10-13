@@ -19,7 +19,14 @@ namespace Inkform.Interactable.Parts
     /// (legacy), RandomRange re-rolls a speed within [min, max] at the start of every leg.
     /// Curves: forwardCurve shapes legs traveling in ascending-index direction, returnCurve the
     /// descending ones (Loop only ever ascends).
+    ///
+    /// Runs before PlayerHandler (order 0): PlayerMotor.StepPlatform carries a rider by the
+    /// distance the platform moved, so the platform must already be at this frame's position when
+    /// it measures. Otherwise the carry lags a frame — harmless sideways, but vertically the
+    /// platform outruns the rider: rising, it sinks into the player and the depenetration bounces
+    /// them off; descending, it drops away and the player free-falls after it.
     /// </summary>
+    [DefaultExecutionOrder(-100)]
     public class PatrolMover : MonoBehaviour, IInteractablePart
     {
         public enum PatrolMode

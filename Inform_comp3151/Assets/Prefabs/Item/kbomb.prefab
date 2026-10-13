@@ -90,6 +90,7 @@ MonoBehaviour:
   hazardDetonatorMask:
     serializedVersion: 2
     m_Bits: 8192
+  chainReaction: 1
   chainDelay: 0.1
   triggerFrames:
   - {fileID: -43189483694800998, guid: 31b2e210484a3ac4fadf72477858c2b0, type: 3}

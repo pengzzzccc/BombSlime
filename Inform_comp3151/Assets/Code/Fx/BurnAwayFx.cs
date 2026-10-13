@@ -164,6 +164,7 @@ namespace Inkform.Fx
                 float progress = Mathf.Clamp01(time / burnDuration);
                 float front = Mathf.Lerp(frontStart, frontEnd, progress);
                 instance.SetFloat("_BurnFront", front);
+                instance.SetFloat("_BurnTime", time);   // the shader's flicker clock, frozen with ours under pause
 
                 EmitAsh(front, dt);
 

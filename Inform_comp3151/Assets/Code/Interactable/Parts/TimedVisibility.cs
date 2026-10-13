@@ -17,6 +17,14 @@ namespace Inkform.Interactable.Parts
     /// shape and gives it an edge glow (SpriteGlow). The glow lights Glow Lead Time before the
     /// hazard appears — the warning — and stays on until it disappears.
     ///
+    /// Beam transition (lasers): with a Transition Material (Inkform/LaserBeamTransition) assigned,
+    /// the hidden phase opens with the beam dissolving into particles and closes with it
+    /// re-forming, both swept from the beam's top end toward its emitter base. Both play inside the
+    /// hidden time, so the lethal on-time stays exactly as tuned — and the collider stays off for
+    /// the whole hidden phase, transitions included: particles never hurt. Sprite renderers wear the
+    /// transition material only while it plays; their own material is handed back the moment the
+    /// beam is solid again. Hazards without a SpriteRenderer (spike tilemaps) just flip as before.
+    ///
     /// Implementation note: the flip only toggles Collider2D and Renderer enabled, **never SetActive** —
     /// deactivation would stop this component's own Update and it could never wake itself when the
     /// hidden phase ends. This is a project-wide rule (BreakablePart.SetBroken / RestorablePart.SetGone
@@ -52,6 +60,18 @@ namespace Inkform.Interactable.Parts
         [Tooltip("Glow band thickness, world units")]
         [SerializeField, Min(0f)] private float glowWorldWidth = 0.0625f;
 
+        public enum BeamBase { Auto, LocalBottom, LocalTop }
+
+        [Header("Beam transition")]
+        [Tooltip("Material with the Inkform/LaserBeamTransition shader (LaserBeamTransition). Empty = no transition, the hazard just flips")]
+        [SerializeField] private Material transitionMaterial;
+        [Tooltip("Seconds the beam spends forming at the end of the hidden phase (no collision while it plays)")]
+        [SerializeField, Min(0f)] private float appearTime = 0.175f;
+        [Tooltip("Seconds the beam spends breaking up at the start of the hidden phase (no collision while it plays)")]
+        [SerializeField, Min(0f)] private float disappearTime = 0.15f;
+        [Tooltip("Which end is the base the sweep runs toward. Auto = the end nearest a glowing emitter (local bottom when there is none)")]
+        [SerializeField] private BeamBase beamBase = BeamBase.Auto;
+
         private Collider2D body;
         private readonly List<Renderer> renderers = new List<Renderer>();
         private Timer timer;
@@ -68,6 +88,19 @@ namespace Inkform.Interactable.Parts
         private bool glowsResolved;
         private bool glowOn;
         private Bounds hazardBounds;
+
+        // Beam transition state: one material instance per hazard (SpriteRenderer feeds each sprite
+        // its own _MainTex through its property block), the materials it replaced, and the beam's
+        // measured geometry, resolved once the emitters are known
+        private static readonly int FrontId = Shader.PropertyToID("_Front");
+        private static readonly int ModeId = Shader.PropertyToID("_Mode");
+        private static readonly int FxTimeId = Shader.PropertyToID("_FxTime");
+        private Material transitionInstance;
+        private readonly List<SpriteRenderer> beamSprites = new List<SpriteRenderer>();
+        private readonly List<Material> beamOriginals = new List<Material>();
+        private bool transitioning;
+        private bool everVisible;
+        private float sweepEnd = 1.4f;
 
         // Emitters are claimed by the nearest hazard: a base touching two beams glows for one only.
         // The scene's sprites are scanned once per frame for all hazards resolving in it, not once each
@@ -99,6 +132,7 @@ namespace Inkform.Interactable.Parts
             renderers.AddRange(root.GetComponentsInChildren<Renderer>(true));
 
             visible = startVisible;
+            everVisible = visible;
             timer.Set(PhaseDuration(visible));
             Apply();
         }
@@ -109,15 +143,17 @@ namespace Inkform.Interactable.Parts
         void Update()
         {
             // First frame: every scene object has run Awake, so the emitter bases all exist
-            if (!glowsResolved) ResolveEmitterGlows();
+            if (!glowsResolved) { ResolveEmitterGlows(); ResolveBeam(); }
 
             if (!timer.IsRunning) Flip();
+            UpdateTransition();
             UpdateGlow();
         }
 
         private void Flip()
         {
             visible = !visible;
+            if (visible) everVisible = true;
             timer.Set(PhaseDuration(visible));
             Apply();
         }
@@ -128,12 +164,119 @@ namespace Inkform.Interactable.Parts
         private void Apply()
         {
             if (body != null) body.enabled = visible;
+            EndTransition();
             foreach (Renderer r in renderers) r.enabled = visible;
 
             // The loop follows visibility through AmbientSource's own documented contract: enabling
             // plays its loop, disabling stops it. That keeps AmbientSource the one
             // component that owns looping world audio — no second audio implementation lives here
             if (loopSource != null) loopSource.enabled = visible;
+        }
+
+        // ---- Beam transition ----
+
+        // Both transitions live inside the hidden phase; if they would not fit, they shrink
+        // together so at least a tenth of it stays truly empty
+        private void TransitionTimes(out float appear, out float disappear)
+        {
+            appear = transitionInstance != null ? appearTime : 0f;
+            disappear = transitionInstance != null && everVisible ? disappearTime : 0f;
+            float budget = PhaseDuration(false) * 0.9f;
+            float sum = appear + disappear;
+            if (sum > budget && sum > 0f)
+            {
+                appear *= budget / sum;
+                disappear *= budget / sum;
+            }
+        }
+
+        private void UpdateTransition()
+        {
+            if (transitionInstance == null || visible) return;
+
+            TransitionTimes(out float appear, out float disappear);
+            float remaining = timer.Remaining;
+            float elapsed = PhaseDuration(false) - remaining;
+
+            float mode, progress;
+            if (disappear > 0f && elapsed < disappear) { mode = 1f; progress = elapsed / disappear; }
+            else if (appear > 0f && remaining < appear) { mode = 0f; progress = 1f - remaining / appear; }
+            else { EndTransition(); return; }
+
+            BeginTransition();
+            // appear eases out (the beam snaps toward the base, then settles); disappear eases in
+            float eased = mode < 0.5f ? 1f - (1f - progress) * (1f - progress) : progress * progress;
+            transitionInstance.SetFloat(ModeId, mode);
+            transitionInstance.SetFloat(FrontId, eased * sweepEnd);
+            transitionInstance.SetFloat(FxTimeId, Time.time);
+        }
+
+        private void BeginTransition()
+        {
+            if (transitioning) return;
+            transitioning = true;
+            beamOriginals.Clear();
+            foreach (SpriteRenderer sr in beamSprites)
+            {
+                beamOriginals.Add(sr.sharedMaterial);
+                sr.sharedMaterial = transitionInstance;
+                sr.enabled = true;      // rendering only: the collider stays off all hidden phase
+            }
+        }
+
+        private void EndTransition()
+        {
+            if (!transitioning) return;
+            transitioning = false;
+            for (int i = 0; i < beamSprites.Count && i < beamOriginals.Count; i++)
+            {
+                if (beamSprites[i] == null) continue;
+                beamSprites[i].sharedMaterial = beamOriginals[i];
+                beamSprites[i].enabled = visible;
+            }
+            beamOriginals.Clear();
+        }
+
+        // Measures the beam once: its long axis and world size (grain stays square on a stretched
+        // sprite) and which end is the base — by default the end nearest a glowing emitter
+        private void ResolveBeam()
+        {
+            if (transitionMaterial == null) return;
+            beamSprites.Clear();
+            foreach (Renderer r in renderers)
+                if (r is SpriteRenderer sr && sr.sprite != null && !glowRenderers.Contains(sr)) beamSprites.Add(sr);
+            if (beamSprites.Count == 0) return;
+
+            SpriteRenderer main = beamSprites[0];
+            Transform t = main.transform;
+            Bounds local = main.sprite.bounds;
+            Vector3 scale = t.lossyScale;
+            float lenX = local.size.x * Mathf.Abs(scale.x), lenY = local.size.y * Mathf.Abs(scale.y);
+            bool axisX = lenX > lenY;
+
+            bool baseAtTop = beamBase == BeamBase.LocalTop;
+            if (beamBase == BeamBase.Auto && glows.Count > 0)
+            {
+                Vector3 emitters = Vector3.zero;
+                foreach (Glow g in glows) emitters += g.emitter.bounds.center;
+                emitters /= glows.Count;
+                Vector3 c = local.center;
+                Vector3 top = t.TransformPoint(axisX ? new Vector3(local.max.x, c.y, 0f) : new Vector3(c.x, local.max.y, 0f));
+                Vector3 bottom = t.TransformPoint(axisX ? new Vector3(local.min.x, c.y, 0f) : new Vector3(c.x, local.min.y, 0f));
+                emitters.z = top.z = bottom.z = 0f;
+                baseAtTop = (emitters - top).sqrMagnitude < (emitters - bottom).sqrMagnitude;
+            }
+            // a flipped renderer mirrors the mesh but not the UVs
+            if (axisX ? main.flipX : main.flipY) baseAtTop = !baseAtTop;
+
+            transitionInstance = new Material(transitionMaterial) { name = transitionMaterial.name + " (beam)" };
+            transitionInstance.SetFloat("_AxisX", axisX ? 1f : 0f);
+            transitionInstance.SetFloat("_BaseAtTop", baseAtTop ? 1f : 0f);
+            transitionInstance.SetFloat("_Length", Mathf.Max(lenX, lenY));
+            transitionInstance.SetFloat("_Width", Mathf.Min(lenX, lenY));
+            // the sweep runs past the base by the settle band plus the head, so the beam ends fully
+            // solid (appear) or fully gone (disappear) before the material is handed back
+            sweepEnd = 1f + transitionInstance.GetFloat("_Settle") + transitionInstance.GetFloat("_HeadWidth");
         }
 
         // ---- Emitter glow ----
@@ -143,7 +286,9 @@ namespace Inkform.Interactable.Parts
         private void UpdateGlow()
         {
             if (glows.Count == 0) return;
-            bool on = visible || timer.Remaining <= glowLeadTime;
+            // the warning covers the whole re-forming beam, not just the last glowLeadTime
+            TransitionTimes(out float appear, out _);
+            bool on = visible || timer.Remaining <= Mathf.Max(glowLeadTime, appear);
             if (on == glowOn) return;
             glowOn = on;
             for (int i = 0; i < glows.Count; i++) ShowGlow(glows[i], on);
@@ -258,6 +403,9 @@ namespace Inkform.Interactable.Parts
         private void OnDestroy()
         {
             if (loopSource != null) loopSource.enabled = false;
+
+            EndTransition();
+            if (transitionInstance != null) Destroy(transitionInstance);
 
             foreach (Glow glow in glows)
             {

@@ -16,6 +16,11 @@ namespace Inkform.Bus
         public static event Action<FaceDirection> FaceChanged;
         public static event Action<Vector2, bool> DashAttempted;
 
+        /// <summary>A jump (ground, air or wall) actually started this frame. Transient, like
+        /// DashAttempted. Distinct from the JumpUp state, which only plays for jumps with
+        /// horizontal speed — anything that must follow EVERY jump (the jump sound) listens here.</summary>
+        public static event Action Jumped;
+
         /// <summary>The player just touched a surface — ground, ceiling or a wall — moving into
         /// it at the given speed (world units / s). Transient, like DashAttempted.</summary>
         public static event Action<ContactSide, float> Contacted;
@@ -71,7 +76,9 @@ namespace Inkform.Bus
         public static void RaiseDashAttempted(Vector2 position, bool succeeded) =>
             DashAttempted?.Invoke(position, succeeded);
 
-        public static void RaiseInteractPressed() => InteractPressed?.Invoke();
+        public static void RaiseJumped() => Jumped?.Invoke();
+
+        public static void RaiseInteractPressed()=> InteractPressed?.Invoke();
 
         public static void RaiseContact(ContactSide side, float impactSpeed) => Contacted?.Invoke(side, impactSpeed);
 
@@ -83,6 +90,7 @@ namespace Inkform.Bus
             StateChanged = null;
             FaceChanged = null;
             DashAttempted = null;
+            Jumped = null;
             Contacted = null;
             InteractPressed = null;
             PlayerRegistered = null;
