@@ -38,6 +38,8 @@ namespace Inkform.Player
         [Header("Wall jump")]
         [SerializeField] private float wallJumpTime = 0.15f;
         [SerializeField][Range(0, 1)] private float wallKickMultiplier = 0.3f;
+        [Tooltip("Wall coyote time: after the side sensors lose the wall (airborne), a jump still counts as a wall jump off that wall for this long")]
+        [SerializeField] private float wallCoyoteTime = 0.2f;
 
         [Header("Attack dash")]
         [SerializeField][Range(1, 5)] private float attackMultiplier = 1f;
@@ -57,6 +59,8 @@ namespace Inkform.Player
         private Timer knockbackTimer;
         private Timer updateBuffer;     // brief window after leaving the ground, during which jump count is not refilled
         private Timer coyoteTimer;      // the ground jump's grace window after walking off a ledge
+        private Timer wallCoyoteTimer;  // the wall jump's grace window after leaving a wall
+        private float lastWallKick;     // kick X sign off the wall last touched (+1 = left wall, kick right)
 
         private int jumpLeft;
         private float requestTime = -999f;
@@ -277,6 +281,7 @@ namespace Inkform.Player
             knockbackTimer.Clear();
             updateBuffer.Clear();
             coyoteTimer.Clear();
+            wallCoyoteTimer.Clear();
             grappleLocked = false;
             groundPlatform = null;
             groundPrevPos = Vector2.zero;
@@ -359,17 +364,31 @@ namespace Inkform.Player
             // dash ends — the dash owns the velocity until its timer expires
             bool buffered = (Time.time - requestTime) < jumpBuffer;
 
+            // Wall coyote: every airborne frame on a wall re-arms the grace window and remembers
+            // which way to kick. Not re-armed during the post-wall-jump lockout — the kick leaves
+            // the wall a frame or two later, and re-arming there would hand out a second wall jump
+            // off the same wall in mid-air. Touching ground drops it: a ground jump wins there
+            if (contact.OnGround) wallCoyoteTimer.Clear();
+            else if (contact.OnWall && !wallJumpBuffer.IsRunning)
+            {
+                wallCoyoteTimer.Set(wallCoyoteTime);
+                lastWallKick = contact.OnLeftWall ? 1f : -1f;
+            }
+
             // Wall jump: any airborne frame a side sensor touches a wall — sliding, rising or
-            // hanging alike, no wall-slide state required. It is free: it never spends jumpLeft,
-            // so wall jumps never eat the air-jump budget
-            bool wallJump = contact.OnWall && !contact.OnGround;
+            // hanging alike, no wall-slide state required — or within wallCoyoteTime of leaving
+            // one. It is free: it never spends jumpLeft, so wall jumps never eat the air-jump budget
+            bool touchingWall = contact.OnWall && !contact.OnGround;
+            bool wallJump = touchingWall || (!contact.OnGround && wallCoyoteTimer.IsRunning);
             if (buffered && (wallJump || jumpLeft > 0) && !attackTimer.IsRunning)
             {
                 if (wallJump)
                 {
-                    float kick = contact.OnLeftWall ? 1f : -1f;     // away from the touched wall
+                    // Away from the wall: the one touched now, else the one just left
+                    float kick = touchingWall ? (contact.OnLeftWall ? 1f : -1f) : lastWallKick;
                     body.linearVelocity = new Vector2(kick * jumpSpeed * wallKickMultiplier, jumpSpeed);
                     wallJumpBuffer.Set(wallJumpTime);
+                    wallCoyoteTimer.Clear();    // one grace window, one wall jump
                 }
                 else
                 {
