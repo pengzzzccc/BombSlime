@@ -31,7 +31,7 @@ MonoBehaviour:
       the reticle
     gamepadText: Grab a Bomb, aim with {Aim} and press {Dash} to dash toward the
       reticle
-    keyboardMoveDashText: Grab a Bomb, hold {Move} and press {Dash} to dash that
+    keyboardMoveDashText: Grab a Bomb, hold {Move:All} and press {Dash} to dash that
       way
     gamepadMoveDashText: Grab a Bomb, push {Move} and press {Dash} to dash that way
   - hint: 5

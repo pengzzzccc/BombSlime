@@ -27,12 +27,20 @@ namespace Inkform.UI
             public string text;
         }
 
-        // Composite parts shown for a keyboard axis (Move's WASD): a side-scroller only walks left/right
+        // Composite parts shown for a keyboard axis (Move's WASD): a side-scroller only walks
+        // left/right, so the default is the pair; {Move:All} asks for all four (an 8-way dash),
+        // in the order the keys read — W A S D
         private static readonly string[] AxisParts = { "left", "right" };
+        private static readonly string[] AllParts = { "up", "left", "down", "right" };
+
+        /// <summary>Token modifier for every composite direction: {Move:All}.</summary>
+        public const string AllDirectionsModifier = "All";
 
         /// <summary>Appends the icons for an action's binding in the current scheme's group: its
-        /// first plain binding, or for a composite (keyboard Move) its left and right keys.</summary>
-        public static void Resolve(InputAction action, PromptScheme scheme, TutorialHintSet set, List<Glyph> into)
+        /// first plain binding, or for a composite (keyboard Move) its left and right keys — all
+        /// four with allDirections.</summary>
+        public static void Resolve(InputAction action, PromptScheme scheme, TutorialHintSet set, List<Glyph> into,
+            bool allDirections = false)
         {
             if (action == null) return;
             string group = scheme == PromptScheme.KeyboardMouse ? BindingTools.KbmGroup : BindingTools.GamepadGroup;
@@ -44,7 +52,7 @@ namespace Inkform.UI
                 return;
             }
 
-            foreach (string part in AxisParts)
+            foreach (string part in allDirections ? AllParts : AxisParts)
             {
                 int partIndex = BindingTools.FindBindingIndex(action, group, part);
                 if (partIndex < 0) continue;
@@ -100,6 +108,20 @@ namespace Inkform.UI
                 i = close + 1;
             }
             return segments;
+        }
+
+        /// <summary>Splits a token into its action name and modifier: "Move:All" → Move, every
+        /// composite direction; "Jump" → Jump, the default parts. Unknown modifiers are ignored.</summary>
+        public static void ParseToken(string token, out string actionName, out bool allDirections)
+        {
+            actionName = token ?? string.Empty;
+            allDirections = false;
+            int colon = actionName.IndexOf(':');
+            if (colon < 0) return;
+
+            string modifier = actionName.Substring(colon + 1).Trim();
+            actionName = actionName.Substring(0, colon).Trim();
+            allDirections = string.Equals(modifier, AllDirectionsModifier, System.StringComparison.OrdinalIgnoreCase);
         }
 
         // "<Gamepad>/dpad/left" -> device "Gamepad", control "dpad/left"

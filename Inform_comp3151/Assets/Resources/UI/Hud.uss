@@ -1,6 +1,6 @@
 /* Gameplay HUD — every node picks nothing so clicks reach the world. Free-standing text
    (run stats, fps, save toast) reads over the level through the theme's .outline shadow, made a
-   touch stronger here; the inventory and tutorial hint keep their own dark plates. */
+   touch stronger here; the inventory is its own pixel-art bomb slot. */
 
 #Hud { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
 .hud-layer { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
@@ -27,23 +27,58 @@
 }
 .hud-stat-text { font-size: var(--fs-item); color: var(--c-text); -unity-text-align: middle-left; letter-spacing: 1px; text-shadow: 0px 3px 8px rgba(6, 8, 20, 0.9); }
 
+/* Bomb slot, bottom right: one plate of Art/UI/bombslot.png at 6x (61x19 art -> 366x114,
+   Hud.SlotScale). The plate's colour is the fill (Hud swaps the --tier class: white empty .. red
+   full). Over the plate's line (art x 23..51, y 13) the carried bombs run from the left and the
+   capacity stands at the right end. Every position below is an art pixel times 6 — change
+   the scale here and in Hud.SlotScale together. The layout rules live in BombSlot.cs. */
 .hud-inventory {
     position: absolute;
     right: var(--hud-margin); bottom: var(--hud-margin);
-    width: 132px; height: 86px;
-    background-color: rgba(3, 4, 6, 0.8);
-    border-radius: 8px;
-    border-width: 2px;
-    border-color: rgba(0, 0, 0, 0.85);
-    flex-direction: row;
-    align-items: center;
-    padding: 10px;
+    width: 366px; height: 114px;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
 }
-.hud-inventory-icon { width: 54px; height: 54px; -unity-background-scale-mode: scale-to-fit; }
-.hud-inventory-count { flex-grow: 1; font-size: var(--fs-corner); color: var(--c-white); -unity-text-align: middle-center; }
-/* A capacity crystal just landed (Hud.CelebrateCapacity): the count flashes green for 0.6s and
+.hud-bombslot--white  { background-image: url("project://database/Assets/Art/UI/bombslot.png?fileID=1063289385509242983&guid=d0d1dc37d6e968c46bc20e2a8ed8ba05&type=3#bombslot_7"); }
+.hud-bombslot--green  { background-image: url("project://database/Assets/Art/UI/bombslot.png?fileID=5014870569906810329&guid=d0d1dc37d6e968c46bc20e2a8ed8ba05&type=3#bombslot_2"); }
+.hud-bombslot--yellow { background-image: url("project://database/Assets/Art/UI/bombslot.png?fileID=-7980041488471010020&guid=d0d1dc37d6e968c46bc20e2a8ed8ba05&type=3#bombslot_8"); }
+.hud-bombslot--orange { background-image: url("project://database/Assets/Art/UI/bombslot.png?fileID=7630015065188675767&guid=d0d1dc37d6e968c46bc20e2a8ed8ba05&type=3#bombslot_1"); }
+.hud-bombslot--red    { background-image: url("project://database/Assets/Art/UI/bombslot.png?fileID=143927302600813951&guid=d0d1dc37d6e968c46bc20e2a8ed8ba05&type=3#bombslot_0"); }
+
+/* The strip over the line, art x 23..51, y 2..13: bottom edge on the line row, so a bomb
+   sprite's transparent bottom border overlaps the line and the visible bomb touches it. The
+   bombs take what the capacity leaves (BombRow grows); Hud sizes them to fit — at most their
+   own 9 art px, smaller when many share the row. */
+.hud-slot-line {
+    position: absolute;
+    left: 138px; top: 12px; width: 174px; height: 72px;
+    flex-direction: row;
+    align-items: flex-end;
+}
+.hud-bomb-row { flex-grow: 1; height: 100%; margin-right: 6px; }
+.hud-bomb {
+    position: absolute;
+    bottom: 0;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+}
+.hud-bomb--green  { background-image: url("project://database/Assets/Art/UI/bombslot.png?fileID=-2678744153661006810&guid=d0d1dc37d6e968c46bc20e2a8ed8ba05&type=3#bombslot_4"); }
+.hud-bomb--yellow { background-image: url("project://database/Assets/Art/UI/bombslot.png?fileID=749068713475871345&guid=d0d1dc37d6e968c46bc20e2a8ed8ba05&type=3#bombslot_6"); }
+.hud-bomb--orange { background-image: url("project://database/Assets/Art/UI/bombslot.png?fileID=-6359593606444334649&guid=d0d1dc37d6e968c46bc20e2a8ed8ba05&type=3#bombslot_5"); }
+.hud-bomb--red    { background-image: url("project://database/Assets/Art/UI/bombslot.png?fileID=-4351223981462703961&guid=d0d1dc37d6e968c46bc20e2a8ed8ba05&type=3#bombslot_3"); }
+
+/* Capacity at the line's right end, standing on it (the bottom margin clears the line row), in
+   the plate's own dark ink over its light face */
+.hud-capacity {
+    flex-shrink: 0;
+    margin: 0 0 6px 0; padding: 0;
+    font-size: 52px;
+    color: rgb(52, 49, 49);
+    -unity-text-align: lower-right;
+}
+/* A capacity crystal just landed (Hud.CelebrateCapacity): the capacity flashes green for 0.6s and
    "+1" floats up off the plate's top edge — opacity and the rise are driven by C#. */
-.hud-inventory-count--up { color: var(--c-green); }
+.hud-capacity--up { color: rgb(7, 160, 0); }
 .hud-inventory-plus {
     position: absolute;
     left: 0; right: 0; bottom: 100%;
@@ -55,7 +90,7 @@
     text-shadow: 0px 2px 6px rgba(6, 8, 20, 0.9);
 }
 
-.hud-save-toast { position: absolute; right: var(--hud-margin); bottom: 138px; font-size: var(--fs-corner); color: rgba(240, 242, 248, 0.95); opacity: 0; -unity-text-align: middle-right; text-shadow: 0px 2px 5px rgba(6, 8, 20, 0.85); }   /* opacity driven by C# */
+.hud-save-toast { position: absolute; right: var(--hud-margin); bottom: 162px; font-size: var(--fs-corner); color: rgba(240, 242, 248, 0.95); opacity: 0; -unity-text-align: middle-right; text-shadow: 0px 2px 5px rgba(6, 8, 20, 0.85); }   /* opacity driven by C# */
 
 /* Tutorial hint: one large line at the bottom centre, the button icons inline at the large glyph size. No plate: a deep shadow under every
    word keeps it readable over the level. Inside the safe margins; a line too long for them wraps

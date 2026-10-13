@@ -55,11 +55,68 @@ namespace Inkform.EditorTools
             Path.Combine(Path.GetDirectoryName(Application.dataPath) ?? ".", "Docs", "Tool", "PerfLogViewer");
         public static string DataFolder => Path.Combine(ViewerFolder, "data");
 
+        // Scenes outside the World's room list (test / blockout levels like Lab_base) that were
+        // exported with "Export Current Scene + Art": one asset path per line. Kept in the data
+        // folder so it travels with the exported data — every later export keeps them in.
+        // Delete a line (and its .jpg / .art.json) to drop that scene again.
+        private static string ExtraScenesPath => Path.Combine(DataFolder, "extra_scenes.txt");
+
         [MenuItem(MenuRoot + "Export Level Layouts")]
-        private static void ExportLayoutsOnly() => Export(renderArt: false);
+        private static void ExportLayoutsOnly() => Export(_ => false);
 
         [MenuItem(MenuRoot + "Export Level Layouts + Art")]
-        private static void ExportWithArt() => Export(renderArt: true);
+        private static void ExportWithArt() => Export(_ => true);
+
+        /// <summary>The open scene's layout and art, for a scene the World does not list (or a
+        /// room whose art alone needs refreshing). The other scenes are re-collected too — the
+        /// layout file is written whole — but keep their already-rendered art, so only this
+        /// scene pays for rendering.</summary>
+        [MenuItem(MenuRoot + "Export Current Scene + Art")]
+        private static void ExportCurrentScene()
+        {
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            string current = SceneManager.GetActiveScene().path;
+            if (string.IsNullOrEmpty(current))
+            {
+                EditorUtility.DisplayDialog("Level layout export", "Save the scene first — an unsaved scene has no path to export.", "OK");
+                return;
+            }
+
+            WorldDefinition world = WorldSetup.FindWorld();
+            bool isRoom = false;
+            if (world != null)
+                foreach (RoomDefinition room in world.Rooms)
+                    if (room != null && room.IsSet && AssetDatabase.GetAssetPath(room.Scene.SceneAsset) == current)
+                        isRoom = true;
+
+            if (!isRoom)
+            {
+                List<string> extras = ReadExtraScenes();
+                if (!extras.Contains(current))
+                {
+                    extras.Add(current);
+                    Directory.CreateDirectory(DataFolder);
+                    File.WriteAllLines(ExtraScenesPath, extras, new UTF8Encoding(false));
+                }
+            }
+
+            Export(path => path == current, saveFirst: false);
+        }
+
+        [MenuItem(MenuRoot + "Export Current Scene + Art", true)]
+        private static bool ExportCurrentSceneOn() => !EditorApplication.isPlaying;
+
+        private static List<string> ReadExtraScenes()
+        {
+            var paths = new List<string>();
+            if (!File.Exists(ExtraScenesPath)) return paths;
+            foreach (string line in File.ReadAllLines(ExtraScenesPath))
+            {
+                string path = line.Trim();
+                if (path.Length > 0 && !paths.Contains(path)) paths.Add(path);
+            }
+            return paths;
+        }
 
         [MenuItem(MenuRoot + "Open PerfLog Viewer")]
         private static void OpenViewer()
@@ -94,7 +151,9 @@ namespace Inkform.EditorTools
 
         // ---- export driver ----
 
-        private static void Export(bool renderArt)
+        // Every exported scene: the World's rooms in order, then the extra scenes. renderArt picks
+        // which scenes get their art rendered now; the rest reuse their sidecar from an earlier run.
+        private static void Export(Func<string, bool> renderArt, bool saveFirst = true)
         {
             WorldDefinition world = WorldSetup.FindWorld();
             if (world == null)
@@ -102,7 +161,17 @@ namespace Inkform.EditorTools
                 EditorUtility.DisplayDialog("Level layout export", "No WorldDefinition asset found.", "OK");
                 return;
             }
-            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            if (saveFirst && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+
+            var scenePaths = new List<string>();
+            foreach (RoomDefinition room in world.Rooms)
+            {
+                if (room == null || !room.IsSet) continue;
+                string roomPath = AssetDatabase.GetAssetPath(room.Scene.SceneAsset);
+                if (!string.IsNullOrEmpty(roomPath) && !scenePaths.Contains(roomPath)) scenePaths.Add(roomPath);
+            }
+            foreach (string extra in ReadExtraScenes())
+                if (!scenePaths.Contains(extra)) scenePaths.Add(extra);
 
             string originalScene = SceneManager.GetActiveScene().path;
             Directory.CreateDirectory(DataFolder);
@@ -117,24 +186,28 @@ namespace Inkform.EditorTools
             int exported = 0;
             try
             {
-                for (int i = 0; i < world.Rooms.Count; i++)
+                for (int i = 0; i < scenePaths.Count; i++)
                 {
-                    RoomDefinition room = world.Rooms[i];
-                    if (room == null || !room.IsSet) continue;
-                    string path = AssetDatabase.GetAssetPath(room.Scene.SceneAsset);
-                    if (string.IsNullOrEmpty(path) || !File.Exists(path)) continue;
+                    string path = scenePaths[i];
+                    if (!File.Exists(path))
+                    {
+                        report.AppendLine($"{path}: missing, skipped");
+                        continue;
+                    }
+                    // Same name the runtime (and so the perf log) gives the scene
+                    string sceneName = Path.GetFileNameWithoutExtension(path);
 
-                    EditorUtility.DisplayProgressBar("Level layout export", $"Opening {room.SceneName}…",
-                        (float)i / world.Rooms.Count);
+                    EditorUtility.DisplayProgressBar("Level layout export", $"Opening {sceneName}…",
+                        (float)i / scenePaths.Count);
                     EditorSceneManager.OpenScene(path, OpenSceneMode.Single);
 
-                    SceneLayout layout = Collect(room.SceneName);
+                    SceneLayout layout = Collect(sceneName);
                     if (layout.Tilemaps.Count == 0 && layout.Checkpoints.Count == 0) continue;   // e.g. the End card
 
-                    ArtInfo art = renderArt ? RenderArt(layout, i, world.Rooms.Count) : ReadArtSidecar(room.SceneName);
+                    ArtInfo art = renderArt(path) ? RenderArt(layout, i, scenePaths.Count) : ReadArtSidecar(sceneName);
                     WriteScene(json, layout, art);
                     exported++;
-                    report.AppendLine($"{room.SceneName}: {layout.Checkpoints.Count} checkpoints, {layout.Hazards.Count} hazards, "
+                    report.AppendLine($"{sceneName}: {layout.Checkpoints.Count} checkpoints, {layout.Hazards.Count} hazards, "
                                     + $"{layout.Tilemaps.Count} tilemaps{(art != null ? $", art {art.Width}×{art.Height}px" : "")}");
                 }
             }

@@ -18,9 +18,14 @@
                     <ui:Label name="DeathLabel" text="0" class="hud-stat-text outline" picking-mode="Ignore" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:VisualElement name="Inventory" class="hud-inventory" picking-mode="Ignore">
-                <ui:Image name="InventoryIcon" class="hud-inventory-icon" picking-mode="Ignore" />
-                <ui:Label name="InventoryCount" text="0/0" class="hud-inventory-count outline" picking-mode="Ignore" />
+            <!-- The bomb slot (Art/UI/bombslot.png): the plate's colour shows how full the backpack
+                 is; on its line the carried bombs (BombRow, filled and sized by Hud) run from the
+                 left, the capacity stands at the right end. -->
+            <ui:VisualElement name="Inventory" class="hud-inventory hud-bombslot--white" picking-mode="Ignore">
+                <ui:VisualElement name="SlotLine" class="hud-slot-line" picking-mode="Ignore">
+                    <ui:VisualElement name="BombRow" class="hud-bomb-row" picking-mode="Ignore" />
+                    <ui:Label name="CapacityLabel" text="0" class="hud-capacity" picking-mode="Ignore" />
+                </ui:VisualElement>
                 <ui:Label name="InventoryPlus" text="+1" class="hud-inventory-plus outline" picking-mode="Ignore" />
             </ui:VisualElement>
             <ui:Label name="SaveToast" text="Saved" class="hud-save-toast outline" picking-mode="Ignore" />

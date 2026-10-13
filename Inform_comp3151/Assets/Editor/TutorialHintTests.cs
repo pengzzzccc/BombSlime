@@ -101,12 +101,31 @@ namespace Inkform.Tests
             {
                 string aim = set.TextFor(TutorialHint.Dash, gamepad);
                 string move = set.TextFor(TutorialHint.Dash, gamepad, moveDash: true);
-                StringAssert.Contains("{Move}", move, $"gamepad={gamepad}: move-dash copy names the move input");
+                StringAssert.Contains("{Move", move, $"gamepad={gamepad}: move-dash copy names the move input");
                 Assert.AreNotEqual(aim, move, $"gamepad={gamepad}: move-dash copy differs from the aim copy");
             }
 
             // Hints without move-dash copy fall back to their normal line
             Assert.AreEqual(set.TextFor(TutorialHint.Jump, true), set.TextFor(TutorialHint.Jump, true, moveDash: true));
+
+            // The keyboard move-dash line shows all four WASD keys, not just A / D
+            StringAssert.Contains("{Move:All}", set.TextFor(TutorialHint.Dash, false, moveDash: true));
+        }
+
+        [Test]
+        public void ParseToken_ReadsAllDirectionsModifier()
+        {
+            InputGlyphs.ParseToken("Move:All", out string name, out bool all);
+            Assert.AreEqual("Move", name);
+            Assert.IsTrue(all);
+
+            InputGlyphs.ParseToken("Move", out name, out all);
+            Assert.AreEqual("Move", name);
+            Assert.IsFalse(all);
+
+            InputGlyphs.ParseToken("Move:Bogus", out name, out all);
+            Assert.AreEqual("Move", name);
+            Assert.IsFalse(all);
         }
 
         // ---- Template ----

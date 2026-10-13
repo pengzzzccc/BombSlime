@@ -9,6 +9,10 @@
    - 会生成 `data/level_layouts.js`，以及每个关卡一张实景 `*.jpg`。
    - 只需要几何时可以用不带 `+ Art` 的版本，速度更快。
    - 实景分辨率在 **Art Resolution** 子菜单里调，默认 12 px/格。
+   - 上面两个菜单只导出 World 里登记的房间。不在 World 里的场景（比如 `Lab_base`）先在 Unity 里打开，再执行 **Export Current Scene + Art**。
+     - 它只渲染当前场景的实景，其他场景沿用之前导出的图。
+     - 场景路径会记进 `data/extra_scenes.txt`，以后执行任何导出都会带上它。
+     - 不想再导出时，删掉对应那一行，以及它的 `*.jpg` 和 `*.art.json`。
 3. 双击 `index.html`，或执行 Unity 菜单 **Open PerfLog Viewer**，然后把一个或多个 CSV 拖进页面。
 
 ## 视图

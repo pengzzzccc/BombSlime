@@ -11,7 +11,7 @@ namespace Inkform.UI
     /// <summary>
     /// The gameplay HUD, rebuilt on the Toolkit tree from the old prefab's components: the run
     /// stats (top left: the run timer beside its clock, the death count beside its skull),
-    /// FpsDisplay (top right), InventoryHud (bottom right), SaveIndicator (the "Saved" toast above
+    /// FpsDisplay (top right), the bomb slot (bottom right), SaveIndicator (the "Saved" toast above
     /// it) and the HudRoot visibility switch — plus the tutorial hint line (bottom centre,
     /// TutorialHintView). Everything is picking-mode Ignore in the UXML — the HUD never eats a
     /// click meant for the world.
@@ -23,9 +23,14 @@ namespace Inkform.UI
     /// minutes:seconds:milliseconds; Show Timer only hides it. The toast and FPS counter run on
     /// unscaled time too (hitstop must not freeze them).
     ///
+    /// The backpack is the bomb slot (Art/UI/bombslot.png, bottom right): the carried bombs stand
+    /// on the plate's line from its left end (shrinking to fit when many), the capacity stands at
+    /// the line's right end, and the plate's colour goes from white
+    /// (empty) through green, yellow, orange to red (full) — rules in BombSlot.
+    ///
     /// A capacity crystal flies into the backpack plate before its slot counts (CapacityUpgradeFlight):
-    /// from its Rise to its Land the readout keeps the old capacity, then the plate pops, the count
-    /// flashes green and "+1" floats up off the plate.
+    /// from its Rise to its Land the readout keeps the old capacity, then the plate pops, the
+    /// capacity flashes green and "+1" floats up off the plate.
     /// </summary>
     public sealed class Hud
     {
@@ -33,6 +38,10 @@ namespace Inkform.UI
         private const float ToastFadeSeconds = 0.4f;
         private const float FpsUpdateInterval = 0.5f;   // refresh the label text at most this often
         private const float FpsSmoothing = 0.1f;        // exponential smoothing on the instant fps
+
+        private const float SlotScale = 6f;             // bomb slot art pixel -> HUD pixel (Hud.uss)
+        private const string PlateClassPrefix = "hud-bombslot--";
+        private const string BombClassPrefix = "hud-bomb--";
 
         private readonly VisualElement gameplay;
         private readonly VisualElement timerRow;
@@ -42,9 +51,10 @@ namespace Inkform.UI
         private readonly Label deathLabel;
         private readonly Label fpsLabel;
         private readonly VisualElement inventoryRoot;
-        private readonly VisualElement inventoryIcon;
-        private readonly Label inventoryCount;
+        private readonly VisualElement bombRow;
+        private readonly Label capacityLabel;
         private readonly Label inventoryPlus;
+        private BombSlot.Tier shownTier = BombSlot.Tier.White;   // the UXML starts on the white plate
         private readonly Label saveToast;
         private readonly TutorialHintView tutorialHint;
 
@@ -68,8 +78,11 @@ namespace Inkform.UI
             deathLabel = root.Q<Label>("DeathLabel");
             fpsLabel = root.Q<Label>("FpsLabel");
             inventoryRoot = root.Q("Inventory");
-            inventoryIcon = root.Q("InventoryIcon");
-            inventoryCount = root.Q<Label>("InventoryCount");
+            bombRow = root.Q("BombRow");
+            capacityLabel = root.Q<Label>("CapacityLabel");
+            // The row's width is the capacity's leftovers: known only after layout, and it moves
+            // when the capacity gains a digit — the bombs re-fit whenever it does
+            bombRow?.RegisterCallback<GeometryChangedEvent>(_ => LayoutBombs());
             inventoryPlus = root.Q<Label>("InventoryPlus");
             saveToast = root.Q<Label>("SaveToast");
             tutorialHint = new TutorialHintView(root);
@@ -164,19 +177,53 @@ namespace Inkform.UI
                 timerRow.style.display = SettingsStore.ShowTimer ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
-        /// <summary>Compact readout for the next FIFO item and current count/capacity
-        /// (old InventoryHud.Refresh).</summary>
+        /// <summary>The bomb slot: plate colour by fill, one bomb on the line per carried item,
+        /// the capacity under the line. Rebuilt on every InventoryStore change.</summary>
         private void RefreshInventory()
         {
-            if (inventoryRoot == null || inventoryIcon == null || inventoryCount == null) return;
+            if (inventoryRoot == null || bombRow == null || capacityLabel == null) return;
 
-            bool hasItem = InventoryStore.TryPeekFirst(out InventoryItemDefinition first);
-            Sprite icon = hasItem ? first.Icon : null;
-            if (icon != null) inventoryIcon.style.backgroundImage = new StyleBackground(icon);
-            inventoryIcon.style.display = icon != null ? DisplayStyle.Flex : DisplayStyle.None;
-            int shownCapacity = Mathf.Max(InventoryStore.Count, InventoryStore.Capacity - heldCapacity);
-            inventoryCount.text = $"{InventoryStore.Count}/{shownCapacity}";
+            int count = InventoryStore.Count;
+            int shownCapacity = Mathf.Max(count, InventoryStore.Capacity - heldCapacity);
+            BombSlot.Tier tier = BombSlot.TierFor(count, shownCapacity);
+
+            inventoryRoot.RemoveFromClassList(TierClass(PlateClassPrefix, shownTier));
+            inventoryRoot.AddToClassList(TierClass(PlateClassPrefix, tier));
+            shownTier = tier;
+
+            bombRow.Clear();
+            for (int i = 0; i < count; i++)
+            {
+                var bomb = new VisualElement { pickingMode = PickingMode.Ignore };   // the HUD never eats a click
+                bomb.AddToClassList("hud-bomb");
+                bomb.AddToClassList(TierClass(BombClassPrefix, tier));
+                bombRow.Add(bomb);
+            }
+
+            capacityLabel.text = shownCapacity.ToString();
+            LayoutBombs();
         }
+
+        // Bombs side by side from the line's left end, each at its own size (9 art px) while
+        // they fit, all shrunk evenly once they would not. Before the first layout the width is
+        // unknown (NaN): the GeometryChangedEvent that follows lays them out.
+        private void LayoutBombs()
+        {
+            if (bombRow == null) return;
+            float available = bombRow.resolvedStyle.width;
+            if (float.IsNaN(available)) return;
+
+            float size = BombSlot.BombSize(bombRow.childCount, available, BombSlot.BombSprite * SlotScale);
+            for (int i = 0; i < bombRow.childCount; i++)
+            {
+                VisualElement bomb = bombRow[i];
+                bomb.style.width = size;
+                bomb.style.height = size;
+                bomb.style.left = i * size;
+            }
+        }
+
+        private static string TierClass(string prefix, BombSlot.Tier tier) => prefix + tier.ToString().ToLowerInvariant();
 
         // Rise comes the same frame the store grows (before the panel draws), so the new capacity
         // never shows early. Cancel (the flight torn down) just stops holding it back.
@@ -200,14 +247,14 @@ namespace Inkform.UI
             }
         }
 
-        // The crystal hits the plate: the plate pops, the count flashes green, "+N" floats up
+        // The crystal hits the plate: the plate pops, the capacity flashes green, "+N" floats up
         private void CelebrateCapacity(int increase)
         {
             if (inventoryRoot != null) UiFx.Pop(inventoryRoot);
-            if (inventoryCount != null)
+            if (capacityLabel != null)
             {
-                inventoryCount.AddToClassList("hud-inventory-count--up");
-                inventoryCount.schedule.Execute(() => inventoryCount.RemoveFromClassList("hud-inventory-count--up"))
+                capacityLabel.AddToClassList("hud-capacity--up");
+                capacityLabel.schedule.Execute(() => capacityLabel.RemoveFromClassList("hud-capacity--up"))
                     .StartingIn(600);
             }
 

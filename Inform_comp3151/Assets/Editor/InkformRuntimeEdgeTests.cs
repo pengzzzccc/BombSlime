@@ -688,7 +688,7 @@ namespace Inkform.Tests
         }
 
         [Test]
-        public void Hud_InventoryShowsCountAndUsesFifoHeadIcon()
+        public void Hud_BombSlotShowsBombsOnTheLineAndCapacityBelow()
         {
             VisualTreeAsset tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Resources/UI/Hud.uxml");
             Assert.IsNotNull(tree, "missing Resources/UI/Hud.uxml");
@@ -698,16 +698,26 @@ namespace Inkform.Tests
             SetField(item, "id", "hud-head");
             try
             {
-                Label count = host.Q<Label>("InventoryCount");
-                VisualElement icon = host.Q("InventoryIcon");
-                Assert.AreEqual("0/0", count.text);
-                Assert.AreEqual(DisplayStyle.None, icon.style.display.value);
+                VisualElement slot = host.Q("Inventory");
+                VisualElement bombs = host.Q("BombRow");
+                Label capacity = host.Q<Label>("CapacityLabel");
+                Assert.AreEqual("0", capacity.text);
+                Assert.AreEqual(0, bombs.childCount);
+                Assert.IsTrue(slot.ClassListContains("hud-bombslot--white"), "empty backpack: white plate");
 
-                Assert.IsTrue(InventoryStore.TryCollectCapacityPickup("hud-head-capacity", 1));
-                Assert.AreEqual("0/1", count.text);
+                Assert.IsTrue(InventoryStore.TryCollectCapacityPickup("hud-head-capacity", 2));
+                Assert.AreEqual("2", capacity.text);
                 Assert.IsTrue(InventoryStore.TryAdd(item));
-                Assert.AreEqual("1/1", count.text);
-                Assert.AreEqual(item.Icon, icon.style.backgroundImage.value.sprite);
+                Assert.AreEqual(1, bombs.childCount, "one bomb on the line");
+                Assert.IsTrue(slot.ClassListContains("hud-bombslot--yellow"), "half full: yellow plate");
+                Assert.IsFalse(slot.ClassListContains("hud-bombslot--white"), "the old tier class is swapped out");
+                Assert.IsTrue(bombs[0].ClassListContains("hud-bomb--yellow"), "the bombs wear the plate's colour");
+
+                Assert.IsTrue(InventoryStore.TryAdd(item));
+                Assert.AreEqual(2, bombs.childCount);
+                Assert.IsTrue(slot.ClassListContains("hud-bombslot--red"), "full: red plate");
+                foreach (VisualElement bomb in bombs.Children())
+                    Assert.AreEqual(PickingMode.Ignore, bomb.pickingMode, "generated bombs must not block pointer input");
             }
             finally
             {
@@ -725,27 +735,27 @@ namespace Inkform.Tests
             Hud hud = new Hud(host);
             try
             {
-                Label count = host.Q<Label>("InventoryCount");
+                Label capacity = host.Q<Label>("CapacityLabel");
                 Assert.IsNotNull(host.Q<Label>("InventoryPlus"), "the landing \"+1\" label");
-                Assert.AreEqual("0/0", count.text);
+                Assert.AreEqual("0", capacity.text);
 
                 // The pickup's order: the store grows, then the flight rises — the same frame
                 Assert.IsTrue(InventoryStore.TryCollectCapacityPickup("hud-crystal", 1));
                 ItemBus.RaiseCapacityFlight(CapacityFlightPhase.Rise, 1);
-                Assert.AreEqual("0/0", count.text, "the old capacity stays up while the crystal flies");
+                Assert.AreEqual("0", capacity.text, "the old capacity stays up while the crystal flies");
                 ItemBus.RaiseCapacityFlight(CapacityFlightPhase.Hold, 1);
                 ItemBus.RaiseCapacityFlight(CapacityFlightPhase.Fly, 1);
-                Assert.AreEqual("0/0", count.text);
+                Assert.AreEqual("0", capacity.text);
 
                 ItemBus.RaiseCapacityFlight(CapacityFlightPhase.Land, 1);
-                Assert.AreEqual("0/1", count.text, "landing shows the new capacity");
+                Assert.AreEqual("1", capacity.text, "landing shows the new capacity");
 
                 // A flight torn down early releases its hold too
                 Assert.IsTrue(InventoryStore.TryCollectCapacityPickup("hud-crystal-2", 1));
                 ItemBus.RaiseCapacityFlight(CapacityFlightPhase.Rise, 1);
-                Assert.AreEqual("0/1", count.text);
+                Assert.AreEqual("1", capacity.text);
                 ItemBus.RaiseCapacityFlight(CapacityFlightPhase.Cancel, 1);
-                Assert.AreEqual("0/2", count.text);
+                Assert.AreEqual("2", capacity.text);
             }
             finally
             {
@@ -834,8 +844,8 @@ namespace Inkform.Tests
             Assert.IsNotNull(host.Q<Label>("DeathLabel"));
             Assert.IsNotNull(host.Q<Label>("FpsLabel"));
             Assert.IsNotNull(host.Q("Inventory"));
-            Assert.IsNotNull(host.Q("InventoryIcon"));
-            Assert.IsNotNull(host.Q<Label>("InventoryCount"));
+            Assert.IsNotNull(host.Q("BombRow"));
+            Assert.IsNotNull(host.Q<Label>("CapacityLabel"));
             Assert.IsNotNull(host.Q<Label>("InventoryPlus"));
             Assert.IsNotNull(host.Q<Label>("SaveToast"));
 

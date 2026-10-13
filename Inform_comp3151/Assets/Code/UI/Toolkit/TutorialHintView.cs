@@ -168,11 +168,12 @@ namespace Inkform.UI
                 }
 
                 glyphs.Clear();
-                InputAction action = InputActions.Wrapper.asset.FindAction(segment.text);
-                InputGlyphs.Resolve(action, scheme, set, glyphs);
+                InputGlyphs.ParseToken(segment.text, out string actionName, out bool allDirections);
+                InputAction action = InputActions.Wrapper.asset.FindAction(actionName);
+                InputGlyphs.Resolve(action, scheme, set, glyphs, allDirections);
                 if (glyphs.Count == 0)
                 {
-                    AddText(segment.text);   // unknown action name: show the word rather than a gap
+                    AddText(actionName);   // unknown action name: show the word rather than a gap
                     continue;
                 }
                 foreach (InputGlyphs.Glyph glyph in glyphs) AddGlyph(glyph);

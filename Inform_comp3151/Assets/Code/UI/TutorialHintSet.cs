@@ -8,7 +8,8 @@ namespace Inkform.UI
     /// Copy and gamepad icons for the tutorial hints (Resources/UI/TutorialHints). Each hint has a
     /// keyboard line and a gamepad line; {ActionName} in a line (an action of the Player map:
     /// Move, Aim, Jump, Dash, RopeFire, SpitBomb...) becomes that action's live binding icon, so a
-    /// rebind or a device switch changes the icon, never the copy.
+    /// rebind or a device switch changes the icon, never the copy. A keyboard axis shows its
+    /// left / right keys; {Move:All} shows all four (W A S D).
     ///
     /// Gamepad icons are keyed by the binding's control path after the device ("leftTrigger",
     /// "dpad/left"), one sprite per pad face. Keyboard keys need no art: they draw as keycaps.
