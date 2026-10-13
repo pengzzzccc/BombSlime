@@ -130,12 +130,12 @@ TextureImporter:
       name: Layer4.1_0
       rect:
         serializedVersion: 2
-        x: 50
-        y: 261
-        width: 233
-        height: 99
+        x: 0
+        y: 0
+        width: 640
+        height: 360
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -148,209 +148,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: Layer4.1_1
-      rect:
-        serializedVersion: 2
-        x: 246
-        y: 259
-        width: 383
-        height: 101
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 9d2a1aacfb2eecb60800000000000000
-      internalID: 7768395720626905817
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Layer4.1_2
-      rect:
-        serializedVersion: 2
-        x: 31
-        y: 0
-        width: 14
-        height: 200
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2401a5becaa1fbcd0800000000000000
-      internalID: -2540282334828425150
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Layer4.1_3
-      rect:
-        serializedVersion: 2
-        x: 75
-        y: 0
-        width: 45
-        height: 212
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e7d54e77edbe93280800000000000000
-      internalID: -9062953434379690626
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Layer4.1_4
-      rect:
-        serializedVersion: 2
-        x: 77
-        y: 155
-        width: 38
-        height: 102
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 846590b9cdf71be00800000000000000
-      internalID: 1058767972879390280
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Layer4.1_5
-      rect:
-        serializedVersion: 2
-        x: 188
-        y: 0
-        width: 265
-        height: 225
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 6fc0e054e2c018070800000000000000
-      internalID: 8106774197110181110
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Layer4.1_6
-      rect:
-        serializedVersion: 2
-        x: 458
-        y: 0
-        width: 20
-        height: 157
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 31fd08e3a4d43f290800000000000000
-      internalID: -7857851943559831789
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Layer4.1_7
-      rect:
-        serializedVersion: 2
-        x: 495
-        y: 0
-        width: 28
-        height: 216
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 74e3b6bd2881795e0800000000000000
-      internalID: -1903025367234691513
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Layer4.1_8
-      rect:
-        serializedVersion: 2
-        x: 585
-        y: 0
-        width: 33
-        height: 238
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e1e0ea0200f19f980800000000000000
-      internalID: -8504732335903732194
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Layer4.1_9
-      rect:
-        serializedVersion: 2
-        x: 156
-        y: 0
-        width: 24
-        height: 139
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f2503cd9cb82cae70800000000000000
-      internalID: 9127715335338919215
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 3c300f8bc2716b04c99d1db75178ef9d
     internalID: 0
     vertices: []
     indices: 
@@ -358,18 +160,11 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":640.0,"y":360.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       Layer4.1_0: -8764218293143722932
-      Layer4.1_1: 7768395720626905817
-      Layer4.1_2: -2540282334828425150
-      Layer4.1_3: -9062953434379690626
-      Layer4.1_4: 1058767972879390280
-      Layer4.1_5: 8106774197110181110
-      Layer4.1_6: -7857851943559831789
-      Layer4.1_7: -1903025367234691513
-      Layer4.1_8: -8504732335903732194
-      Layer4.1_9: 9127715335338919215
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
