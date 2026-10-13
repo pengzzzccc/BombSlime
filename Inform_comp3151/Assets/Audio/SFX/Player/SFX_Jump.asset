@@ -13,18 +13,18 @@ MonoBehaviour:
   m_Name: SFX_Jump
   m_EditorClassIdentifier: Assembly-CSharp::Inkform.Audio.SoundCue
   clips:
-  - {fileID: 8300000, guid: 0ec15dede3d538345893f39f5683753a, type: 3}
-  - {fileID: 8300000, guid: fc20e1e1861c0d14e875ff991bf3d1bd, type: 3}
+  - {fileID: 8300000, guid: a55b525071a7c6e48992b8e75f7574bb, type: 3}
+  - {fileID: 8300000, guid: 30c4809f160973e4ba31b2c96d3f1669, type: 3}
+  - {fileID: 8300000, guid: 491fa5c1f46804547b30dd8f9964d694, type: 3}
+  - {fileID: 8300000, guid: e7c02142f6449534fb32c56e77fa8cf0, type: 3}
   output: {fileID: 0}
-  volume: 0.538
+  volume: 1
   category: 0
   pitchRange: {x: 0.95, y: 1.05}
   loop: 0
   ignoreListenerPause: 0
   cooldown: 0.05
   maxConcurrent: 3
+  priority: 128
   spatial: 0
   falloffRange: 20
-  minVolume: 0.15
-  reverbAmount: 1
-  minCutoff: 900

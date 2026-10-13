@@ -125,11 +125,12 @@ MonoBehaviour:
   itemSpit: {fileID: 11400000, guid: ee9dae4465f8a9d4e8711c5a30c4ca39, type: 2}
   inventoryCapacityUpgrade: {fileID: 11400000, guid: 539d6ca680ef6c24ba3eac20cb9ebd86, type: 2}
   capacityLand: {fileID: 11400000, guid: 98c71ef0d806eb94388de42aa85d97c3, type: 2}
-  jump: {fileID: 0}
+  jump: {fileID: 11400000, guid: 61e594f499b3788498461baee604a1f3, type: 2}
   land: {fileID: 11400000, guid: 8910332ea935bd946962c594897611c8, type: 2}
   ropeFire: {fileID: 11400000, guid: a1626c14602e82e4b8e3c50d99cf5727, type: 2}
   ropeHit: {fileID: 11400000, guid: a07029ad34759c9439ba437956ff992f, type: 2}
   ropeCancel: {fileID: 11400000, guid: 7f7695527cc729a41ba112500954be6b, type: 2}
+  ropeRelease: {fileID: 0}
   dashTrail: {fileID: 11400000, guid: 06c4b3a17742d3b4ba226ab4b52683a1, type: 2}
   footstep: {fileID: 11400000, guid: e7ce185bf3e4b8f4c969be6b45418db6, type: 2}
   footstepInterval: 0.3
@@ -147,9 +148,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60be3a14fc1fb4044b170de2661afd40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inkform.Fx.Haptics.HapticsDirector
-  enableRumble: 1
-  landStrength: 0.18
-  landDuration: 0.12
+  dualSenseLevels:
+  - scale: 0.35
+    floor: 0
+  - scale: 0.65
+    floor: 0
+  - scale: 1
+    floor: 0
+  triggerLevels:
+  - 0.35
+  - 0.65
+  - 1
+  minImpactSpeed: 1.5
+  maxImpactSpeed: 14
+  contactMin: 0.15
+  contactMax: 0.4
+  groundDuration: 0.12
+  groundHighShare: 0.35
+  ceilingTriggerDuration: 0.06
+  ceilingTriggerFrequency: 160
+  ceilingHighShare: 0.4
+  ceilingTapDuration: 0.035
+  ceilingTapGap: 0.045
+  wallDuration: 0.08
+  rightSideBoost: 1.4
+  triggerStart: 2
+  triggerBreak: 5
+  triggerStrength: 3
+  triggerSnapForce: 5
+  kickDuration: 0.06
+  kickAmplitude: 6
+  kickFrequency: 90
   blastStrength: 0.5
   blastDuration: 0.22
   blastFalloff: 20
@@ -179,9 +208,20 @@ MonoBehaviour:
   releaseDuration: 0.1
   upgradeStrength: 0.2
   upgradeDuration: 0.25
+  capacityPickupStrength: 0.1
+  capacityPickupDuration: 0.08
   uiStrength: 0.08
   uiClickDuration: 0.1
   uiToggleDuration: 0.1
+  uiBumpStrength: 0.3
+  uiBumpDuration: 0.08
+  debugPad: 
+  debugRoute: 
+  debugLow: 0
+  debugHigh: 0
+  debugWriteOk: 0
+  debugFrozen: 0
+  debugFocused: 0
 --- !u!114 &1644368403275166719
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -297,3 +337,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7712596195240afaccf2076277c231d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inkform.Fx.Haptics.GenericPadHaptics
+  lowSpeed: 0.25
+  highSpeed: 0.75
+  levelScales:
+  - 0.35
+  - 0.65
+  - 1
+  shakeSeconds: 0.15
+  bumpSeconds: 0.1
+  minImpactSpeed: 1.5
+  debugPad: 
+  debugLow: 0
+  debugHigh: 0
+  debugDriving: 0

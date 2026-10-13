@@ -81,7 +81,11 @@ namespace Inkform.Player
             contactEdges.Detect(contact.OnGround, contact.OnCeiling, contact.OnLeftWall, contact.OnRightWall, RaiseContact);
             motor.Tick();
             contactEdges.RememberVelocity(new Vector2(motor.VelocityX, motor.VelocityY));
-            if (motor.ConsumeJumpStarted()) anim.OnJumpStarted();
+            if (motor.ConsumeJumpStarted())
+            {
+                anim.OnJumpStarted();
+                PlayerBus.RaiseJumped();
+            }
             anim.Tick();
             // Dash smashing lives in DashBreaker's own Update (RopeGun-style independent loop):
             // it must survive anything this chain throws before it

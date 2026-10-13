@@ -218,15 +218,10 @@ namespace Inkform.Player
 
         public void RequestJump()
         {
+            // Only stamps the request; whether it becomes a ground, air or wall jump is StepJump's
+            // call, made against the sensors on the frame it fires (so a press buffered just
+            // before touching a wall still wall-jumps)
             requestTime = Time.time;
-
-            // On a wall with the jump count spent, grant one extra so wall jumps never eat the
-            // double-jump budget
-            if (contact.OnWall && jumpLeft == 0 && !wallJumpBuffer.IsRunning)
-            {
-                jumpLeft++;
-                wallJumpBuffer.Set(wallJumpTime);
-            }
         }
 
         /// <summary>Jump released: cuts a chunk of the upward velocity, holding longer jumps higher.</summary>
@@ -363,22 +358,26 @@ namespace Inkform.Player
             // A jump requested during a dash stays buffered (requestTime) and fires right after the
             // dash ends — the dash owns the velocity until its timer expires
             bool buffered = (Time.time - requestTime) < jumpBuffer;
-            if (buffered && jumpLeft > 0 && !attackTimer.IsRunning)
+
+            // Wall jump: any airborne frame a side sensor touches a wall — sliding, rising or
+            // hanging alike, no wall-slide state required. It is free: it never spends jumpLeft,
+            // so wall jumps never eat the air-jump budget
+            bool wallJump = contact.OnWall && !contact.OnGround;
+            if (buffered && (wallJump || jumpLeft > 0) && !attackTimer.IsRunning)
             {
-                if (contact.OnLeftWall && !contact.OnGround)
+                if (wallJump)
                 {
-                    body.linearVelocity = new Vector2(jumpSpeed * wallKickMultiplier, jumpSpeed);
+                    float kick = contact.OnLeftWall ? 1f : -1f;     // away from the touched wall
+                    body.linearVelocity = new Vector2(kick * jumpSpeed * wallKickMultiplier, jumpSpeed);
                     wallJumpBuffer.Set(wallJumpTime);
                 }
-                else if (contact.OnRightWall && !contact.OnGround)
+                else
                 {
-                    body.linearVelocity = new Vector2(-jumpSpeed * wallKickMultiplier, jumpSpeed);
-                    wallJumpBuffer.Set(wallJumpTime);
+                    jumpLeft--;
                 }
 
                 body.linearVelocityY = jumpSpeed;
                 requestTime = -999f;
-                jumpLeft--;
                 jumpStarted = true;     // ground/double/wall jumps all count; the animation layer plays JumpUp
 
                 // On the jump frame the feet have not left the ground; without a guard the line below
@@ -390,7 +389,7 @@ namespace Inkform.Player
 
             // Coyote time: the grace window keeps the unused ground jump alive for a moment after
             // walking off a ledge; once it expires the jump is revoked. Assumes the single-jump
-            // design — a consumed jump is never revoked, and wall jumps grant their own extra.
+            // design — a consumed jump is never revoked, and wall jumps never touch the count.
             // updateBuffer above is a different job: it blocks the refill on the jump frame itself.
             // OnCeiling is excluded so ceiling-stick's jump refill is never revoked
             if (contact.OnGround) coyoteTimer.Set(coyoteTime);
