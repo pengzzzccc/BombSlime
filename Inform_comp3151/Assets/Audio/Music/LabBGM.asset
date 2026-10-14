@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: LabBGM
   m_EditorClassIdentifier: Assembly-CSharp::Inkform.Audio.SoundCue
   clips:
-  - {fileID: 8300000, guid: 213a8a33b30fa0e4a8e5de9e2cfdd833, type: 3}
+  - {fileID: 8300000, guid: 6726c46170164114e906596ed48f803b, type: 3}
   output: {fileID: 0}
-  volume: 0.498
+  volume: 0.345
   category: 1
   pitchRange: {x: 0.95, y: 1.05}
   loop: 1
