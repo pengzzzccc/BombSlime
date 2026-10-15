@@ -27,10 +27,11 @@ namespace Inkform.UI
             UiFx.DropTitle(Q<VisualElement>("TitleRow"), "RUN COMPLETE", 76f);   // --fs-title
         }
 
-        // Esc leaves for the main menu too, exactly like CONFIRM — one prompt says it all
+        // CONFIRM rolls the end credits (they return to the main menu themselves); Esc does the
+        // same, exactly like CONFIRM — one prompt says it all
         protected override void DefinePrompts(PromptBar bar) =>
-            bar.Add(PromptBar.Key.Confirm, "Confirm", UI.ReturnToMainMenu);
+            bar.Add(PromptBar.Key.Confirm, "Confirm", UI.OpenCredits);
 
-        private void OnBackClicked() => UI.ReturnToMainMenu();
+        private void OnBackClicked() => UI.OpenCredits();
     }
 }

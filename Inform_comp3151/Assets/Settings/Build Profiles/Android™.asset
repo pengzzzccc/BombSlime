@@ -56,7 +56,7 @@ MonoBehaviour:
     m_path: Assets/Scenes/Menu/End.unity
     m_guid: 6af981f88ec3d944192dfde0ff18c9ed
   - m_enabled: 1
-    m_path: Assets/Scenes/Level2/Lab_base.unity
+    m_path: Assets/Scenes/Menu/End.unity
     m_guid: 6af981f88ec3d944192dfde0ff18c9ed
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
@@ -205,8 +205,10 @@ MonoBehaviour:
     - line: '|   loadStoreDebugModeEnabled: 0'
     - line: '|   visionOSBundleVersion: 1.0'
     - line: '|   tvOSBundleVersion: 1.0'
-    - line: '|   bundleVersion: 0.1'
-    - line: '|   preloadedAssets: []'
+    - line: '|   bundleVersion: 0.2'
+    - line: '|   preloadedAssets:'
+    - line: '|   - {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100,
+        type: 3}'
     - line: '|   metroInputSource: 0'
     - line: '|   wsaTransparentSwapchain: 0'
     - line: '|   xboxOneDisableKinectGpuReservation: 1'

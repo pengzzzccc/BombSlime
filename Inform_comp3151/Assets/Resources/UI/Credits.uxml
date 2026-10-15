@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="Credits.uss" />
+    <!-- End credits, after the run summary: on solid black, #Roll (built by CreditsPanel from
+         Resources/UI/CreditsRoll) scrolls up through #Viewport — the game logo, the team by role
+         with concept paintings between, the playtesters, and the final picture, where the roll
+         stops before fading back to the main menu. Back (Esc / pad B) skips. Nothing here takes
+         focus or a click. -->
+    <ui:VisualElement name="Credits" class="screen credits-screen" picking-mode="Ignore">
+        <ui:VisualElement name="Viewport" class="credits-viewport" picking-mode="Ignore">
+            <ui:VisualElement name="Roll" class="credits-roll" picking-mode="Ignore" />
+        </ui:VisualElement>
+        <ui:VisualElement class="credits-footer" picking-mode="Ignore">
+            <ui:VisualElement name="PromptBar" class="prompt-bar" picking-mode="Ignore" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

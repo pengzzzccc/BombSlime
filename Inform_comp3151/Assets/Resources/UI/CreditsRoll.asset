@@ -1,0 +1,88 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b87f7acafda84c1588ba24ea5cf5c025, type: 3}
+  m_Name: CreditsRoll
+  m_EditorClassIdentifier: Assembly-CSharp::Inkform.UI.CreditsRoll
+  music: {fileID: 11400000, guid: 52c929715095aa946b449184d7df497f, type: 2}
+  scrollSpeed: 90
+  holdSeconds: 1
+  fadeSeconds: 1.2
+  entries:
+  - kind: 0
+    title: Producer
+    names:
+    - Raphael Byun
+    image: {fileID: 0}
+  - kind: 0
+    title: Creative Director
+    names:
+    - Zhanci (James) Peng
+    image: {fileID: 0}
+  - kind: 2
+    title: 
+    names: []
+    image: {fileID: 0}
+  - kind: 0
+    title: Programmer
+    names:
+    - Zhanci (James) Peng
+    - Viet Phi Long Le
+    image: {fileID: 0}
+  - kind: 0
+    title: Art
+    names:
+    - Andy Zhan
+    - Zhanci (James) Peng
+    image: {fileID: 0}
+  - kind: 1
+    title: 
+    names: []
+    image: {fileID: 2800000, guid: 71d47f9eba50a2242995dd47b69ef52b, type: 3}
+  - kind: 0
+    title: Level Design
+    names:
+    - Viet Phi Long Le
+    - Andy Zhan
+    - Zhanci (James) Peng
+    - Julian Baxter
+    image: {fileID: 0}
+  - kind: 0
+    title: SFX
+    names:
+    - Zhanci (James) Peng
+    image: {fileID: 0}
+  - kind: 1
+    title: 
+    names: []
+    image: {fileID: 2800000, guid: d60aaa088d1c7d141b6fed011b6eb1b7, type: 3}
+  - kind: 0
+    title: Music
+    names:
+    - Julian Baxter
+    image: {fileID: 0}
+  - kind: 1
+    title: 
+    names: []
+    image: {fileID: 2800000, guid: b60380bf94300a347a631ec568911331, type: 3}
+  - kind: 0
+    title: Playtesters
+    names:
+    - "\u4E5D\u91CC\u660E"
+    - "\u9ED1\u732B\u8B66\u957F"
+    - Marcus Shidiak
+    - 'keeq1 '
+    image: {fileID: 0}
+  - kind: 2
+    title: Thanks for playing
+    names: []
+    image: {fileID: 0}
+  finalImage: {fileID: 2800000, guid: 9ef6b2f6bd00cfb429275e6a4d8baa00, type: 3}

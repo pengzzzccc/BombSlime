@@ -1,0 +1,33 @@
+/* End credits — a centred column scrolling up over solid black: the role headings small and
+   muted, the names large in the title colour, concept art between the blocks, the final
+   picture last. CreditsPanel builds the column and drives its translate. */
+
+.credits-screen { background-color: rgb(0, 0, 0); }
+
+/* The window the roll moves through: the whole screen, clipped */
+.credits-viewport { position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden; }
+
+/* The column itself, centred; it starts below the screen and CreditsPanel moves it up */
+.credits-roll { position: absolute; left: 0; right: 0; top: 0; align-items: center; }
+
+.credits-logo { width: 448px; height: 448px; background-size: contain; background-position: center; background-repeat: no-repeat; margin-bottom: 120px; }
+.credits-game-title { font-size: var(--fs-display); color: var(--c-title); -unity-text-align: middle-center; margin-bottom: 120px; }
+
+/* One role: heading over its names */
+.credits-block { align-items: center; margin: 40px 0; }
+.credits-role { font-size: var(--fs-value); color: var(--c-muted); -unity-text-align: middle-center; letter-spacing: 3px; margin-bottom: 14px; }
+.credits-name { font-size: var(--fs-page); color: var(--c-title); -unity-text-align: middle-center; margin: 4px 0; }
+
+/* A line on its own ("Thanks for playing") */
+.credits-line { font-size: var(--fs-section); color: var(--c-text); -unity-text-align: middle-center; margin: 120px 0 80px 0; }
+
+/* Concept paintings and the final picture: width set here, height by C# from the art's aspect */
+.credits-image { width: 1100px; margin: 90px 0; background-size: contain; background-position: center; background-repeat: no-repeat; }
+.credits-final { width: 1000px; margin: 40px 0 0 0; }
+
+/* Skip prompt, bottom right on the safe margins, over the roll */
+.credits-footer {
+    position: absolute;
+    right: var(--safe-x); bottom: var(--safe-y);
+    flex-direction: row;
+}

@@ -890,10 +890,30 @@ namespace Inkform.Tests
         }
 
         [Test]
+        public void Credits_SheetAndRollAreWired()
+        {
+            VisualTreeAsset tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Resources/UI/Credits.uxml");
+            Assert.IsNotNull(tree, "missing Resources/UI/Credits.uxml");
+            VisualElement host = tree.Instantiate();
+            // CreditsPanel finds these by name: the clipped window, the column it scrolls, the Skip prompt
+            Assert.IsNotNull(host.Q("Viewport"));
+            Assert.IsNotNull(host.Q("Roll"));
+            Assert.IsNotNull(host.Q("PromptBar"));
+
+            Inkform.UI.CreditsRoll roll = AssetDatabase.LoadAssetAtPath<Inkform.UI.CreditsRoll>("Assets/Resources/UI/CreditsRoll.asset");
+            Assert.IsNotNull(roll, "missing Resources/UI/CreditsRoll.asset — the credits would be empty");
+            Assert.IsNotNull(roll.finalImage, "the roll stops on its final picture (draft)");
+            Assert.IsNotEmpty(roll.entries, "the roll lists the team");
+            Assert.IsNotNull(roll.music, "the credits play their music cue");
+            Assert.IsNotEmpty(roll.music.clips, "the Credits cue carries the CreditsTheme clip");
+            Assert.AreEqual(Inkform.Audio.SoundCue.Category.Music, roll.music.category, "the credits music goes through the music channel");
+        }
+
+        [Test]
         public void ToolkitUi_ResourcesContainEverySheetAndTheme()
         {
             // Panels the UIManager mounts, plus the HUD and the menu scene's backdrop layer
-            foreach (string sheet in new[] { "MainMenu", "SaveMenu", "PauseMenu", "Settings", "EndPanel", "Hud",
+            foreach (string sheet in new[] { "MainMenu", "SaveMenu", "PauseMenu", "Settings", "EndPanel", "Credits", "Hud",
                                              "Boot", "MenuBackdrop" })
             {
                 VisualTreeAsset tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>($"Assets/Resources/UI/{sheet}.uxml");

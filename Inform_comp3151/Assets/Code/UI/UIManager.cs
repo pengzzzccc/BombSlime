@@ -184,8 +184,10 @@ namespace Inkform.UI
             // paused game with the sheet still up.
             if (IsOpen<SettingsPanel>()) { CloseSettings(); return; }
             if (IsOpen<SaveMenuPanel>()) { BackFromSaveMenu(); return; }
-            // The end sheet has no inner level: Escape leaves the finished run for the main menu
-            if (IsOpen<EndPanel>()) { ReturnToMainMenu(); return; }
+            // The credits skip straight to the main menu; the run summary before them moves on to
+            // the credits, exactly like its CONFIRM
+            if (IsOpen<CreditsPanel>()) { GetPanel<CreditsPanel>().Skip(); return; }
+            if (IsOpen<EndPanel>()) { OpenCredits(); return; }
 
             if (!pausePressed) return;   // pad B with no sheet open: nothing to back out of
             if (IsInMainMenu) return;   // menu root: nothing left to back out of
@@ -267,11 +269,21 @@ namespace Inkform.UI
             SetCursor(false);
         }
 
-        /// <summary>End sheet's Back button and Escape: leaves the finished run and returns to the
-        /// main menu. SceneDirector owns the transition (and ends the run on the way out).</summary>
+        /// <summary>The run summary's CONFIRM / Back: the end credits roll (CreditsPanel), which
+        /// return to the main menu on their own when they finish or are skipped.</summary>
+        public void OpenCredits()
+        {
+            // Without the credits sheet (missing UXML) the summary still has a way out
+            if (GetPanel<CreditsPanel>() == null) { ReturnToMainMenu(); return; }
+            Open<CreditsPanel>();
+        }
+
+        /// <summary>Leaves the finished run and returns to the main menu — the end of the credits,
+        /// or their skip. SceneDirector owns the transition (and ends the run on the way out).</summary>
         public void ReturnToMainMenu()
         {
             Close<EndPanel>();
+            Close<CreditsPanel>();
             SetCursor(false);
             sceneDirector?.ReturnToMainMenu();
         }
@@ -326,6 +338,7 @@ namespace Inkform.UI
             else if (IsInMainMenu)
             {
                 Close<EndPanel>();
+                Close<CreditsPanel>();
                 if (bootPlayed)
                 {
                     // Repeat landing while the boot sequence is on stage (the startup scene's own
@@ -346,6 +359,7 @@ namespace Inkform.UI
             else
             {
                 Close<EndPanel>();
+                Close<CreditsPanel>();
                 Close<MainMenuPanel>();
                 SetCursor(false);
             }
@@ -538,6 +552,7 @@ namespace Inkform.UI
             AddPanel<PausePanel>("UI/PauseMenu", host => new PausePanel(host, this));
             AddPanel<SettingsPanel>("UI/Settings", host => new SettingsPanel(host, this));
             AddPanel<EndPanel>("UI/EndPanel", host => new EndPanel(host, this));
+            AddPanel<CreditsPanel>("UI/Credits", host => new CreditsPanel(host, this));
             AddPanel<BootPanel>("UI/Boot", host => new BootPanel(host, this));
         }
 
