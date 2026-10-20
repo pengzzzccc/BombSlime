@@ -29,6 +29,10 @@
                 <ui:Label name="InventoryPlus" text="+1" class="hud-inventory-plus outline" picking-mode="Ignore" />
             </ui:VisualElement>
             <ui:Label name="SaveToast" text="Saved" class="hud-save-toast outline" picking-mode="Ignore" />
+            <!-- The room's name, top centre, on entering a room (Hud drives the fade) -->
+            <ui:VisualElement name="RoomTitle" class="hud-room-title" picking-mode="Ignore">
+                <ui:Label name="RoomTitleLabel" class="hud-room-title-text title-font header-outline" picking-mode="Ignore" />
+            </ui:VisualElement>
             <ui:VisualElement name="TutorialHint" class="hud-tutorial" picking-mode="Ignore">
                 <ui:VisualElement name="TutorialHintPanel" class="hud-tutorial-panel" picking-mode="Ignore" />
             </ui:VisualElement>

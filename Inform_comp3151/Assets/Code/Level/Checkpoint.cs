@@ -32,6 +32,16 @@ namespace Inkform.Level
         [Tooltip("Door-arrival id: the LevelExit leading into this scene names this checkpoint in its targetSpawnId. Replaces the old Spawn_<scene> object-name convention; plain mid-level checkpoints leave it empty")]
         [SerializeField] private string spawnId = "";
 
+        public enum WalkDirection { Right, Left }
+
+        [Header("Arrival walk")]
+        [Tooltip("Arriving here through a door, the player walks this way on their own before getting control back (left / right: the slime walks, it does not climb)")]
+        [SerializeField] private WalkDirection arrivalWalkDirection = WalkDirection.Right;
+        [Tooltip("How far the arrival walk goes, in world units. 0 = no walk, control comes back at once. Stops early against a wall")]
+        [SerializeField, Min(0f)] private float arrivalWalkDistance = 0f;
+        [Tooltip("Walking pace as a share of the full run speed")]
+        [SerializeField, Range(0.1f, 1f)] private float arrivalWalkSpeed = 0.6f;
+
         [Header("Timecard machine look")]
         [Tooltip("Activation sequence: first frame = idle resident, last frame = stamped freeze-frame")]
         [SerializeField] private Sprite[] frames;
@@ -44,6 +54,11 @@ namespace Inkform.Level
         public bool IsStartPoint => isStartPoint;
         public Vector2 SpawnPos => (Vector2)transform.position + spawnOffset;
         public string SpawnId => spawnId;
+
+        /// <summary>+1 right, -1 left.</summary>
+        public float ArrivalWalkSign => arrivalWalkDirection == WalkDirection.Left ? -1f : 1f;
+        public float ArrivalWalkDistance => arrivalWalkDistance;
+        public float ArrivalWalkSpeed => arrivalWalkSpeed;
 
         void Awake()
         {
@@ -150,10 +165,35 @@ namespace Inkform.Level
             }
 #endif
 
+            DrawArrivalWalk();
+
             // The spawn point gets an extra cross to distinguish it from plain checkpoints (only one per level)
             if (!isStartPoint) return;
             Gizmos.DrawLine(SpawnPos + Vector2.left * 0.3f, SpawnPos + Vector2.right * 0.3f);
             Gizmos.DrawLine(SpawnPos + Vector2.down * 0.3f, SpawnPos + Vector2.up * 0.3f);
+        }
+
+        // The arrival walk: an arrow from the spawn point to where the walk ends, tick marks every
+        // unit, and its length as a label — direction and reach read at a glance while placing doors
+        private void DrawArrivalWalk()
+        {
+            if (arrivalWalkDistance <= 0f) return;
+
+            Vector2 from = SpawnPos;
+            Vector2 dir = Vector2.right * ArrivalWalkSign;
+            Vector2 to = from + dir * arrivalWalkDistance;
+            Gizmos.color = new Color(1f, 0.85f, 0.25f, 0.95f);
+            Gizmos.DrawLine(from, to);
+            Gizmos.DrawLine(to, to - dir * 0.35f + Vector2.up * 0.22f);
+            Gizmos.DrawLine(to, to - dir * 0.35f + Vector2.down * 0.22f);
+            for (int i = 1; i < arrivalWalkDistance; i++)
+            {
+                Vector2 tick = from + dir * i;
+                Gizmos.DrawLine(tick + Vector2.down * 0.08f, tick + Vector2.up * 0.08f);
+            }
+#if UNITY_EDITOR
+            UnityEditor.Handles.Label(to + Vector2.up * 0.35f, $"walk {arrivalWalkDistance:0.#}");
+#endif
         }
     }
 }

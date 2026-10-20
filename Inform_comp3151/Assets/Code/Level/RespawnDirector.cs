@@ -1,5 +1,6 @@
 using Inkform.Bus;
 using Inkform.Fx;
+using Inkform.Input;
 using Inkform.Life;
 using Inkform.Player;
 using Inkform.Save;
@@ -66,6 +67,7 @@ namespace Inkform.Level
 
         void OnDisable()
         {
+            EndArrivalWalk();   // never leave gameplay input locked behind
             LifeBus.Died -= OnDied;
             LifeBus.CheckpointSet -= OnCheckpointSet;
             SceneManager.sceneLoaded -= OnSceneLoaded;
@@ -124,7 +126,89 @@ namespace Inkform.Level
             }
 
             checkpoint = spawn.SpawnPos;
-            PlaceInitialPlayer(checkpoint, true);
+            PlayerHandler placed = PlaceInitialPlayer(checkpoint, true);
+
+            // Arrived through a door (spawnId is non-null for every door arrival, "" when it names
+            // the start point): the arrival checkpoint may walk the player in before handing over
+            if (spawnId != null && placed != null && spawn.ArrivalWalkDistance > 0f)
+                BeginArrivalWalk(placed, spawn);
+        }
+
+        // ---- Arrival walk ----
+
+        // The player walking in from a door on their own (Checkpoint's arrival walk). It waits for the
+        // scene transition to finish completely, then walks. Gameplay
+        // input stays locked under this component's own name from arrival until the walk ends, so
+        // the transition handing control back does not let the player move in the meantime.
+        private PlayerHandler walker;
+        private float walkSign;
+        private float walkStartX;
+        private float walkDistance;
+        private float walkSpeed;
+        private float walkLastX;
+        private float walkStalled;
+        private InputHandler walkInput;
+
+        // A walk that has stopped advancing for this long is pressed against something: end it
+        private const float WalkStallSeconds = 0.4f;
+
+        private void BeginArrivalWalk(PlayerHandler player, Checkpoint spawn)
+        {
+            EndArrivalWalk();
+            walker = player;
+            walkSign = spawn.ArrivalWalkSign;
+            walkDistance = spawn.ArrivalWalkDistance;
+            walkSpeed = spawn.ArrivalWalkSpeed;
+            walkStartX = walkLastX = player.transform.position.x;
+            walkStalled = 0f;
+
+            walkInput = GetComponent<InputHandler>();
+            if (walkInput == null) walkInput = FindAnyObjectByType<InputHandler>();
+            if (walkInput != null) walkInput.SetGameplayInputLocked(this, true);
+        }
+
+        private void StepArrivalWalk()
+        {
+            if (walker == null || LifeBus.IsDead)
+            {
+                EndArrivalWalk();
+                return;
+            }
+
+            // Stand still until the transition (fade-in included) is fully over
+            if (SceneDirector.Instance != null && SceneDirector.Instance.IsTransitioning)
+            {
+                walker.Move(Vector2.zero);
+                walkStartX = walkLastX = walker.transform.position.x;   // measure from where the walk really starts
+                return;
+            }
+
+            float x = walker.transform.position.x;
+            if ((x - walkStartX) * walkSign >= walkDistance)
+            {
+                EndArrivalWalk();
+                return;
+            }
+
+            // Scaled time on purpose: hitstop or a pause is not the walk being blocked
+            walkStalled = Mathf.Abs(x - walkLastX) < 0.001f ? walkStalled + Time.deltaTime : 0f;
+            walkLastX = x;
+            if (walkStalled >= WalkStallSeconds)
+            {
+                EndArrivalWalk();
+                return;
+            }
+
+            // The same entry the input layer drives: facing and the walk animation follow for free
+            walker.Move(new Vector2(walkSign * walkSpeed, 0f));
+        }
+
+        private void EndArrivalWalk()
+        {
+            if (walker != null) walker.Move(Vector2.zero);
+            walker = null;
+            if (walkInput != null) walkInput.SetGameplayInputLocked(this, false);
+            walkInput = null;
         }
 
         /// <summary>Prevents the deferred scene initializer from creating the player while a room
@@ -201,7 +285,8 @@ namespace Inkform.Level
         /// Autosave. Called at the two moments `checkpoint` changes for a reason worth keeping — a room
         /// entered, or a checkpoint touched — so the save always names a place the player can be put
         /// back onto. Deliberately *not* called from the death respawn or from Unstuck: neither moves
-        /// the checkpoint, so there would be nothing new to write.
+        /// the checkpoint, so there would be nothing new to write (the save keeps the checkpoint, not
+        /// the player's live position, so a push-out has nothing to write either).
         ///
         /// This lives here rather than in a save-specific director because this class already owns
         /// "where the player comes back", and reading `checkpoint` from anywhere else would mean
@@ -221,8 +306,11 @@ namespace Inkform.Level
                 sceneInitPending = false;
                 pending = null;
                 respawnRemaining = 0f;
+                EndArrivalWalk();   // a walk from the previous room must not carry over
                 InitForScene();
             }
+
+            if (walker != null) StepArrivalWalk();
 
             if (pending == null) return;
             if (GameTimeController.Instance == null || !GameTimeController.Instance.IsUserPaused)
@@ -238,23 +326,72 @@ namespace Inkform.Level
         }
 
         /// <summary>
-        /// Puts the player back on the last checkpoint on demand — the Controls tab's Unstuck button,
-        /// for when a bug wedges the slime somewhere it cannot leave. Reuses the death path's teleport
-        /// rather than moving the transform here, so anything listening for a respawn (camera snap,
-        /// state reset) sees the same event it always does.
+        /// Unstuck (the pause menu's button, and the Controls tab's row), for when a bug wedges the
+        /// slime somewhere it cannot leave. Two remedies, the gentler first:
         ///
-        /// Clears any death still waiting out its delay: that pending respawn would otherwise fire a
-        /// second later against a player who has already been moved, teleporting them again.
+        ///  - Wedged into terrain: pushed to the nearest free spot (UnstuckSolver, within a few
+        ///    units, preferring up). Only the player moves — no respawn, so the level is not
+        ///    restored and nothing since the checkpoint is lost.
+        ///  - Not wedged (trapped in a pit, say), or no free spot nearby: back to the last
+        ///    checkpoint through the death path's own teleport, so everything listening for a
+        ///    respawn (camera snap, state reset, level restore) sees the event it always does. Any
+        ///    death still waiting out its delay is cleared — it would otherwise fire a second later
+        ///    against a player who has already been moved, teleporting them again.
+        ///
+        /// Either way LifeBus.Unstuck reports where from and where to, for the perf log.
         /// </summary>
-        public void RespawnNow()
+        public void Unstuck()
         {
-            GameObject player = GameObject.FindGameObjectWithTag(Tags.Player);
+            PlayerHandler player = PlayerBus.Player;
             if (player == null) return;     // no player in this scene (the menu) — nobody to rescue
+            EndArrivalWalk();               // a rescue hands control back, it does not keep walking
+
+            Vector2 from = player.transform.position;
+            if (!LifeBus.IsDead && TryPushOut(player, out Vector2 freeSpot))
+            {
+                player.NudgeTo(freeSpot);
+                LifeBus.RaiseUnstuck(from, freeSpot, true);
+                return;
+            }
 
             pending = null;
             respawnRemaining = 0f;
-            LifeBus.RaiseRespawned(player, checkpoint);
+            LifeBus.RaiseRespawned(player.gameObject, checkpoint);
             FxBus.RaiseSnap();
+            LifeBus.RaiseUnstuck(from, checkpoint, false);
+        }
+
+        // Terrain the body can be wedged in (ContactSensor's mask: Terrain | Breakable), and what a
+        // push-out must also keep clear of (Hazard) — freeing the player onto spikes rescues nobody
+        private const int WedgeMask = (1 << 6) | (1 << 11);
+        private const int BlockedMask = WedgeMask | (1 << 13);
+
+        // The player's own capsule, tested at the current spot (wedged?) and at candidate spots
+        // (free?). False when the body is not wedged, or no free spot is near enough.
+        private static bool TryPushOut(PlayerHandler player, out Vector2 freeSpot)
+        {
+            freeSpot = default;
+            CapsuleCollider2D capsule = player.GetComponent<CapsuleCollider2D>();
+            if (capsule == null) return false;
+
+            Vector2 scale = player.transform.lossyScale;
+            Vector2 size = new Vector2(capsule.size.x * Mathf.Abs(scale.x), capsule.size.y * Mathf.Abs(scale.y));
+            Vector2 offset = Vector2.Scale(capsule.offset, scale);
+            float angle = player.transform.eulerAngles.z;
+
+            bool Overlaps(Vector2 at, int mask)
+            {
+                Collider2D hit = Physics2D.OverlapCapsule(at + offset, size, capsule.direction, angle, mask);
+                return hit != null && !hit.isTrigger;
+            }
+
+            Vector2 origin = player.transform.position;
+            if (!Overlaps(origin, WedgeMask)) return false;
+
+            Vector2? spot = UnstuckSolver.FindFreeSpot(origin, at => !Overlaps(at, BlockedMask));
+            if (!spot.HasValue) return false;
+            freeSpot = spot.Value;
+            return true;
         }
 
         private void OnCheckpointSet(Vector2 pos)

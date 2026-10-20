@@ -28,6 +28,11 @@ namespace Inkform.Bus
         /// <summary>A checkpoint was activated: pos = the respawn position from now on.</summary>
         public static event Action<Vector2> CheckpointSet;
 
+        /// <summary>The player used Unstuck: from = where they were wedged, to = where they ended
+        /// up, pushedOut = moved to the nearest free spot (true) or sent back to the checkpoint
+        /// (false — which also raised Respawned). Transient, for the perf log.</summary>
+        public static event Action<Vector2, Vector2, bool> Unstuck;
+
         // Current snapshot: subscribers may read anytime instead of tracking their own copy
         public static int DeathCount { get; private set; }
         public static bool IsDead { get; private set; }
@@ -60,6 +65,11 @@ namespace Inkform.Bus
             CheckpointSet?.Invoke(pos);
         }
 
+        public static void RaiseUnstuck(Vector2 from, Vector2 to, bool pushedOut)
+        {
+            Unstuck?.Invoke(from, to, pushedOut);
+        }
+
         // Static fields do not clear on scene reload; with Domain Reload off, dead subscribers from
         // the previous run linger
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -68,6 +78,7 @@ namespace Inkform.Bus
             Died = null;
             Respawned = null;
             CheckpointSet = null;
+            Unstuck = null;
             // The count must clear too: the ScriptableObject "leftover from previous run" pitfall
             // exists for static fields as well
             DeathCount = 0;

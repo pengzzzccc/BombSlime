@@ -29,7 +29,7 @@ namespace Inkform.Tool
     /// first file gets the "# screen=" line.
     ///
     /// Gameplay events ride along as '#E,' comment lines (format=2): every death with its cause,
-    /// hazard and position, every respawn and checkpoint stamp, and a summary per checkpoint-to-
+    /// hazard and position, every respawn, checkpoint stamp and Unstuck, and a summary per checkpoint-to-
     /// checkpoint segment — see CheckpointSegmentTracker. Sample-row readers skip them as comments.
     ///
     /// Output location follows one rule: an existing project-root Log/ folder wins; otherwise a
@@ -182,6 +182,7 @@ namespace Inkform.Tool
             LifeBus.Died += OnDied;
             LifeBus.Respawned += OnRespawned;
             LifeBus.CheckpointSet += OnCheckpointSet;
+            LifeBus.Unstuck += OnUnstuck;
 
             // Switched on mid-level: measure from here. Without a player this is the menu (or boot),
             // and the first LevelBus.Started opens the first segment instead
@@ -200,6 +201,7 @@ namespace Inkform.Tool
             LifeBus.Died -= OnDied;
             LifeBus.Respawned -= OnRespawned;
             LifeBus.CheckpointSet -= OnCheckpointSet;
+            LifeBus.Unstuck -= OnUnstuck;
             segments?.Stop(Now, playClock);
             WriteSummary();
             CloseStream();
@@ -458,6 +460,13 @@ namespace Inkform.Tool
         {
             if (writer == null) return;
             segments.OnCheckpoint(Now, playClock, SceneManagerSceneName(), spawnPos, CheckpointNameAt(spawnPos));
+            writer.Flush();
+        }
+
+        private void OnUnstuck(Vector2 from, Vector2 to, bool pushedOut)
+        {
+            if (writer == null) return;
+            segments.OnUnstuck(Now, playClock, SceneManagerSceneName(), from, to, pushedOut);
             writer.Flush();
         }
 

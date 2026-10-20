@@ -65038,6 +65038,14 @@ PrefabInstance:
       propertyPath: spawnId
       value: Mine Cave 2
       objectReference: {fileID: 0}
+    - target: {fileID: 5108392746215038473, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
+      propertyPath: arrivalWalkSpeed
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5108392746215038473, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
+      propertyPath: arrivalWalkDistance
+      value: 4
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -92774,6 +92782,18 @@ PrefabInstance:
     - target: {fileID: 5108392746215038473, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
       propertyPath: spawnId
       value: Mine Cave 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5108392746215038473, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
+      propertyPath: arrivalWalkSpeed
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5108392746215038473, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
+      propertyPath: arrivalWalkDistance
+      value: 4.02
+      objectReference: {fileID: 0}
+    - target: {fileID: 5108392746215038473, guid: 1d6e83af2c7b95545a90e4f6b28d7c31, type: 3}
+      propertyPath: arrivalWalkDirection
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -527,6 +527,7 @@
       row("coverage", icon(`<svg viewBox="0 0 16 16" width="16" height="16"><rect x="2" y="7" width="12" height="3" rx="1" fill="${T.coverage}"/></svg>`), true) +
       `<h5>${t("map.group.marks")}</h5>` +
       row("deaths", icon(IK.theme.shapeSvg("triangle", T.causeColor("Spike")).replace("<svg", '<svg width="14" height="14"')), false) +
+      row("unstucks", icon(`<svg viewBox="0 0 16 16" width="14" height="14"><path d="M8 2 14 8 8 14 2 8z" fill="${T.status.warning}"/></svg>`), true) +
       row("paths", ico('<path d="M2 12c3-8 6 0 12-8"/>'), false) +
       `<div class="layer-sub"><select id="pathSel"><option value="session" ${map.opts.pathColor === "session" ? "selected" : ""}>${t("pathColor.session")}</option><option value="time" ${map.opts.pathColor === "time" ? "selected" : ""}>${t("pathColor.time")}</option></select></div>` +
       row("segments", ico('<path d="M3 12Q8 2 13 12"/><path d="m11 11 2 1 .5-2"/>'), false) +

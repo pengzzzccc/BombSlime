@@ -150,7 +150,7 @@
     layoutCps.forEach(c => cpFor(c.name, c.spawn[0], c.spawn[1]));
 
     const out = {
-      scene, layout, sessions: [], deaths: [], deathsAll: [], respawns: [], paths: [], jumps: [],
+      scene, layout, sessions: [], deaths: [], deathsAll: [], respawns: [], unstucks: [], paths: [], jumps: [],
       checkpoints: [], segments: [], segInstances: [], hazards: [], bounds: null,
       anyInferred: false, anyEvents: false, interval: 1, maxTime: 0,
     };
@@ -187,6 +187,12 @@
       const respawns = s.events.respawns.filter(r => r.scene === scene).map(r => ({ ...r, session: s, ts: r.t - t0 }));
       entry.respawns = respawns;
       out.respawns.push(...respawns);
+
+      // Unstuck uses: where the level trapped someone, and where they were put
+      for (const u of s.events.unstucks || []) {
+        if (u.scene !== scene || u.x == null) continue;
+        out.unstucks.push({ ...u, session: s, ts: u.t - t0 });
+      }
 
       // checkpoint stamps
       if (s.hasEvents) {

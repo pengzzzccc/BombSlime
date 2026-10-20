@@ -92,6 +92,25 @@
 
 .hud-save-toast { position: absolute; right: var(--hud-margin); bottom: 162px; font-size: var(--fs-corner); color: rgba(240, 242, 248, 0.95); opacity: 0; -unity-text-align: middle-right; text-shadow: 0px 2px 5px rgba(6, 8, 20, 0.85); }   /* opacity driven by C# */
 
+/* Room title: the room's name in a dark band across the top centre, shown on entering a room —
+   fades in a moment after the scene opens, holds, fades out (opacity and display driven by
+   Hud.cs). The name comes from the room asset's Display Name (scene name when empty). */
+.hud-room-title {
+    position: absolute;
+    left: 0; right: 0; top: 18%;
+    align-items: center;
+    opacity: 0;
+    display: none;
+}
+.hud-room-title-text {
+    font-size: var(--fs-title);
+    color: var(--c-title);
+    -unity-text-align: middle-center;
+    padding: 10px 90px;
+    background-color: rgba(0, 0, 0, 0.55);
+    border-radius: 6px;
+}
+
 /* Tutorial hint: one large line at the bottom centre, the button icons inline at the large glyph size. No plate: a deep shadow under every
    word keeps it readable over the level. Inside the safe margins; a line too long for them wraps
    between words and icons. Opacity, display and the rise are driven by C# (TutorialHintView). */

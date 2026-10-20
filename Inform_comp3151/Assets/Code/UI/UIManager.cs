@@ -511,8 +511,10 @@ namespace Inkform.UI
         }
 
         /// <summary>
-        /// Controls tab's "Unstuck": teleports the player back to the last checkpoint and hands
-        /// control straight back, for when a bug wedges them somewhere they cannot leave. Routed
+        /// "Unstuck" — the pause menu's button and the Controls tab's row: frees the player
+        /// (pushed out of terrain they are wedged in, or back to the last checkpoint — see
+        /// RespawnDirector.Unstuck) and hands control straight back, for when a bug wedges them
+        /// somewhere they cannot leave. Routed
         /// through here rather than called from the panel because panels never touch the game
         /// (see the class docs) — and because the RespawnDirector is a sibling component on this
         /// same GameManager.
@@ -525,7 +527,7 @@ namespace Inkform.UI
         {
             if (IsInMainMenu) return;
 
-            GetComponent<Inkform.Level.RespawnDirector>()?.RespawnNow();
+            GetComponent<Inkform.Level.RespawnDirector>()?.Unstuck();
             Close<SettingsPanel>();
             Resume();
         }

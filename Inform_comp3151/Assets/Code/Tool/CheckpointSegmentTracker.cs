@@ -41,7 +41,11 @@ namespace Inkform.Tool
             "#E-schema,respawn,time_s,play_s,scene,x,y,seg",
             "#E-schema,checkpoint,time_s,play_s,scene,x,y,name,seg",
             "#E-schema,segment,time_s,play_s,scene,seg,from,from_x,from_y,to,to_x,to_y,start_s,duration_s,play_dur_s,deaths,end_reason",
+            "#E-schema,unstuck,time_s,play_s,scene,x,y,to_x,to_y,method,seg",
         };
+
+        public const string UnstuckPushOut = "pushout";
+        public const string UnstuckCheckpoint = "checkpoint";
 
         private readonly TextWriter writer;
 
@@ -126,6 +130,18 @@ namespace Inkform.Tool
             lifeStartPlay = play;
 
             Write("respawn", time, play, sceneName, F2(pos.x), F2(pos.y),
+                open ? segmentId.ToString(CultureInfo.InvariantCulture) : "");
+        }
+
+        /// <summary>The player used Unstuck: where they were wedged, where they ended up, and how
+        /// (pushed out of terrain, or back to the checkpoint). Neither a death nor a segment
+        /// boundary — it marks where the level traps players.</summary>
+        public void OnUnstuck(double time, double play, string sceneName, Vector2 from, Vector2 to, bool pushedOut)
+        {
+            EnsureScene(time, play, sceneName);
+            Write("unstuck", time, play, sceneName,
+                F2(from.x), F2(from.y), F2(to.x), F2(to.y),
+                pushedOut ? UnstuckPushOut : UnstuckCheckpoint,
                 open ? segmentId.ToString(CultureInfo.InvariantCulture) : "");
         }
 

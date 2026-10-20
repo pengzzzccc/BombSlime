@@ -155,7 +155,7 @@
     gaps.sort((a, b) => a - b);
     const interval = gaps.length ? Math.max(0.05, gaps[gaps.length >> 1]) : 1;
 
-    const events = { deaths: [], respawns: [], checkpoints: [], segments: [] };
+    const events = { deaths: [], respawns: [], checkpoints: [], segments: [], unstucks: [] };
     for (const line of rawEvents) {
       const parts = splitCsv(line);
       const kind = parts[1];
@@ -171,6 +171,7 @@
       else if (kind === "respawn") events.respawns.push({ t: ev.time_s, play: ev.play_s, scene: ev.scene, x: ev.x, y: ev.y, seg: ev.seg });
       else if (kind === "checkpoint") events.checkpoints.push({ t: ev.time_s, play: ev.play_s, scene: ev.scene, x: ev.x, y: ev.y, name: ev.name, seg: ev.seg });
       else if (kind === "segment") events.segments.push(normalizeSegment(ev));
+      else if (kind === "unstuck") events.unstucks.push({ t: ev.time_s, play: ev.play_s, scene: ev.scene, x: ev.x, y: ev.y, toX: ev.to_x, toY: ev.to_y, method: ev.method, seg: ev.seg });
     }
 
     const hasEvents = rawEvents.length > 0 && Object.keys(schemas).length > 0;

@@ -216,6 +216,20 @@ namespace Inkform.Player
             motor.StopForDeath();
         }
 
+        /// <summary>Unstuck's push-out (RespawnDirector): moves the player to a nearby free spot
+        /// without a respawn, so the level is not restored and nothing is lost. An attached rope
+        /// lets go first — its pull would drag the player straight back.</summary>
+        public void NudgeTo(Vector2 pos)
+        {
+            if (ropeGun != null) ropeGun.Cancel();
+            motor.TeleportTo(pos);
+
+            // Same baseline re-sync as a respawn: the new spot's contacts are not "just touched"
+            contact.Tick();
+            anim.SyncContactBaseline();
+            contactEdges.SyncBaseline(contact.OnGround, contact.OnCeiling, contact.OnLeftWall, contact.OnRightWall);
+        }
+
         // Called by LifeBus on respawn: teleports to the checkpoint and zeros all transient state
         private void OnRespawned(GameObject victim, Vector2 pos)
         {

@@ -291,6 +291,32 @@ namespace Inkform.Tests
         }
 
         // Parses the tracker's output the way the analytics tools do: by the schema's column names
+        [Test]
+        public void Unstuck_IsLoggedWithBothEndsAndHow()
+        {
+            var output = new StringWriter();
+            var tracker = new CheckpointSegmentTracker(output);
+
+            tracker.BeginScene(0, 0, Scene);
+            tracker.OnUnstuck(12.5, 10, Scene, new Vector2(100.25f, 50.5f), new Vector2(100.25f, 52f), true);
+            tracker.OnUnstuck(20, 18, Scene, new Vector2(80f, 40f), new Vector2(10f, 5f), false);
+
+            List<Dictionary<string, string>> unstucks = Events(output, "unstuck");
+            Assert.AreEqual(2, unstucks.Count);
+
+            Dictionary<string, string> pushed = unstucks[0];
+            Assert.AreEqual(Scene, pushed["scene"]);
+            Assert.AreEqual("100.25", pushed["x"]);
+            Assert.AreEqual("50.50", pushed["y"]);
+            Assert.AreEqual("100.25", pushed["to_x"]);
+            Assert.AreEqual("52.00", pushed["to_y"]);
+            Assert.AreEqual(CheckpointSegmentTracker.UnstuckPushOut, pushed["method"]);
+            Assert.AreEqual(tracker.SegmentId.ToString(CultureInfo.InvariantCulture), pushed["seg"], "tagged with the open segment");
+
+            Assert.AreEqual(CheckpointSegmentTracker.UnstuckCheckpoint, unstucks[1]["method"]);
+            Assert.AreEqual(0, tracker.SegmentDeaths, "an Unstuck is not a death");
+        }
+
         private static List<Dictionary<string, string>> Events(StringWriter output, string kind)
         {
             Dictionary<string, string[]> schema = Schema(output);

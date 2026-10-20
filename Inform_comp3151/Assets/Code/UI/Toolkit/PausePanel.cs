@@ -3,7 +3,7 @@ using UnityEngine.UIElements;
 namespace Inkform.UI
 {
     /// <summary>
-    /// Pause sheet over the frozen game view: Resume / Options / Save &amp; Quit, sliding in from
+    /// Pause sheet over the frozen game view: Resume / Options / Unstuck / Save &amp; Quit, sliding in from
     /// the right over a 40% dim like Celeste's OuiOptions. The UIManager drives the pause state
     /// machine (timeScale, input, cursor); this panel only forwards its buttons, exactly like
     /// the old uGUI PausePanel.
@@ -14,6 +14,7 @@ namespace Inkform.UI
         {
             Bind(Q<Button>("Btn_Resume"), "Btn_Resume", OnResume);
             Bind(Q<Button>("Btn_Settings"), "Btn_Settings", OnSettings);
+            Bind(Q<Button>("Btn_Unstuck"), "Btn_Unstuck", UI.Unstuck);
             Bind(Q<Button>("Btn_SaveAndQuit"), "Btn_SaveAndQuit", OnQuitToMainMenu);
         }
 

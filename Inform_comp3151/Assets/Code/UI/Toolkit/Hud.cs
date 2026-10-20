@@ -13,7 +13,7 @@ namespace Inkform.UI
     /// stats (top left: the run timer beside its clock, the death count beside its skull),
     /// FpsDisplay (top right), the bomb slot (bottom right), SaveIndicator (the "Saved" toast above
     /// it) and the HudRoot visibility switch — plus the tutorial hint line (bottom centre,
-    /// TutorialHintView). Everything is picking-mode Ignore in the UXML — the HUD never eats a
+    /// TutorialHintView) and the room title (top centre, the room's name on entering it). Everything is picking-mode Ignore in the UXML — the HUD never eats a
     /// click meant for the world.
     ///
     /// A plain object driven from UIManager.Update. The run has one clock, SaveStore.PlaySeconds
@@ -56,6 +56,16 @@ namespace Inkform.UI
         private readonly Label inventoryPlus;
         private BombSlot.Tier shownTier = BombSlot.Tier.White;   // the UXML starts on the white plate
         private readonly Label saveToast;
+        private readonly VisualElement roomTitle;
+        private readonly Label roomTitleLabel;
+
+        // Room title timing (unscaled seconds): waits for the scene fade to open, fades in, holds,
+        // fades out. roomTitleClock < 0 = nothing showing
+        private const float RoomTitleDelay = 0.8f;
+        private const float RoomTitleFadeIn = 0.5f;
+        private const float RoomTitleHold = 2.5f;
+        private const float RoomTitleFadeOut = 0.8f;
+        private float roomTitleClock = -1f;
         private readonly TutorialHintView tutorialHint;
 
         private bool timerRunning;
@@ -85,6 +95,8 @@ namespace Inkform.UI
             bombRow?.RegisterCallback<GeometryChangedEvent>(_ => LayoutBombs());
             inventoryPlus = root.Q<Label>("InventoryPlus");
             saveToast = root.Q<Label>("SaveToast");
+            roomTitle = root.Q("RoomTitle");
+            roomTitleLabel = root.Q<Label>("RoomTitleLabel");
             tutorialHint = new TutorialHintView(root);
 
             RefreshRunStats();
@@ -93,6 +105,7 @@ namespace Inkform.UI
             ItemBus.CapacityFlight += OnCapacityFlight;
             SettingsStore.Changed += ApplyVisibility;
             SaveStore.Saved += ShowToast;
+            LevelBus.Started += ShowRoomTitle;
 
             RefreshInventory();
             ApplyVisibility();
@@ -131,6 +144,7 @@ namespace Inkform.UI
 
             // Tutorial hint fades on unscaled time too: hitstop must not stall it mid-fade
             tutorialHint.Tick(unscaledDelta);
+            TickRoomTitle(unscaledDelta);
 
             // FPS readout: unscaled (hitstop must not zero the reading), smoothed and printed at
             // most twice a second (old FpsDisplay).
@@ -288,6 +302,58 @@ namespace Inkform.UI
             return true;
         }
 
+        // ---- Room title ----
+
+        // A room finished loading (every load: door, continue, new game). Null is the menu or an
+        // unregistered scene — nothing to name. The End room's name never shows: its scene hides
+        // the whole gameplay layer this lives in.
+        private void ShowRoomTitle(string sceneName)
+        {
+            if (roomTitle == null || roomTitleLabel == null) return;
+            if (string.IsNullOrEmpty(sceneName))
+            {
+                roomTitleClock = -1f;
+                ApplyRoomTitle(0f);
+                return;
+            }
+
+            roomTitleLabel.text = SceneDirector.Instance != null
+                ? SceneDirector.Instance.DisplayNameOf(sceneName)
+                : sceneName;
+            roomTitleClock = 0f;
+            ApplyRoomTitle(0f);
+        }
+
+        // Unscaled, like the toast: hitstop and the pause menu must not stall it mid-fade
+        private void TickRoomTitle(float unscaledDelta)
+        {
+            if (roomTitleClock < 0f || roomTitle == null) return;
+            roomTitleClock += unscaledDelta;
+
+            float t = roomTitleClock - RoomTitleDelay;
+            float opacity;
+            if (t < 0f) opacity = 0f;
+            else if (t < RoomTitleFadeIn) opacity = t / RoomTitleFadeIn;
+            else if (t < RoomTitleFadeIn + RoomTitleHold) opacity = 1f;
+            else opacity = 1f - (t - RoomTitleFadeIn - RoomTitleHold) / RoomTitleFadeOut;
+
+            if (opacity <= 0f && t > 0f)
+            {
+                roomTitleClock = -1f;   // faded out: done
+                opacity = 0f;
+            }
+            ApplyRoomTitle(Mathf.Clamp01(opacity));
+        }
+
+        private void ApplyRoomTitle(float opacity)
+        {
+            if (roomTitle == null) return;
+            roomTitle.style.opacity = opacity;
+            roomTitle.style.display = opacity > 0f ? DisplayStyle.Flex : DisplayStyle.None;
+            // Settles down into place as it fades in, like the tutorial hint
+            roomTitle.style.translate = new Translate(0f, (opacity - 1f) * 10f);
+        }
+
         private void ShowToast()
         {
             if (saveToast == null) return;
@@ -303,6 +369,7 @@ namespace Inkform.UI
             ItemBus.CapacityFlight -= OnCapacityFlight;
             SettingsStore.Changed -= ApplyVisibility;
             SaveStore.Saved -= ShowToast;
+            LevelBus.Started -= ShowRoomTitle;
             tutorialHint.Dispose();
         }
     }

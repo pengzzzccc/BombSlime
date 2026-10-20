@@ -8,6 +8,7 @@
             <ui:VisualElement class="overlay-list plate pause-list">
                 <ui:Button name="Btn_Resume" text="RESUME" class="menu-item floaty outline" />
                 <ui:Button name="Btn_Settings" text="OPTIONS" class="menu-item floaty outline" />
+                <ui:Button name="Btn_Unstuck" text="UNSTUCK" class="menu-item floaty outline" />
                 <ui:Button name="Btn_SaveAndQuit" text="SAVE &amp; QUIT" class="menu-item floaty outline" />
             </ui:VisualElement>
         </ui:VisualElement>

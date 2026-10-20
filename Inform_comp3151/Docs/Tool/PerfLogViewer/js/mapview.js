@@ -9,6 +9,7 @@
   const DEFAULT_LAYERS = {
     deathHeat: true, lethality: false, presence: false, perf: false, mech: false, coverage: false, contours: false,
     paths: true, segments: true, checkpoints: true, hazards: true, doors: true, props: false, deaths: true,
+    unstucks: true,
   };
   const HEAT_LAYERS = ["presence", "lethality", "perf", "mech", "deathHeat"];
   const HEAT_RAMP = { deathHeat: "death", lethality: "lethal", presence: "presence", perf: "perf", mech: "mech" };
@@ -411,6 +412,7 @@
       if (this.layers.checkpoints) this.drawCheckpoints(ctx);
       if (this.layers.hazards) this.drawHazards(ctx);
       if (this.layers.deaths) this.drawDeaths(ctx, replay ? this.replay.t : Infinity);
+      if (this.layers.unstucks && !replay) this.drawUnstucks(ctx);
       if (replay) this.drawGhosts(ctx);
       if (!forExport) this.drawHover(ctx);
     }
@@ -935,6 +937,45 @@
         }
         this.hits.push({ type: "hazard", x: sx, y: sy, r: Math.max(12, r), data: h });
       });
+      ctx.restore();
+    }
+
+    // Unstuck uses: a diamond where the player was wedged, a dashed line to where they were put.
+    // Amber = pushed out of the terrain nearby, red = sent back to the checkpoint (the bigger loss)
+    drawUnstucks(ctx) {
+      const T = this.theme, d = this.data;
+      if (!d.unstucks || !d.unstucks.length) return;
+      const hl = this.highlight;
+      ctx.save();
+      for (const u of d.unstucks) {
+        if (hl && hl !== u.session.id) continue;
+        const [sx, sy] = this.toScreen(u.x, u.y);
+        const pushed = u.method === "pushout";
+        const color = pushed ? T.status.warning : T.status.serious;
+        if (u.toX != null && u.toY != null) {
+          const [tx, ty] = this.toScreen(u.toX, u.toY);
+          ctx.globalAlpha = 0.8;
+          ctx.setLineDash([5, 4]);
+          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = color;
+          ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(tx, ty); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = color;
+          ctx.beginPath(); ctx.arc(tx, ty, 3, 0, Math.PI * 2); ctx.fill();
+        }
+        if (sx < -20 || sx > this.W + 20 || sy < -20 || sy > this.H + 20) continue;
+        const r = 7;
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy - r); ctx.lineTo(sx + r, sy); ctx.lineTo(sx, sy + r); ctx.lineTo(sx - r, sy);
+        ctx.closePath(); ctx.fill();
+        ctx.lineWidth = 2; ctx.strokeStyle = T.map.bg; ctx.stroke();
+        ctx.fillStyle = "#ffffff";
+        ctx.font = `800 9px ${T.font}`;
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText("!", sx, sy + 0.5);
+      }
       ctx.restore();
     }
 

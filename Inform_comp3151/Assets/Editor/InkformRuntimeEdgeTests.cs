@@ -848,6 +848,8 @@ namespace Inkform.Tests
             Assert.IsNotNull(host.Q<Label>("CapacityLabel"));
             Assert.IsNotNull(host.Q<Label>("InventoryPlus"));
             Assert.IsNotNull(host.Q<Label>("SaveToast"));
+            Assert.IsNotNull(host.Q("RoomTitle"), "the room name banner Hud fades on entering a room");
+            Assert.IsNotNull(host.Q<Label>("RoomTitleLabel"));
 
             // The old prefab asserted raycastTarget == false on every Graphic; the Toolkit shape
             // of that contract is picking-mode Ignore on every element of the HUD tree.

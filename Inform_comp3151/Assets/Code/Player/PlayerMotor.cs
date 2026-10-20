@@ -287,6 +287,25 @@ namespace Inkform.Player
             groundPrevPos = Vector2.zero;
         }
 
+        /// <summary>Unstuck's push-out: moves the body a short way out of the terrain it is wedged
+        /// in and lets it fall from rest. Not a respawn — the jump budget and buffered input stay;
+        /// only what would fling the body on from the new spot (velocity, a running dash or
+        /// knockback, the wall-jump lockout, the platform follow) is cleared.</summary>
+        public void TeleportTo(Vector2 pos)
+        {
+            // The project sets m_AutoSyncTransforms = 0: transform and rigidbody positions do not sync,
+            // write both
+            transform.position = pos;
+            body.position = pos;
+            body.linearVelocity = Vector2.zero;
+
+            attackTimer.Clear();
+            dashActive = false;
+            knockbackTimer.Clear();
+            wallJumpBuffer.Clear();
+            groundPlatform = null;
+        }
+
         // The branch order matters, relying on ContactSensor's inverted semantics: CeilingStickActive
         // is always true while away from the ceiling, so the second branch (stick time exhausted) can
         // only hit while actually stuck — wall sliding and fall acceleration only run otherwise.
