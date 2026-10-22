@@ -63,6 +63,12 @@ namespace Inkform.WorldTools
                     findings.Add(new Finding("Error", $"{room.name}: scene file missing at '{room.Scene.ScenePath}'"));
                     continue;
                 }
+                // A renamed / moved scene keeps its asset reference (GUID), but the serialized path —
+                // which is the room's identity (SceneName), what doors load and saves hold — only
+                // catches up when the room asset is saved again. Until then the build ships the old name.
+                if (path != room.Scene.ScenePath)
+                    findings.Add(new Finding("Error",
+                        $"{room.name}: stale scene path '{room.Scene.ScenePath}' — the scene is now '{path}'. Re-save the room asset (select it, change nothing, File > Save Project) or fix scenePath"));
                 if (SceneUtility.GetBuildIndexByScenePath(path) < 0)
                     findings.Add(new Finding("Error", $"{room.name}: scene '{room.SceneName}' is NOT in the Build Settings — Tools > Inkform > World > Sync Build Settings"));
             }

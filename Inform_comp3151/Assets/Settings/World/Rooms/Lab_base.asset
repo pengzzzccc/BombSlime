@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inkform.Level.RoomDefinition
   scene:
     sceneAsset: {fileID: 102900000, guid: 473b3ef3b3f71e74f8fad4d191ff621f, type: 3}
-    scenePath: Assets/Scenes/Level2/Lab_base.unity
+    scenePath: Assets/Scenes/Level2/Lab basement.unity
   displayName:

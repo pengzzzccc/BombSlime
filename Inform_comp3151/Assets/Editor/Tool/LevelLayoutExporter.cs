@@ -55,7 +55,7 @@ namespace Inkform.EditorTools
             Path.Combine(Path.GetDirectoryName(Application.dataPath) ?? ".", "Docs", "Tool", "PerfLogViewer");
         public static string DataFolder => Path.Combine(ViewerFolder, "data");
 
-        // Scenes outside the World's room list (test / blockout levels like Lab_base) that were
+        // Scenes outside the World's room list (test / blockout levels like Lab_build) that were
         // exported with "Export Current Scene + Art": one asset path per line. Kept in the data
         // folder so it travels with the exported data — every later export keeps them in.
         // Delete a line (and its .jpg / .art.json) to drop that scene again.
