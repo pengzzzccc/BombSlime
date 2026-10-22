@@ -163,10 +163,11 @@ namespace Inkform.Settings
         private const string KeyStickSens = "Inkform.stickSensitivity";
         private const string KeyDevice = "Inkform.inputDevice";
         private const string KeyDashAim = "Inkform.dashAimSource";
-        // The .v3 suffix is a scheme version: bumping it orphans every previously saved override so a
+        // The .vN suffix is a scheme version: bumping it orphans every previously saved override so a
         // changed default layout reaches players who had rebound under the old defaults (v3, 2026-10:
-        // gamepad Dash/Jump/SpitBomb remapped to LB / LT / RB). Rebinding saves under the new key.
-        private const string KeyBindings = "Inkform.bindingOverrides.v3";
+        // gamepad Dash/Jump/SpitBomb remapped to LB / LT / RB; v4, 2026-10: once more, so a saved
+        // override can no longer keep the pad's Dash off LB). Rebinding saves under the new key.
+        private const string KeyBindings = "Inkform.bindingOverrides.v4";
         private const string KeyResW = "Inkform.resolutionWidth";
         private const string KeyResH = "Inkform.resolutionHeight";
         private const string KeyFullscreen = "Inkform.fullscreen";

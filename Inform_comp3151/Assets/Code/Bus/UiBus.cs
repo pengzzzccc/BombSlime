@@ -24,7 +24,8 @@ namespace Inkform.Bus
         Hook,
         Bomb,
         Dash,
-        CeilingStick   // appended: zones serialize the enum's number
+        CeilingStick,  // appended: zones serialize the enum's number
+        Capacity       // the backpack only holds so many bombs (the slot bottom right); crystals add room
     }
 
     public static class UiBus

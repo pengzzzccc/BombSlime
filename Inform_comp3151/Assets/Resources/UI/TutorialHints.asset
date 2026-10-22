@@ -16,16 +16,26 @@ MonoBehaviour:
   - hint: 0
     keyboardText: '{Move} to move'
     gamepadText: '{Move} to move'
+    keyboardMoveDashText: 
+    gamepadMoveDashText: 
   - hint: 1
     keyboardText: Press {Jump} to jump, hold to jump higher
     gamepadText: Press {Jump} to jump, hold to jump higher
+    keyboardMoveDashText: 
+    gamepadMoveDashText: 
   - hint: 2
     keyboardText: Aim with the mouse, click {RopeFire} to hook, click again to let
       go
     gamepadText: Aim with {Aim}, press {RopeFire} to hook, press again to let go
+    keyboardMoveDashText: 
+    gamepadMoveDashText: 
   - hint: 3
-    keyboardText: Hook on Bomb, Press {SpitBomb} to throw a bomb at the reticle
-    gamepadText: Hook on Bomb, Press {SpitBomb} to throw a bomb at the reticle
+    keyboardText: Grab a Bomb, aim with the mouse and press {Dash} to dash toward
+      the reticle and break the wall.
+    gamepadText: Grab a Bomb, aim with {Aim} and press {Dash} to dash toward the
+      reticle and break the wall.
+    keyboardMoveDashText: 
+    gamepadMoveDashText: 
   - hint: 4
     keyboardText: Grab a Bomb, aim with the mouse and press {Dash} to dash toward
       the reticle
@@ -37,6 +47,13 @@ MonoBehaviour:
   - hint: 5
     keyboardText: Jump {Jump} to briefly move along the ceiling
     gamepadText: Jump {Jump} to briefly move along the ceiling
+    keyboardMoveDashText: 
+    gamepadMoveDashText: 
+  - hint: 6
+    keyboardText: Check your backpack (bottom right) Find crystals to carry more
+    gamepadText: Check your backpack (bottom right) Find crystals to carry more
+    keyboardMoveDashText: 
+    gamepadMoveDashText: 
   gamepadIcons:
   - control: leftTrigger
     xbox: {fileID: 7648980015805897073, guid: c761534b32dabc84c8329223cd9343f1, type: 3}
