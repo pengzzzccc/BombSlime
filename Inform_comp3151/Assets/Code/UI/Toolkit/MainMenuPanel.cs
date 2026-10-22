@@ -6,15 +6,15 @@ namespace Inkform.UI
     /// <summary>
     /// Main menu sheet over the cave backdrop, in two states:
     ///  - Title screen (once per session, right after the boot card): the game logo centred with
-    ///    "Press any key" under it. Any key, click or pad button moves the logo aside to its spot
-    ///    right of the menu while the title, the menu list and the footer slide in from the left;
-    ///    focus lands on BEGIN once the logo has arrived.
-    ///  - Menu (every other open: back from options / the save menu, back from a run): Celeste
-    ///    OuiMainMenu layout on the shared page frame — title and a menu list on the left safe
-    ///    margin, a big BEGIN above the smaller OPTIONS / EXIT — with the logo already beside it.
+    ///    "Press any key" under it. Any key, click or pad button moves the logo up and shrinks it
+    ///    to its spot above the menu while the menu row and the footer slide in; focus lands on
+    ///    BEGIN once the logo has arrived.
+    ///  - Menu (every other open: back from options / the save menu / the credits, back from a
+    ///    run): the logo is the title, centred in the upper part of the screen; BEGIN, OPTIONS,
+    ///    EXIT and CREDITS sit in one row across the lower part.
     /// This panel only reports button presses to the UIManager, which decides everything (same
     /// stance as the old uGUI MainMenuPanel): Play goes through the save menu, Settings opens the
-    /// options sheet, Exit quits.
+    /// options sheet, Exit quits, Credits rolls the end credits and comes back here.
     /// </summary>
     public class MainMenuPanel : ToolkitPanel
     {
@@ -30,14 +30,14 @@ namespace Inkform.UI
         private const float MenuEnterFromX = -120f;
 
         // The logo's title-screen spot: centre as a share of the screen, size a whole multiple of
-        // the 64 px art (x13 ≈ 0.7 of the old x18; a whole multiple keeps the point-filtered
-        // pixels even). Its spot beside the menu lives in MainMenu.uss (.main-logo, x12 ≈ 1.7 of
-        // the old x7) — keep MenuLogoSize equal to it, the tween lands there.
+        // the 64 px art (x13; a whole multiple keeps the point-filtered pixels even). Its spot as
+        // the menu's title lives in MainMenu.uss (.main-logo: centred, 38% down, x12) — keep the
+        // Menu* values equal to it, the tween lands there.
         private const float TitleLogoLeft = 50f;
         private const float TitleLogoTop = 45f;
         private const float TitleLogoSize = 832f;
-        private const float MenuLogoLeft = 74f;
-        private const float MenuLogoTop = 44f;
+        private const float MenuLogoLeft = 50f;
+        private const float MenuLogoTop = 38f;
         private const float MenuLogoSize = 768f;
 
         private readonly VisualElement logo;
@@ -54,6 +54,7 @@ namespace Inkform.UI
             Bind(Q<Button>("Btn_Begin"), "Btn_Begin", OnBegin);
             Bind(Q<Button>("Btn_Settings"), "Btn_Settings", OnSettings);
             Bind(Q<Button>("Btn_Exit"), "Btn_Exit", OnExit);
+            Bind(Q<Button>("Btn_Credits"), "Btn_Credits", OnCredits);
 
             // PlayerSettings > bundleVersion, shown bottom left. Missing label is legal (the
             // sheet still works without it), same tolerance as every other Bind.
@@ -64,11 +65,10 @@ namespace Inkform.UI
             pressAnyKey = Q<Label>("PressAnyKey");
             ApplyLogoArt(Q<Label>("LogoPlaceholder"));
 
-            VisualElement titleBlock = Q("TitleBlock");
             VisualElement menuColumn = Q("MenuColumn");
             VisualElement footer = Q("Footer");
-            menuGroups = new[] { titleBlock, menuColumn, footer };
-            menuParts = new[] { titleBlock, Q("MenuPlate"), Q("Btn_Begin"), Q("Btn_Settings"), Q("Btn_Exit"), footer };
+            menuGroups = new[] { menuColumn, footer };
+            menuParts = new[] { Q("Btn_Begin"), Q("Btn_Settings"), Q("Btn_Exit"), Q("Btn_Credits"), footer };
         }
 
         /// <summary>The next open shows the title screen (UIManager.FinishBoot, once per session).</summary>
@@ -136,7 +136,7 @@ namespace Inkform.UI
             }
         }
 
-        // Any key on the title screen: the prompt fades, the logo moves aside, the menu follows
+        // Any key on the title screen: the prompt fades, the logo rises to its title spot, the menu follows
         private void LeaveTitleScreen()
         {
             onTitle = false;
@@ -190,7 +190,7 @@ namespace Inkform.UI
             logo.style.height = size;
         }
 
-        // Back to the USS resting spot beside the menu
+        // Back to the USS resting spot above the menu
         private void ClearLogoPlacement()
         {
             logo.style.left = StyleKeyword.Null;
@@ -215,5 +215,8 @@ namespace Inkform.UI
         private void OnSettings() => UI.OpenSettings();
 
         private void OnExit() => UI.Quit();
+
+        // The same roll as the end of a run; from here it returns to this menu, not through a load
+        private void OnCredits() => UI.OpenCredits();
     }
 }

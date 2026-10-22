@@ -269,13 +269,30 @@ namespace Inkform.UI
             SetCursor(false);
         }
 
-        /// <summary>The run summary's CONFIRM / Back: the end credits roll (CreditsPanel), which
-        /// return to the main menu on their own when they finish or are skipped.</summary>
+        /// <summary>The end credits roll (CreditsPanel): from the run summary's CONFIRM / Back, or
+        /// the main menu's CREDITS. They come back on their own when they finish or are skipped —
+        /// see FinishCredits.</summary>
         public void OpenCredits()
         {
-            // Without the credits sheet (missing UXML) the summary still has a way out
-            if (GetPanel<CreditsPanel>() == null) { ReturnToMainMenu(); return; }
+            // Without the credits sheet (missing UXML) there is nothing to roll: just come back
+            if (GetPanel<CreditsPanel>() == null) { FinishCredits(); return; }
             Open<CreditsPanel>();
+        }
+
+        /// <summary>The credits ended or were skipped. Opened from the main menu, they hand back to
+        /// the menu sheet and its music — no load, no run to end. After a run they leave the end
+        /// scene for the main menu (ReturnToMainMenu).</summary>
+        public void FinishCredits()
+        {
+            if (!IsInMainMenu)
+            {
+                ReturnToMainMenu();
+                return;
+            }
+
+            Close<CreditsPanel>();
+            Open<MainMenuPanel>();
+            PlayMenuMusic();
         }
 
         /// <summary>Leaves the finished run and returns to the main menu — the end of the credits,

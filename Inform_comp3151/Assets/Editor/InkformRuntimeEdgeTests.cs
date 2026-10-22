@@ -892,6 +892,25 @@ namespace Inkform.Tests
         }
 
         [Test]
+        public void MainMenuUxml_HasTheButtonRowAndTheLogoAsTitle()
+        {
+            VisualTreeAsset tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Resources/UI/MainMenu.uxml");
+            Assert.IsNotNull(tree, "missing Resources/UI/MainMenu.uxml");
+            VisualElement host = tree.Instantiate();
+
+            // MainMenuPanel binds these by name
+            foreach (string button in new[] { "Btn_Begin", "Btn_Settings", "Btn_Exit", "Btn_Credits" })
+                Assert.IsNotNull(host.Q<UnityEngine.UIElements.Button>(button), button);
+            Assert.IsNotNull(host.Q("MenuColumn"));
+            Assert.IsNotNull(host.Q("Logo"), "the logo is the menu's title");
+            Assert.IsNotNull(host.Q<Label>("PressAnyKey"));
+
+            // The text title and the dark plate behind the list are gone
+            Assert.IsNull(host.Q("TitleBlock"));
+            Assert.IsNull(host.Q("MenuPlate"));
+        }
+
+        [Test]
         public void Credits_SheetAndRollAreWired()
         {
             VisualTreeAsset tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Resources/UI/Credits.uxml");

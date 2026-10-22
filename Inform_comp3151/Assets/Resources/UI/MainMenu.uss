@@ -1,15 +1,13 @@
-/* Main menu — the shared page frame does the placement; this sheet drops the menu list a
-   little below the title (about 40% of the screen height) and places the game logo. */
+/* Main menu — the game logo is the title, centred in the upper part of the screen; the menu is
+   one row of buttons across the lower part, no backing plate. */
 
-.main-menu-content { justify-content: flex-start; padding-top: 140px; }
-
-/* Game logo, placed by its centre as a share of the screen. This is its resting spot beside the
-   menu; on the title screen MainMenuPanel overrides left / top / size inline (centred, smaller)
+/* Game logo, placed by its centre as a share of the screen. This is its resting spot above the
+   menu; on the title screen MainMenuPanel overrides left / top / size inline (centred, larger)
    and tweens back to these values. 768 px = 12x the 64 px pixel art (MainMenuPanel.MenuLogoSize). */
 .main-logo {
     position: absolute;
-    left: 74%;
-    top: 44%;
+    left: 50%;
+    top: 38%;
     width: 768px;
     height: 768px;
     translate: -50% -50%;
@@ -28,7 +26,7 @@
     white-space: nowrap;
 }
 
-/* Title screen prompt under the centred logo (below the x13 logo);MainMenuPanel shows it and drives its breathing */
+/* Title screen prompt under the centred logo (below the x13 logo); MainMenuPanel shows it and drives its breathing */
 .press-any-key {
     display: none;
     position: absolute;
@@ -41,11 +39,21 @@
     white-space: nowrap;
 }
 
-/* The game's name on the menu: display size, the game font (title colour and shadow come from
-   .page-title / .header-outline) */
-.main-title { font-size: var(--fs-display); letter-spacing: 4px; }
+/* The menu row: four buttons spread evenly across the safe width, its top edge 80% down the screen */
+.main-menu-row {
+    position: absolute;
+    left: var(--safe-x); right: var(--safe-x);
+    top: 80%;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+}
 
-/* The list hugs its items on the left margin; its plate sits behind them, reaching a little past
-   the text on every side (more on the right, where a selected item grows) */
-.main-menu-content > .menu-list { align-self: flex-start; position: relative; }
-.menu-plate { position: absolute; left: -36px; right: -56px; top: -20px; bottom: -20px; padding: 0; }
+/* Every button the same size, centred on its own spot, growing from its centre when selected */
+.main-menu-item {
+    font-size: var(--fs-section);
+    -unity-text-align: middle-center;
+    transform-origin: center;
+    margin: 0;
+    padding: 6px 18px;
+}

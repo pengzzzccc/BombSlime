@@ -6,7 +6,8 @@ using UnityEngine.UIElements;
 namespace Inkform.UI
 {
     /// <summary>
-    /// End credits, opened from the run summary (EndPanel's CONFIRM / Back). The column built from
+    /// End credits, opened from the run summary (EndPanel's CONFIRM / Back) or the main menu's
+    /// CREDITS — either way UIManager.FinishCredits takes it back to the main menu. The column built from
     /// Resources/UI/CreditsRoll — the game logo, the team by role with concept art between, the
     /// playtesters, a closing line and the final picture — rises from below the screen at the
     /// roll's speed, with its music on the music channel. It stops when the final picture sits
@@ -49,7 +50,7 @@ namespace Inkform.UI
 
         protected override void DefinePrompts(PromptBar bar) => bar.Add(PromptBar.Key.Back, "Skip", Skip);
 
-        /// <summary>Back pressed (or the Skip prompt clicked): leave for the main menu now. A
+        /// <summary>Back pressed (or the Skip prompt clicked): back to the main menu now. A
         /// press in the first moment after opening is ignored, so the Esc that left the summary
         /// (or a double tap of it) cannot skip the roll before it has begun.</summary>
         public void Skip()
@@ -153,7 +154,7 @@ namespace Inkform.UI
         {
             if (phase == Phase.Done || !IsOpen) return;
             phase = Phase.Done;
-            UI.ReturnToMainMenu();
+            UI.FinishCredits();
         }
 
         // ---- Building the column ----
