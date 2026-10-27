@@ -34,6 +34,20 @@ namespace Inkform.Player
         public bool TryCollectCapacityUpgrade(string pickupId, int capacityIncrease = 1) =>
             InventoryStore.TryCollectCapacityPickup(pickupId, capacityIncrease);
 
+        /// <summary>Holds at least one dash-fuel item: the next dash would succeed.</summary>
+        public bool HasDashFuel
+        {
+            get
+            {
+                for (int i = 0; i < InventoryStore.Items.Count; i++)
+                {
+                    InventoryItemDefinition item = InventoryStore.Items[i];
+                    if (item != null && item.IsDashFuel) return true;
+                }
+                return false;
+            }
+        }
+
         public bool TryConsumeDashFuel()
         {
             for (int i = 0; i < InventoryStore.Items.Count; i++)

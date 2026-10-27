@@ -53,8 +53,8 @@ MonoBehaviour:
     m_path: Assets/Scenes/Level1/Mine Cave 3.unity
     m_guid: 49a6807fcb1271b409efc4f30dc7529f
   - m_enabled: 1
-    m_path: Assets/Scenes/Menu/End.unity
-    m_guid: 6af981f88ec3d944192dfde0ff18c9ed
+    m_path: Assets/Scenes/Level2/Lab basement.unity
+    m_guid: 473b3ef3b3f71e74f8fad4d191ff621f
   - m_enabled: 1
     m_path: Assets/Scenes/Menu/End.unity
     m_guid: 6af981f88ec3d944192dfde0ff18c9ed

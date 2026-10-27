@@ -53,6 +53,7 @@ GameObject:
   - component: {fileID: 9904000001}
   - component: {fileID: 9904000002}
   - component: {fileID: 9904000003}
+  - component: {fileID: 9904000004}
   m_Layer: 3
   m_Name: Player
   m_TagString: Player
@@ -394,6 +395,23 @@ MonoBehaviour:
   fadeTime: 0.2
   tint: {r: 0.6, g: 0.85, b: 1, a: 0.6}
   poolSize: 12
+--- !u!114 &9904000004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3780543705610343857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43b14cf4290c43fd964d013f5127cdb7, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inkform.Player.DashAimIndicator
+  arrowSprite: {fileID: 21300000, guid: 65e5cb76d9ee1e14ca5c8dca68d9874b, type: 3}
+  radius: 0.9
+  arrowScale: 1
+  alpha: 0.85
+  sortingOrder: 18
 --- !u!1 &5765958816110314823
 GameObject:
   m_ObjectHideFlags: 0

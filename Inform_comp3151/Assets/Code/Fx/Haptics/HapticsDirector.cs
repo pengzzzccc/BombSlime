@@ -53,8 +53,9 @@ namespace Inkform.Fx.Haptics
         {
             new MotorCurve(0.35f, 0f), new MotorCurve(0.65f, 0f), new MotorCurve(1f, 0f),
         };
-        [Tooltip("Adaptive-trigger strength at the Trigger Effects level Low / Medium / High: scales resistance, snap-back and buzz amplitude. High = the tuned strengths as they are")]
-        [SerializeField] private float[] triggerLevels = { 0.35f, 0.65f, 1f };
+        // Halved across the board (2026-10): the full tuned strengths felt too heavy on the DualSense
+        [Tooltip("Adaptive-trigger strength at the Trigger Effects level Low / Medium / High: scales resistance, snap-back and buzz amplitude. 1 = the tuned strengths as they are")]
+        [SerializeField] private float[] triggerLevels = { 0.175f, 0.325f, 0.5f };
 
         [Header("Contact (ground / ceiling / walls)")]
         [Tooltip("Touches slower than this (into the surface) do not rumble: sliding along a wall, a small step")]

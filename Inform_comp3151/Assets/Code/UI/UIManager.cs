@@ -153,6 +153,9 @@ namespace Inkform.UI
                 panel.Tick(unscaled);
             hud?.Tick(unscaled);
             NavigateWithStick();
+#if UNITY_WEBGL && !UNITY_EDITOR
+            PauseOnBrowserUnlock();
+#endif
 
             // Pause is read directly rather than via an action in the input asset: adding a Pause
             // action would require regenerating the generated wrapper (the project treats it as
@@ -783,6 +786,31 @@ namespace Inkform.UI
 
             hud = new Hud(host);
         }
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+        // Assets/Plugins/WebGL/PointerLock.jslib
+        [System.Runtime.InteropServices.DllImport("__Internal")]
+        private static extern int InkformIsPointerLocked();
+
+        private bool browserLockHeld;
+
+        /// <summary>In a browser, Esc releases the pointer lock and is eaten by the browser, so the
+        /// Esc branch above never runs. Treat the browser letting go of a lock we still asked for as
+        /// that Esc: open the pause sheet, like desktop. This also keeps the player from clicking
+        /// straight back in during Chrome's re-lock cooldown (see PointerLockGuard.jspre).</summary>
+        private void PauseOnBrowserUnlock()
+        {
+            bool locked = InkformIsPointerLocked() != 0;
+            bool released = browserLockHeld && !locked;
+            browserLockHeld = locked;
+            if (!released) return;
+
+            // We released it ourselves (a sheet opened → SetCursor(true)): nothing to react to
+            if (UnityEngine.Cursor.lockState != CursorLockMode.Locked) return;
+            if (GameStateStore.Current != GameStateStore.GameState.Playing) return;
+            OpenPause();
+        }
+#endif
 
         private void SetCursor(bool visible)
         {

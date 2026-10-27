@@ -5,84 +5,9 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/Menu/MainMenu.unity
     guid: 37631e5845af32445b0a05c4cfa3a1a1
-  - enabled: 0
-    path: Assets/Scenes/Generated/L1_B1.unity
-    guid: 3ddc661978fbce24b9d003b9bd822401
-  - enabled: 0
-    path: Assets/Scenes/Generated/L1_B2.unity
-    guid: 542bdd9e4526b8340801061b631f7b64
-  - enabled: 0
-    path: Assets/Scenes/Generated/L1_B3.unity
-    guid: 13d6ff57202fe5645b391845e7aa148e
-  - enabled: 0
-    path: Assets/Scenes/Generated/L1_B4.unity
-    guid: a71aff0083a04754cb300f5f3196d53c
-  - enabled: 0
-    path: Assets/Scenes/Generated/L1_B5.unity
-    guid: c43cc8eda7d8f2741b07cebbc4020d0f
-  - enabled: 0
-    path: Assets/Scenes/Generated/L1_B6.unity
-    guid: b78c12f3f35ff3c4fa740d2c454d0132
-  - enabled: 0
-    path: Assets/Scenes/Generated/L1_Boss.unity
-    guid: 1908f06f0c8f23c43ac0c2b38bd4f072
-  - enabled: 0
-    path: Assets/Scenes/Generated/L1_Player.unity
-    guid: 481fcc1b077ee1a4e8676998610c00a7
-  - enabled: 0
-    path: Assets/Scenes/Generated/L1_S1.unity
-    guid: 327be90917886be49a5c0a78691cbfae
-  - enabled: 0
-    path: Assets/Scenes/Generated/L1_S2.unity
-    guid: f99322da04188684fb8c30bac598ae3d
-  - enabled: 0
-    path: Assets/Scenes/Generated/L1_S3.unity
-    guid: 2e00ad8627875b34da0e8d699f1a021a
-  - enabled: 0
-    path: Assets/Scenes/Generated/L1_S4.unity
-    guid: 78208d96dd882bd46b6bc34f76304117
-  - enabled: 0
-    path: Assets/Scenes/Generated/L2_B1.unity
-    guid: 870a3aae6614651479d5aa3b14632516
-  - enabled: 0
-    path: Assets/Scenes/Generated/L2_B2.unity
-    guid: 6e7ae3551a0cdda4fb63a56d117d13fb
-  - enabled: 0
-    path: Assets/Scenes/Generated/L2_B3.unity
-    guid: 34e16cc76ac7fab4e89b4fa0365a39a7
-  - enabled: 0
-    path: Assets/Scenes/Generated/L2_B4.unity
-    guid: c18eeb4b1a3463843963abe347510a8a
-  - enabled: 0
-    path: Assets/Scenes/Generated/L2_B5.unity
-    guid: 5ffe78a36143b474287c1f5a33a3bcb1
-  - enabled: 0
-    path: Assets/Scenes/Generated/L2_B6.unity
-    guid: 2ff40303a69e1d442a87839c8690958b
-  - enabled: 0
-    path: Assets/Scenes/Generated/L2_Boss.unity
-    guid: 661520cc2e76b934abe20aa362d878ef
-  - enabled: 0
-    path: Assets/Scenes/Generated/L2_S1.unity
-    guid: 1f07758b49c7f594b9b5a541ae6402fd
-  - enabled: 0
-    path: Assets/Scenes/Generated/L2_S2.unity
-    guid: ddb8994dbca8cf0448cda5f8f12f8dc6
-  - enabled: 0
-    path: Assets/Scenes/Generated/L3_LongFight.unity
-    guid: ca6ad2446e5f4c540acf01023ee12a60
-  - enabled: 0
-    path: Assets/Scenes/Level1/L1_B2.unity
-    guid: ebd79b34ceae0d14daf8895d7fa20e6c
-  - enabled: 0
-    path: Assets/Scenes/Level1/L1_B3.unity
-    guid: 8e86c152b693822479aa95649eb85236
-  - enabled: 0
-    path: Assets/Scenes/Test/PlayerTest.unity
-    guid: 7f80c46cb978389418099080bbd56749
   - enabled: 1
     path: Assets/Scenes/Level1/Mine Cave 1.unity
     guid: 742e3b7aacdf8d74bac3cd030b491f51
@@ -92,5 +17,14 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Level1/Mine Cave 3.unity
     guid: 49a6807fcb1271b409efc4f30dc7529f
+  - enabled: 1
+    path: Assets/Scenes/Level2/Lab basement.unity
+    guid: 473b3ef3b3f71e74f8fad4d191ff621f
+  - enabled: 1
+    path: Assets/Scenes/Menu/End.unity
+    guid: 6af981f88ec3d944192dfde0ff18c9ed
+  - enabled: 0
+    path: Assets/Scenes/Test/PlayerTest.unity
+    guid: 7f80c46cb978389418099080bbd56749
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

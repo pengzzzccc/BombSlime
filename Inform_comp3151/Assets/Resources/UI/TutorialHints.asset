@@ -34,8 +34,10 @@ MonoBehaviour:
       the reticle and break the wall.
     gamepadText: Grab a Bomb, aim with {Aim} and press {Dash} to dash toward the
       reticle and break the wall.
-    keyboardMoveDashText: 
-    gamepadMoveDashText: 
+    keyboardMoveDashText: Grab a Bomb, hold {Move:All} and press {Dash} to dash that
+      way and break the wall.
+    gamepadMoveDashText: Grab a Bomb, push {Move} and press {Dash} to dash that way
+      and break the wall.
   - hint: 4
     keyboardText: Grab a Bomb, aim with the mouse and press {Dash} to dash toward
       the reticle

@@ -134,6 +134,21 @@ namespace Inkform.Player
         /// rope gun Aim degrades to Move. Either way the direction is SNAPPED to 8 directions —
         /// never a free angle. The dash itself is fixed-direction and gravity-free for its whole
         /// duration, decaying to a stop at the end (see PlayerMotor).</summary>
+        /// <summary>The 8-way direction the next dash would take, resolved exactly as Dash() does.
+        /// DashAimIndicator draws it, so the arrow always shows the real dash.</summary>
+        public Vector2 DashDirection
+        {
+            get
+            {
+                bool useMove = SettingsStore.DashAim == SettingsStore.DashAimSource.Move;
+                if (!useMove && ropeGun != null)
+                    return Dir8.Snap(ropeGun.EffectiveFireDir);
+                if (lastMoveInput.sqrMagnitude > 0.0001f)
+                    return Dir8.Snap(lastMoveInput);
+                return PlayerBus.Face == FaceDirection.R ? Vector2.right : Vector2.left;
+            }
+        }
+
         public void Dash()
         {
             if (LifeBus.IsDead) return;
@@ -141,14 +156,7 @@ namespace Inkform.Player
             bool succeeded = inventory != null && inventory.TryConsumeDashFuel();
             if (succeeded)
             {
-                Vector2 dir;
-                bool useMove = SettingsStore.DashAim == SettingsStore.DashAimSource.Move;
-                if (!useMove && ropeGun != null)
-                    dir = Dir8.Snap(ropeGun.EffectiveFireDir);
-                else if (lastMoveInput.sqrMagnitude > 0.0001f)
-                    dir = Dir8.Snap(lastMoveInput);
-                else
-                    dir = PlayerBus.Face == FaceDirection.R ? Vector2.right : Vector2.left;
+                Vector2 dir = DashDirection;
 
                 // The dash takes over motion: release any active rope (mid-pull or miss dangle)
                 // first, or the pull's per-physics-step velocity writes would fight the dash

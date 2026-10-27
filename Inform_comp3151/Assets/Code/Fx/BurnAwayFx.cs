@@ -220,7 +220,13 @@ namespace Inkform.Fx
 
             SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
             sr.sprite = WhiteSquare;
-            sr.sortingOrder = target != null ? target.sortingOrder : 0;
+            // The body's own sorting layer, one order above it: the ash flies off in front of the
+            // burning player. Copying only the order left the bits on Default, behind the player layer
+            if (target != null)
+            {
+                sr.sortingLayerID = target.sortingLayerID;
+                sr.sortingOrder = target.sortingOrder + 1;
+            }
 
             // mostly pale ash flakes; some ember sparks that blink in fixed ticks
             bool ember = Random.value < 0.4f;

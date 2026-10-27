@@ -1323,6 +1323,59 @@ namespace Inkform.Tests
         }
 
         [Test]
+        public void DashAim_DefaultsToMoveInput()
+        {
+            Assert.AreEqual(SettingsStore.DashAimSource.Move, SettingsStore.DefaultDashAim);
+        }
+
+        [Test]
+        public void PlayerDashDirection_SnapsMoveInputTo8Ways_AndIndicatorNeedsFuel()
+        {
+            GameObject go = new GameObject("Dash direction test");
+            go.SetActive(false);
+            go.AddComponent<Rigidbody2D>();
+            go.AddComponent<ContactSensor>();
+            PlayerMotor motor = go.AddComponent<PlayerMotor>();
+            AnimStateResolver anim = go.AddComponent<AnimStateResolver>();
+            PlayerInventory inventory = go.AddComponent<PlayerInventory>();
+            PlayerHandler player = go.AddComponent<PlayerHandler>();
+            InventoryItemDefinition fuel = ScriptableObject.CreateInstance<InventoryItemDefinition>();
+            SetField(fuel, "id", "dash-fuel");
+            SetField(fuel, "dashFuel", true);
+            go.SetActive(true);
+            Invoke(motor, "Awake");
+            Invoke(anim, "Awake");
+            Invoke(player, "Awake");
+
+            // The private setter, not SetDashAim: the test must not write the editor's PlayerPrefs
+            PropertyInfo dashAim = typeof(SettingsStore).GetProperty(nameof(SettingsStore.DashAim));
+            object saved = dashAim.GetValue(null);
+            try
+            {
+                dashAim.SetValue(null, SettingsStore.DashAimSource.Move);
+
+                player.Move(new Vector2(0.9f, 0.3f));
+                Assert.AreEqual(Vector2.right, player.DashDirection);
+
+                player.Move(new Vector2(-0.7f, 0.7f));
+                Vector2 diagonal = player.DashDirection;
+                Assert.AreEqual(-Mathf.Sqrt(0.5f), diagonal.x, 1e-4f);
+                Assert.AreEqual(Mathf.Sqrt(0.5f), diagonal.y, 1e-4f);
+
+                Assert.IsFalse(inventory.HasDashFuel);
+                Assert.IsTrue(inventory.TryCollectCapacityUpgrade("dash-dir-capacity", 1));
+                Assert.IsTrue(inventory.TryStore(fuel));
+                Assert.IsTrue(inventory.HasDashFuel);
+            }
+            finally
+            {
+                dashAim.SetValue(null, saved);
+                UnityEngine.Object.DestroyImmediate(fuel);
+                UnityEngine.Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
         public void PlayerDash_SmashesBreakableInFrontThroughTheBombPath()
         {
             // Player rig — same shape as the fuel-dash test above

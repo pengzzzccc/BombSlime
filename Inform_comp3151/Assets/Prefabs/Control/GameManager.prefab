@@ -156,9 +156,9 @@ MonoBehaviour:
   - scale: 1
     floor: 0
   triggerLevels:
-  - 0.35
-  - 0.65
-  - 1
+  - 0.175
+  - 0.325
+  - 0.5
   minImpactSpeed: 1.5
   maxImpactSpeed: 14
   contactMin: 0.15

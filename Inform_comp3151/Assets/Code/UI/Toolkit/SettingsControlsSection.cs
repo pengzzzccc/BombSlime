@@ -10,7 +10,7 @@ namespace Inkform.UI
     /// The CONTROLS section, in groups: DEVICE (input device, rumble level, trigger effects level),
     /// SENSITIVITY, DASH (which input steers the dash), KEY BINDINGS (the active device's rebind table only, each key drawn as its
     /// button icon), GRAPPLING HOOK (the rope gun's snap options the RopeGun reads live from
-    /// SettingsStore; adaptive slide speed goes with Wall Snap, no row of its own) and MAINTENANCE last (Unstuck, Reset Bindings, Reset All — out of the way
+    /// SettingsStore: Bomb Snap and its dead zone) and MAINTENANCE last (Unstuck, Reset Bindings, Reset All — out of the way
     /// of a stray press). The section follows a live device switch while the sheet is open:
     /// touching a pad swaps table and icons.
     /// </summary>
@@ -108,7 +108,6 @@ namespace Inkform.UI
             BuildRebindTable(padGroup, GamepadRows, padKeySlots, BindingTools.GamepadGroup, BindingTools.KbmGroup);
 
             AddSubHeader("GRAPPLING HOOK");
-            AddOnOffRow("Wall Snap", () => SettingsStore.RopeWallSnap, SettingsStore.SetRopeWallSnap);
             AddOnOffRow("Bomb Snap", () => SettingsStore.RopeBombSnap, SettingsStore.SetRopeBombSnap);
             AddSliderRow("Snap Dead Zone", 0f, 1f, v => v.ToString("0.00"),
                 () => SettingsStore.RopeSnapDeadZone, SettingsStore.SetRopeSnapDeadZone);

@@ -42,6 +42,7 @@ namespace Inkform.Settings
         public const RumbleLevel DefaultLevel = RumbleLevel.Medium;
         public const float DefaultStickSensitivity = 1.6f;
         public const float DefaultRopeSnapDeadZone = 0.25f;
+        public const DashAimSource DefaultDashAim = DashAimSource.Move;
 
         // ---- Values (PlayerPrefs-backed) ----
 
@@ -59,7 +60,7 @@ namespace Inkform.Settings
         public static InputDevice Device { get; private set; } = InputDevice.KeyboardMouse;
 
         /// <summary>Dash direction source; PlayerHandler reads it live on each dash.</summary>
-        public static DashAimSource DashAim { get; private set; } = DashAimSource.Aim;
+        public static DashAimSource DashAim { get; private set; } = DefaultDashAim;
 
         public static int ResolutionWidth { get; private set; }
         public static int ResolutionHeight { get; private set; }
@@ -101,10 +102,6 @@ namespace Inkform.Settings
 
         // ---- Grapping hook (rope gun) aim feel; RopeGun reads these live ----
 
-        /// <summary>Reticle snaps to the terrain anchor while green. Off: the green reticle rides
-        /// the free cursor (color/firing unchanged).</summary>
-        public static bool RopeWallSnap { get; private set; } = true;
-
         /// <summary>Carriables (bombs) on the aim path are snap targets and eat-pull candidates.
         /// Off: the rope ignores them entirely — preview never snaps, firing never eat-pulls.</summary>
         public static bool RopeBombSnap { get; private set; } = true;
@@ -112,12 +109,6 @@ namespace Inkform.Settings
         /// <summary>Snap escape dead zone in world units: the free cursor must pull closer than
         /// the snap target by this margin before the snap releases. Prevents boundary flicker.</summary>
         public static float RopeSnapDeadZone { get; private set; } = 0.3f;
-
-        /// <summary>While sliding on a wall snap, rescale the aim input by the measured geometric
-        /// gain so the anchor slides at the free-cursor speed the sensitivity settings define,
-        /// whatever the wall angle. Not a setting of its own: it goes with Wall Snap (the slide
-        /// it corrects only exists while wall snapping).</summary>
-        public static bool RopeAdaptiveSpeed => RopeWallSnap;
 
         /// <summary>Global visual FX intensity 0~1: scales screen shake, camera zoom, post punch and
         /// shatter launch speed at their consumers. Hitstop is a duration, not a strength, so it is
@@ -182,7 +173,7 @@ namespace Inkform.Settings
         private const string KeyRumbleLegacy = "Inkform.rumbleOn";     // pre-levels on/off switch, migrated on load
         private const string KeyTriggerLevel = "Inkform.triggerLevel";
         private const string KeyTriggerEffects = "Inkform.triggerEffectsOn";   // pre-levels on/off switch, migrated on load
-        private const string KeyRopeWallSnap = "Inkform.ropeWallSnap";
+        private const string KeyRopeWallSnap = "Inkform.ropeWallSnap";     // retired: the reticle no longer snaps to walls
         private const string KeyRopeBombSnap = "Inkform.ropeBombSnap";
         private const string KeyRopeDeadZone = "Inkform.ropeSnapDeadZone";
         private const string KeyRopeAdaptive = "Inkform.ropeAdaptiveSpeed";
@@ -200,7 +191,7 @@ namespace Inkform.Settings
             MouseSensitivity = 1f;
             StickSensitivity = DefaultStickSensitivity;
             Device = InputDevice.KeyboardMouse;
-            DashAim = DashAimSource.Aim;
+            DashAim = DefaultDashAim;
             ResolutionWidth = ResolutionHeight = 0;
             Fullscreen = true;
             FpsCap = 120;
@@ -211,7 +202,6 @@ namespace Inkform.Settings
             PerfInterval = 1f;
             RumbleLevel = DefaultLevel;
             TriggerLevel = DefaultLevel;
-            RopeWallSnap = true;
             RopeBombSnap = true;
             RopeSnapDeadZone = DefaultRopeSnapDeadZone;
             FxIntensity = 1f;
@@ -240,8 +230,8 @@ namespace Inkform.Settings
             MouseSensitivity = PlayerPrefs.GetFloat(KeyMouseSens, 1f);
             StickSensitivity = PlayerPrefs.GetFloat(KeyStickSens, DefaultStickSensitivity);
             Device = (InputDevice)PlayerPrefs.GetInt(KeyDevice, (int)InputDevice.KeyboardMouse);
-            DashAim = PlayerPrefs.GetInt(KeyDashAim, (int)DashAimSource.Aim) == (int)DashAimSource.Move
-                ? DashAimSource.Move : DashAimSource.Aim;
+            DashAim = PlayerPrefs.GetInt(KeyDashAim, (int)DefaultDashAim) == (int)DashAimSource.Aim
+                ? DashAimSource.Aim : DashAimSource.Move;
             Fullscreen = PlayerPrefs.GetInt(KeyFullscreen, 1) != 0;
             FpsCap = PlayerPrefs.GetInt(KeyFps, 120);
             VSync = PlayerPrefs.GetInt(KeyVSync, 0) != 0;
@@ -265,7 +255,7 @@ namespace Inkform.Settings
                 PlayerPrefs.SetInt(KeyTriggerLevel, (int)TriggerLevel);
                 PlayerPrefs.DeleteKey(KeyTriggerEffects);
             }
-            RopeWallSnap = PlayerPrefs.GetInt(KeyRopeWallSnap, 1) != 0;
+            PlayerPrefs.DeleteKey(KeyRopeWallSnap);   // retired: wall snap was removed
             RopeBombSnap = PlayerPrefs.GetInt(KeyRopeBombSnap, 1) != 0;
             RopeSnapDeadZone = PlayerPrefs.GetFloat(KeyRopeDeadZone, DefaultRopeSnapDeadZone);
             PlayerPrefs.DeleteKey(KeyRopeAdaptive);   // retired: adaptive speed now follows Wall Snap
@@ -474,14 +464,6 @@ namespace Inkform.Settings
 
         // ---- Grapping hook setters (RopeGun reads the properties live) ----
 
-        public static void SetRopeWallSnap(bool value)
-        {
-            if (RopeWallSnap == value) return;
-            RopeWallSnap = value;
-            PlayerPrefs.SetInt(KeyRopeWallSnap, value ? 1 : 0);
-            Changed?.Invoke();
-        }
-
         public static void SetRopeBombSnap(bool value)
         {
             if (RopeBombSnap == value) return;
@@ -506,7 +488,7 @@ namespace Inkform.Settings
             MouseSensitivity = 1f;
             StickSensitivity = DefaultStickSensitivity;
             Device = InputDevice.KeyboardMouse;
-            DashAim = DashAimSource.Aim;
+            DashAim = DefaultDashAim;
             Fullscreen = true;
             FpsCap = 120;
             VSync = false;
@@ -516,7 +498,6 @@ namespace Inkform.Settings
             PerfInterval = 1f;
             RumbleLevel = DefaultLevel;
             TriggerLevel = DefaultLevel;
-            RopeWallSnap = true;
             RopeBombSnap = true;
             RopeSnapDeadZone = DefaultRopeSnapDeadZone;
             FxIntensity = 1f;

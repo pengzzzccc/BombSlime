@@ -57,27 +57,13 @@ namespace Inkform.Player
         [SerializeField] private Color hitColor = new Color(0.35f, 1f, 0.35f);
         [SerializeField] private Color missColor = new Color(1f, 0.35f, 0.35f);
 
-        // Snap behaviour (wall/bomb snap, dead zone, adaptive slide speed) is player-facing and
-        // lives in SettingsStore — read live at each use site. Only the adaptive speed's runtime
-        // state is kept here.
-
-        // Adaptive wall-slide speed: the snap anchor moves as intercept(aimOffset), so its speed
-        // depends on the wall angle (a grazing aim barely moves the intercept, a square-on aim
-        // moves it 1:1). Each sliding frame measures |anchor move| / |cursor move|, smooths it,
-        // and the next frame's aim input is divided by it — the anchor then slides at exactly
-        // the free-cursor speed the settings define. Clamped so grazing-angle spikes cannot
-        // explode the input.
-        private float snapGainSmooth = 1f;
-        private bool snapSliding;
-        private Vector2 lastAnchorPos;
-        private Vector2 lastAimOffset;
+        // Snap behaviour (bomb snap, dead zone) is player-facing and lives in SettingsStore — read
+        // live at each use site. The reticle never snaps to terrain: only bombs.
 
         // Set by Aim() on non-zero input, consumed by UpdatePreview: the edge-snap escape is a
         // deliberate "pull the cursor closer" gesture and must not fire on input-less frames —
         // a lock's anchor distance drifts as the player walks, which would otherwise fake the pull
         private bool aimMovedSincePreview;
-        private const float SnapGainMin = 0.2f;
-        private const float SnapGainMax = 5f;
 
         [Header("Rope")]
         [SerializeField] private Sprite ropeSegmentSprite;                  // vertical rope strip: the art runs along the sprite's +Y, tiled along the rope's length
@@ -266,13 +252,6 @@ namespace Inkform.Player
             // edge-snap escape is evaluated exclusively on these frames (see there)
             if (delta.sqrMagnitude > 0f) aimMovedSincePreview = true;
 
-            // Adaptive wall-slide speed: while the reticle slides on a wall snap, divide the
-            // input by the measured geometric gain — the anchor then moves along the wall at
-            // the same speed the free cursor would have at the current sensitivity settings,
-            // regardless of the wall angle. Same path for mouse and stick.
-            if (SettingsStore.RopeAdaptiveSpeed && snapSliding)
-                delta *= Mathf.Clamp(1f / snapGainSmooth, 1f / SnapGainMax, 1f / SnapGainMin);
-
             if (pixelDelta)
             {
                 Camera cam = Camera.main;
@@ -414,8 +393,7 @@ namespace Inkform.Player
 
         // The anchor of a resolved intercept: the contact point nudged outward from the surface —
         // the contact point itself sits on the terrain, and a small offset keeps a bit of rope from
-        // rendering inside the wall. Shared by the reticle snap (shows where the shot would anchor)
-        // and AttachAtTerrain (where it actually does). The normal direction convention is easy to
+        // rendering inside the wall. Used by AttachAtTerrain. The normal direction convention is easy to
         // get backwards — check the sign against the player (the side the cast came from).
         private Vector2 AnchorPointOf(RaycastHit2D hit)
         {
@@ -660,18 +638,17 @@ namespace Inkform.Player
             // from this frame's probe (the physics scene lags destroys by a sync).
             if (!hit || previewCarriable as MonoBehaviour == null) previewCarriable = null;
 
-            // Reticle: green SNAPS to the resolved target — a carriable it would eat-pull (follows
-            // it as it swings) or, with wallSnap on, the terrain anchor — so what the player sees
-            // glowing is what the press pulls to. With wallSnap off the green reticle rides the
-            // free cursor instead (lastAnchorDistance then equals the cursor's own length, so the
-            // escape and the handover below degenerate into no-ops — color and firing unchanged).
+            // Reticle: green SNAPS only to a carriable it would eat-pull (follows it as it swings).
+            // On terrain the green reticle rides the free cursor (lastAnchorDistance then equals
+            // the cursor's own length, so the escape and the handover below degenerate into
+            // no-ops); the press still anchors where the preview's intercept resolved.
             // Red rides the free cursor; on the green→red flip the free cursor adopts the last
             // anchor's distance first, so the red reticle starts where the green one vanished.
             if (hit)
             {
                 Vector2 anchorPos = previewCarriable != null
                     ? (Vector2)previewCarriable.transform.position
-                    : SettingsStore.RopeWallSnap ? AnchorPointOf(previewHit) : target;
+                    : target;
                 lastAnchorDistance = Vector2.Distance(rangeCenter, anchorPos);
 
                 // Edge-snap escape: pulling the free cursor CLOSER than the snap target releases
@@ -693,21 +670,6 @@ namespace Inkform.Player
                 else
                 {
                     reticle.position = anchorPos;
-
-                    // Adaptive wall-slide gain: measure |anchor move| / |cursor move| on
-                    // consecutive terrain-slide frames only (bomb snaps are skipped — their
-                    // target moves on its own and would poison the ratio; so do switch frames
-                    // and frames the aim stood still, e.g. on a moving platform).
-                    if (SettingsStore.RopeWallSnap && previewCarriable == null && snapSliding)
-                    {
-                        float aimMove = (aimOffset - lastAimOffset).magnitude;
-                        float anchorMove = (anchorPos - lastAnchorPos).magnitude;
-                        if (aimMove > 0.001f && anchorMove > 0.0001f)
-                        {
-                            float gain = Mathf.Clamp(anchorMove / aimMove, SnapGainMin, SnapGainMax);
-                            snapGainSmooth = Mathf.Lerp(snapGainSmooth, gain, 0.35f);
-                        }
-                    }
                 }
             }
             else
@@ -721,9 +683,6 @@ namespace Inkform.Player
                 reticle.position = target;
             }
 
-            snapSliding = previewGreen && SettingsStore.RopeWallSnap && previewCarriable == null;
-            lastAnchorPos = reticle.position;
-            lastAimOffset = aimOffset;
             aimMovedSincePreview = false;
 
             reticleSprite.color = previewGreen ? hitColor : missColor;

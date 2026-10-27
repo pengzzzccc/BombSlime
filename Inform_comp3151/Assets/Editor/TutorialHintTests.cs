@@ -97,19 +97,23 @@ namespace Inkform.Tests
         [Test]
         public void DashHint_FollowsDashDirection()
         {
-            foreach (bool gamepad in new[] { false, true })
+            // Every hint that teaches the dash: the bomb wall-break line too, not only the dash line
+            foreach (TutorialHint hint in new[] { TutorialHint.Dash, TutorialHint.Bomb })
             {
-                string aim = set.TextFor(TutorialHint.Dash, gamepad);
-                string move = set.TextFor(TutorialHint.Dash, gamepad, moveDash: true);
-                StringAssert.Contains("{Move", move, $"gamepad={gamepad}: move-dash copy names the move input");
-                Assert.AreNotEqual(aim, move, $"gamepad={gamepad}: move-dash copy differs from the aim copy");
+                foreach (bool gamepad in new[] { false, true })
+                {
+                    string aim = set.TextFor(hint, gamepad);
+                    string move = set.TextFor(hint, gamepad, moveDash: true);
+                    StringAssert.Contains("{Move", move, $"{hint} gamepad={gamepad}: move-dash copy names the move input");
+                    Assert.AreNotEqual(aim, move, $"{hint} gamepad={gamepad}: move-dash copy differs from the aim copy");
+                }
+
+                // The keyboard move-dash line shows all four WASD keys, not just A / D
+                StringAssert.Contains("{Move:All}", set.TextFor(hint, false, moveDash: true), $"{hint}");
             }
 
             // Hints without move-dash copy fall back to their normal line
             Assert.AreEqual(set.TextFor(TutorialHint.Jump, true), set.TextFor(TutorialHint.Jump, true, moveDash: true));
-
-            // The keyboard move-dash line shows all four WASD keys, not just A / D
-            StringAssert.Contains("{Move:All}", set.TextFor(TutorialHint.Dash, false, moveDash: true));
         }
 
         [Test]

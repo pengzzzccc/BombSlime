@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using Inkform.Level;
 using UnityEditor;
+using UnityEditor.Build.Profile;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -425,58 +426,53 @@ namespace Inkform.WorldTools
                       $"{EditorBuildSettings.scenes.Length} entries total ({profiles} build-profile change(s)).");
         }
 
-        // Same serialized-shape walk the old LevelGraphProjectSetup did: any build profile asset
-        // that overrides the global scene list gets the world's scenes ensured and enabled
+        // Every build profile that overrides the global scene list gets the same shape as Build
+        // Settings: menu first, every room after it, all enabled, then its other live entries.
+        // Goes through the public BuildProfile API — the serialized m_guid is a GUID struct, not a
+        // string, so writing it through SerializedProperty.stringValue throws
         private static int SyncBuildProfiles(WorldDefinition world)
         {
             if (!AssetDatabase.IsValidFolder(BuildProfilesDirectory)) return 0;
 
-            var scenePaths = new List<string>();
+            var worldScenes = new List<string>();
             string menuPath = ScenePathOf(world.MenuScene);
-            if (!string.IsNullOrEmpty(menuPath)) scenePaths.Add(menuPath);
+            if (!string.IsNullOrEmpty(menuPath)) worldScenes.Add(menuPath);
             foreach (RoomDefinition room in world.Rooms)
             {
                 string path = room != null ? ScenePathOf(room.Scene) : null;
-                if (!string.IsNullOrEmpty(path)) scenePaths.Add(path);
+                if (!string.IsNullOrEmpty(path) && !worldScenes.Contains(path)) worldScenes.Add(path);
             }
 
             int changed = 0;
             foreach (string file in Directory.GetFiles(BuildProfilesDirectory, "*.asset"))
             {
-                string assetPath = file.Replace('\\', '/');
-                Object asset = AssetDatabase.LoadAssetAtPath<Object>(assetPath);
-                if (asset == null) continue;
+                var profile = AssetDatabase.LoadAssetAtPath<BuildProfile>(file.Replace('\\', '/'));
+                if (profile == null || !profile.overrideGlobalScenes) continue;
 
-                var serialized = new SerializedObject(asset);
-                SerializedProperty overrideList = serialized.FindProperty("m_OverrideGlobalSceneList");
-                if (overrideList == null || !overrideList.boolValue) continue;
-                SerializedProperty scenes = serialized.FindProperty("m_Scenes");
-                if (scenes == null || !scenes.isArray) continue;
+                var result = new List<EditorBuildSettingsScene>();
+                foreach (string path in worldScenes) result.Add(new EditorBuildSettingsScene(path, true));
+                foreach (EditorBuildSettingsScene existing in profile.scenes)
+                {
+                    if (string.IsNullOrEmpty(existing.path) || !File.Exists(existing.path)) continue;
+                    if (result.Exists(x => x.path == existing.path)) continue;
+                    result.Add(existing);
+                }
 
-                foreach (string scenePath in scenePaths) changed += EnsureProfileScene(scenes, scenePath);
-                serialized.ApplyModifiedPropertiesWithoutUndo();
+                if (SameScenes(profile.scenes, result)) continue;
+                profile.scenes = result.ToArray();
+                EditorUtility.SetDirty(profile);
+                changed++;
             }
             AssetDatabase.SaveAssets();
             return changed;
         }
 
-        private static int EnsureProfileScene(SerializedProperty scenes, string scenePath)
+        private static bool SameScenes(EditorBuildSettingsScene[] a, List<EditorBuildSettingsScene> b)
         {
-            for (int i = 0; i < scenes.arraySize; i++)
-            {
-                SerializedProperty entry = scenes.GetArrayElementAtIndex(i);
-                if (entry.FindPropertyRelative("m_path")?.stringValue != scenePath) continue;
-                SerializedProperty enabled = entry.FindPropertyRelative("m_enabled");
-                if (enabled != null && !enabled.boolValue) { enabled.boolValue = true; return 1; }
-                return 0;
-            }
-
-            scenes.InsertArrayElementAtIndex(scenes.arraySize);
-            SerializedProperty added = scenes.GetArrayElementAtIndex(scenes.arraySize - 1);
-            added.FindPropertyRelative("m_enabled").boolValue = true;
-            added.FindPropertyRelative("m_path").stringValue = scenePath;
-            added.FindPropertyRelative("m_guid").stringValue = AssetDatabase.AssetPathToGUID(scenePath);
-            return 1;
+            if (a.Length != b.Count) return false;
+            for (int i = 0; i < a.Length; i++)
+                if (a[i].path != b[i].path || a[i].enabled != b[i].enabled) return false;
+            return true;
         }
 
         // ---- Helpers ----
@@ -488,7 +484,7 @@ namespace Inkform.WorldTools
             return AssetDatabase.LoadAssetAtPath<WorldDefinition>(AssetDatabase.GUIDToAssetPath(guids[0]));
         }
 
-        private static string ScenePathOf(SceneReference scene)
+        internal static string ScenePathOf(SceneReference scene)
         {
             if (scene == null || !scene.IsSet) return null;
             if (scene.SceneAsset != null) return AssetDatabase.GetAssetPath(scene.SceneAsset);
