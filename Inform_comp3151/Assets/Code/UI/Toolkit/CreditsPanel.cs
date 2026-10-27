@@ -227,8 +227,23 @@ namespace Inkform.UI
         private static void AddLabel(VisualElement parent, string text, params string[] classes)
         {
             var label = new Label(text) { pickingMode = PickingMode.Ignore };
-            foreach (string c in classes) label.AddToClassList(c);
+            // BombSlimeFonts has Latin glyphs only. The editor and desktop players fill the gaps
+            // from OS fonts, but WebGL has none, so CJK text drew blank there. Such a line keeps the
+            // root font instead (Alibaba PuHuiTi, shipped with its glyph data — see UiFonts)
+            bool cjk = HasCjk(text);
+            foreach (string c in classes)
+                if (!(cjk && c == "title-font")) label.AddToClassList(c);
             parent.Add(label);
+        }
+
+        // CJK radicals onward (U+2E80+): Han, kana, Hangul, fullwidth forms. Latin, Greek and
+        // Cyrillic all sit below it
+        private static bool HasCjk(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return false;
+            foreach (char ch in text)
+                if (ch >= '⺀') return true;
+            return false;
         }
     }
 }
