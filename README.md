@@ -5,7 +5,10 @@ to set off chain explosions. You pull yourself across gaps with a rope gun, dash
 slide down walls and stick to ceilings. Levels are built from breakable walls, hazards and
 checkpoints. When you die, the level itself rewinds as well as the player.
 
-COMP3151 course project. Contributors: pengzzzccc, MQ-AndyZhan, 48027480, Viet Phi Long Le, Julian-Baxter.
+Contributors: pengzzzccc, MQ-AndyZhan, 48027480, Viet Phi Long Le, Julian-Baxter.
+
+itch link
+https://pengzzzccc.itch.io/bombslime
 
 ## Gameplay Features
 
