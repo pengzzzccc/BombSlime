@@ -1,3 +1,6 @@
+// DualSenseGamepadHID only exists where the Input System compiles its HID layer (same guard as
+// the package's DualShockGamepadHID.cs); WebGL / Android / consoles have no DualSense writer
+#if UNITY_EDITOR || UNITY_STANDALONE_OSX || UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || UNITY_WSA
 using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
@@ -139,3 +142,4 @@ namespace Inkform.Fx.Haptics
         }
     }
 }
+#endif

@@ -305,7 +305,11 @@ namespace Inkform.Fx.Haptics
             Gamepad target = SettingsStore.Rumble || SettingsStore.TriggerEffects ? ActivePadTracker.Active : null;
 
             // Only a DualSense: every other pad belongs to GenericPadHaptics
+#if UNITY_EDITOR || UNITY_STANDALONE_OSX || UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || UNITY_WSA
             if (!(target is DualSenseGamepadHID)) target = null;
+#else
+            target = null;  // no HID layer on this platform: GenericPadHaptics owns every pad
+#endif
 
             if (output != null && target != null && output.Covers(target)) return;
             Retarget(target);

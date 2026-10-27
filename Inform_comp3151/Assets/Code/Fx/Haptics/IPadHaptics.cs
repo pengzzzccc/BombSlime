@@ -73,6 +73,10 @@ namespace Inkform.Fx.Haptics
         /// <summary>DualSense (and Edge) get the native report writer. Every other pad gets none
         /// here — GenericPadHaptics shakes them on its own.</summary>
         public static IPadHaptics For(Gamepad pad) =>
+#if UNITY_EDITOR || UNITY_STANDALONE_OSX || UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || UNITY_WSA
             pad is DualSenseGamepadHID dualSense ? new DualSenseHaptics(dualSense) : null;
+#else
+            null;   // no HID layer on this platform (WebGL, Android…): no DualSense writer
+#endif
     }
 }

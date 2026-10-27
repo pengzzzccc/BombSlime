@@ -145,7 +145,10 @@ namespace Inkform.Fx.Haptics
         /// Microsoft HID device, which takes no rumble: the XInput device object stands in for it.</summary>
         private static Gamepad RumbleTarget(Gamepad pad)
         {
-            if (pad == null || pad is DualSenseGamepadHID) return null;
+            if (pad == null) return null;
+#if UNITY_EDITOR || UNITY_STANDALONE_OSX || UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || UNITY_WSA
+            if (pad is DualSenseGamepadHID) return null;    // HapticsDirector drives it natively
+#endif
             if (pad is XInputController || !IsMicrosoftHid(pad)) return pad;
             foreach (Gamepad other in Gamepad.all)
                 if (other is XInputController && other.added) return other;
