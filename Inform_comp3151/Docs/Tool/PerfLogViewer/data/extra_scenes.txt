@@ -1,1 +1,2 @@
 Assets/Scenes/Level2/Lab_base.unity
+Assets/Scenes/Menu/MainMenu.unity
