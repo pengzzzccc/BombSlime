@@ -76,6 +76,7 @@ MonoBehaviour:
   - kind: 0
     title: Playtesters
     names:
+    - DataBoto
     - "\u4E5D\u91CC\u660E"
     - "\u9ED1\u732B\u8B66\u957F"
     - Marcus Shidiak
