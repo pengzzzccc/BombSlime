@@ -48,7 +48,14 @@ namespace Inkform.UI
                 Debug.LogWarning($"CreditsPanel: missing Resources/{CreditsRoll.ResourcePath} — the credits are empty and end at once");
         }
 
-        protected override void DefinePrompts(PromptBar bar) => bar.Add(PromptBar.Key.Back, "Skip", Skip);
+        //protected override void DefinePrompts(PromptBar bar) => bar.Add(PromptBar.Key.Back, "Skip", Skip);
+
+        protected override void DefinePrompts(PromptBar bar)
+        {
+            // Pass null for the action since we poll for the hold in Tick() instead of waiting for a single click
+            bar.Add(PromptBar.Key.Action, "Speed Up", null); 
+            bar.Add(PromptBar.Key.Back, "Skip", Skip);
+        }
 
         /// <summary>Back pressed (or the Skip prompt clicked): back to the main menu now. A
         /// press in the first moment after opening is ignored, so the Esc that left the summary
@@ -103,6 +110,14 @@ namespace Inkform.UI
             {
                 case Phase.Rolling:
                     float speed = content != null ? Mathf.Max(1f, content.scrollSpeed) : 90f;
+                    // Check if Shift or Controller X (buttonWest) is held
+                    bool isFastForward = false;
+                    if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.shiftKey.isPressed)
+                        isFastForward = true;
+                    if (UnityEngine.InputSystem.Gamepad.current != null && UnityEngine.InputSystem.Gamepad.current.buttonWest.isPressed)
+                        isFastForward = true;
+                    // Multiply speed if held
+                    if (isFastForward) speed *= 4f; 
                     offset -= speed * unscaledDelta;
                     if (TryStopOffset(height, out float stop) && offset <= stop)
                     {

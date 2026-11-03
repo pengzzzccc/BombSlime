@@ -214,7 +214,7 @@ namespace Inkform.UI
                 bombRow.Add(bomb);
             }
 
-            capacityLabel.text = shownCapacity.ToString();
+            capacityLabel.text = $"{count}/{shownCapacity}";
             LayoutBombs();
         }
 

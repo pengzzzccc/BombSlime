@@ -24,7 +24,8 @@ namespace Inkform.UI
             Overwrite,
             Change,
             Select,
-            Scroll
+            Scroll,
+            Action, // a generic action prompt (used for speeding up the credits roll)
         }
 
         private struct Entry
@@ -128,6 +129,9 @@ namespace Inkform.UI
                     break;
                 case Key.Overwrite:
                     into.Add(pad ? Pad("buttonNorth", scheme) : Kb("ctrl", "Ctrl", scheme));
+                    break;
+                case Key.Action: // <-- This new block for speed up credits roll
+                    into.Add(pad ? Pad("buttonWest", scheme) : Kb("shift", "Shift", scheme));
                     break;
                 case Key.Change:
                     // On a pad the left stick both selects and changes (shown once, as Select)
