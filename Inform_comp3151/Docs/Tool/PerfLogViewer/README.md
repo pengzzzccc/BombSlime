@@ -1,82 +1,83 @@
 # PerfLog Viewer
 
-一个静态网页工具：把 `PerformanceRecorder` 写出的 `perf_*.csv` 拖进去，就能在真实关卡上看死亡、动线、检查点分段难度和性能。不需要安装或构建，也不联网，数据不会离开本机。
+A standalone static web tool for visualising playtest telemetry: drag and drop `perf_*.csv` files recorded by `PerformanceRecorder` to inspect player deaths, movement trajectories, per-checkpoint segment difficulty, and frame-time performance directly over actual level art. No installation, build step, or internet connection is required—all data stays on your local machine.
 
-## 使用
+## Usage
 
-1. 在游戏的 **Video › Perf Recording** 打开录制。**Perf Rate** 建议 0.5 s 或 0.1 s，动线会更细。日志写到 `Docs/PerfLogs/`。
-2. 在 Unity 中执行 **Tools › Inkform › Analytics › Export Level Layouts + Art**。
-   - 会生成 `data/level_layouts.js`，以及每个关卡一张实景 `*.jpg`。
-   - 只需要几何时可以用不带 `+ Art` 的版本，速度更快。
-   - 实景分辨率在 **Art Resolution** 子菜单里调，默认 12 px/格。
-   - 上面两个菜单只导出 World 里登记的房间。不在 World 里的场景（比如 `Lab_base`）先在 Unity 里打开，再执行 **Export Current Scene + Art**。
-     - 它只渲染当前场景的实景，其他场景沿用之前导出的图。
-     - 场景路径会记进 `data/extra_scenes.txt`，以后执行任何导出都会带上它。
-     - 不想再导出时，删掉对应那一行，以及它的 `*.jpg` 和 `*.art.json`。
-3. 双击 `index.html`，或执行 Unity 菜单 **Open PerfLog Viewer**，然后把一个或多个 CSV 拖进页面。
+1. Enable recording in-game under **Video › Perf Recording**. Set **Perf Rate** to `0.5 s` or `0.1 s` for finer movement trajectories. Logs are written to `Docs/PerfLogs/`.
+2. In the Unity Editor, run **Tools › Inkform › Analytics › Export Level Layouts + Art**.
+   - This generates `data/level_layouts.js` along with a rendered `*.jpg` screenshot for each level.
+   - If you only need level geometry, use the variant without `+ Art` for faster export.
+   - Adjust the rendered image resolution under the **Art Resolution** submenu (defaults to `12 px/tile`).
+   - The menu items above only export rooms registered in the `World` asset. For scenes outside the World registry (such as `Lab_base`), open the scene in Unity first and run **Export Current Scene + Art**:
+     - It renders only the active scene's art while preserving previously exported images for other scenes.
+     - The scene path is recorded in `data/extra_scenes.txt` so subsequent exports automatically include it.
+     - To stop exporting an extra scene, remove its line from `data/extra_scenes.txt` and delete its `*.jpg` and `*.art.json` files.
+3. Double-click `index.html` (or run **Tools › Inkform › Analytics › Open PerfLog Viewer** in Unity), then drag and drop one or more CSV files into the page.
 
-## 视图
+## Views
 
-| 标签 | 内容 |
+| Tab | Contents |
 |---|---|
-| 关卡地图 | 实景、示意、混合三种底图，叠加以下图层：死亡热力、致死率（死亡 ÷ 经过的命数）、停留热力、性能卡顿、机制使用（墙滑、天花板、绳索、空中）、未到达区域、死亡等值线、动线、分段难度弧线、检查点、致死物排行、脱困（玩家用 Unstuck 的位置：琥珀色为就近推出，红色为传回检查点）。另有幽灵回放，并可导出带图例的 PNG。 |
-| 总览 | KPI、各场景时长与死亡、会话表 |
-| 检查点分段 | 每段的经过次数、死亡、首次通过率、中位耗时、难度评级。点一行会跳到地图上对应位置。另有分段 × 会话矩阵。 |
-| 死亡分析 | 死因、致死物 Top 10、死亡时状态、存活时长分布、重生陷阱列表 |
-| 难度曲线 | `difficulty_curve.py` 的交互版，可以切换归一化进度或实际时间 |
-| 性能 | FPS、帧时间（含卡顿峰值）、GC，三张图联动缩放。另有各场景帧时间箱线图和渲染统计。 |
+| **Level Map** | Three base map modes (*Art*, *Schematic*, *Hybrid*) with toggleable overlays: **Death Heatmap**, **Lethality Rate** (deaths ÷ lives passing through), **Dwell Heatmap**, **Performance Spikes**, **Mechanic Usage** (wall slide, ceiling stick, rope gun, airborne), **Unreached Areas**, **Death Contours**, **Player Trajectories**, **Segment Difficulty Arcs**, **Checkpoints**, **Top Hazard Sources**, and **Unstuck Events** (where `UnstuckSolver` intervened: amber = nudged to a nearby safe spot, red = teleported back to checkpoint). Includes **Ghost Replay** and PNG export with legend. |
+| **Overview** | High-level KPIs, per-scene playtime and death totals, and the session table. |
+| **Checkpoint Segments** | Attempt count, deaths, first-try clear rate, median duration, and difficulty rating per segment. Clicking a row focuses the corresponding segment on the map. Also includes a **Segment × Session** matrix. |
+| **Death Analysis** | Breakdown by death cause, Top 10 lethal hazards, player state at death, survival-time distribution, and respawn-trap detection. |
+| **Difficulty Curve** | Interactive version of `difficulty_curve.py`, toggleable between normalised progress and actual elapsed time. |
+| **Performance** | Synchronised zoom charts for **FPS**, **Frame Time** (including spike peaks), and **GC Allocations**, plus per-scene frame-time box plots and rendering statistics. |
 
-地图操作：
+### Map Controls
 
-| 操作 | 效果 |
+| Input | Action |
 |---|---|
-| 滚轮 | 缩放 |
-| 拖动 | 平移 |
-| 双击 | 聚焦死亡最多处 |
-| `0` | 适配视图 |
-| `+` / `-` | 缩放 |
-| 方向键 | 平移 |
-| 回放时按空格 | 播放 / 暂停 |
-| 悬停在侧栏会话上 | 地图上只高亮该会话 |
+| Mouse Wheel | Zoom in / out |
+| Click & Drag | Pan |
+| Double-click | Focus on the highest-density death cluster |
+| `0` | Fit level to view |
+| `+` / `-` | Zoom in / out |
+| Arrow Keys | Pan |
+| `Space` (during replay) | Play / Pause ghost replay |
+| Hover session in sidebar | Highlight only that session on the map |
 
-## 日志格式（format=2）
+## Log Format (`format=2`)
 
-样本行不变。新增的事件都写成以 `#` 开头的注释行，所以旧工具（包括 `difficulty_curve.py`）照常可用：
+Periodic sample rows remain unchanged. Gameplay events are written as comment lines prefixed with `#`, keeping backwards compatibility with older tools (including `difficulty_curve.py`):
 
-```
+```csv
 #E-schema,death,time_s,play_s,scene,x,y,hit_x,hit_y,cause,source,state,rope,vx,vy,life_s,seg,seg_deaths
 #E-schema,respawn,time_s,play_s,scene,x,y,seg
 #E-schema,checkpoint,time_s,play_s,scene,x,y,name,seg
 #E-schema,segment,time_s,play_s,scene,seg,from,from_x,from_y,to,to_x,to_y,start_s,duration_s,play_dur_s,deaths,end_reason
 ```
 
-- 字段一律按 schema 里的名字读取，不要按位置读。
-- `play_s`：只在 Playing 状态下累计的时间，不含暂停和过场。
-- `segment`：两次检查点之间的一段。`end_reason` 取值为 `checkpoint`、`scene` 或 `stop`。
+- Always read fields by their column name in `#E-schema` rather than by fixed index.
+- `play_s`: accumulated time spent exclusively in the `Playing` state (excludes pauses and cutscenes).
+- `segment`: a run between two checkpoints. `end_reason` is one of `checkpoint`, `scene`, or `stop`.
 
-旧日志（format=1，没有事件行）也能读：
+Legacy logs (`format=1`, without `#E` event lines) are still supported:
 
-- 死亡从 `deaths` 列的增量推断，位置取上一行的坐标。
-- 有布局数据时，分段由轨迹经过检查点触发盒来推断。
+- Deaths are inferred from increments in the `deaths` column, using the previous sample's coordinates.
+- When level layout data is available, segments are inferred by intersecting player trajectories with checkpoint trigger bounds.
 
-这两类推断数据在界面上都会标为“推断”。
+Both types of inferred records are badged as **Inferred** in the UI.
 
-## Unity 内叠加
+## In-Editor Scene Overlay
 
-**Tools › Inkform › Analytics › PerfLog Scene Overlay** 会把同样的死亡点、热力和动线直接画在 Scene 视图的真实美术上，配色和形状与本工具一致。
+Running **Tools › Inkform › Analytics › PerfLog Scene Overlay** in Unity draws the same death markers, heatmaps, and player trajectories directly over the live level art inside the Unity **Scene View**, sharing the exact colour palette and iconography of the web viewer.
 
-## 文件
+## File Structure
 
-```
-index.html  css/viewer.css
-js/i18n.js     中英文案
-js/theme.js    设计令牌 → Canvas / ECharts 配色（唯一来源）
-js/parse.js    日志解析
-js/model.js    会话、场景聚合、分段、路线顺序
-js/heat.js     热力场、致死率、覆盖率、等值线
-js/mapview.js  地图、图层、回放、导出
-js/charts.js   图表卡片
-js/app.js      界面与交互
-vendor/echarts.min.js   ECharts 5.5.1（Apache-2.0），已本地化
-data/          导出器生成的布局与实景图
+```text
+index.html              Main application entry point
+css/viewer.css          Stylesheet
+js/i18n.js              Bilingual UI strings (EN / ZH)
+js/theme.js             Design tokens → Canvas / ECharts colour palette (single source of truth)
+js/parse.js             CSV and event-schema parser
+js/model.js             Session, scene aggregation, segment, and route ordering model
+js/heat.js              Heatmap fields, lethality rate, coverage, and contour calculation
+js/mapview.js           Canvas map renderer, overlays, ghost replay, and PNG export
+js/charts.js            ECharts card builders
+js/app.js               UI state and interaction wiring
+vendor/echarts.min.js   Bundled ECharts 5.5.1 (Apache-2.0) for offline use
+data/                   Exported room layouts and rendered level art
 ```
